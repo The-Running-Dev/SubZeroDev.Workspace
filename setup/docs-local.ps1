@@ -28,7 +28,10 @@ if (-not (Test-Path -LiteralPath $docsSetupScript -PathType Leaf)) {
 
 Assert-CommandAvailable -Name 'node' -InstallHint 'Install Node.js 18 or later.'
 Assert-CommandAvailable -Name 'npx' -InstallHint 'Install npm/npx with Node.js.'
-Assert-CommandAvailable -Name 'git' -InstallHint 'Install Git to create the isolated local documentation workspace.'
+
+if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Synchronize repository documentation')) {
+    & $docsSetupScript -SourcePath $resolvedSource -TemplatePath $resolvedTemplate
+}
 
 if (-not $SkipInstall -and -not (Test-Path -LiteralPath $templateModules -PathType Container)) {
     if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Install Docusaurus dependencies with pnpm 9')) {
@@ -43,16 +46,6 @@ if (-not $SkipInstall -and -not (Test-Path -LiteralPath $templateModules -PathTy
         }
     }
 }
-if (-not (Test-Path -LiteralPath $templateModules -PathType Container)) {
-    throw "Docusaurus dependencies are missing from $resolvedTemplate. Rerun without -SkipInstall."
-}
-
-if ($WhatIfPreference) {
-    & $docsSetupScript -SourcePath $resolvedSource -TemplatePath $resolvedTemplate -WhatIf
-    Write-Host 'Local documentation preview completed.' -ForegroundColor Yellow
-    return
-}
-
 $startArguments = @(
     '--no-install', 'docusaurus', 'start',
     '--host', $HostName,
@@ -64,36 +57,12 @@ $localUrl = "http://$HostName`:$Port/"
 Write-Host "Starting documentation at $localUrl" -ForegroundColor Green
 Write-Host 'Press Ctrl+C to stop the development server.'
 
-$stagingTemplate = Join-Path ([System.IO.Path]::GetTempPath()) "llms-docs-local-$PID"
-if (Test-Path -LiteralPath $stagingTemplate) {
-    throw "The temporary documentation workspace already exists: $stagingTemplate"
-}
-
-if ($PSCmdlet.ShouldProcess($stagingTemplate, 'Create an isolated local documentation workspace')) {
-    Invoke-NativeCommand -FilePath 'git' -ArgumentList @(
-        'clone', '--quiet', '--local', '--no-hardlinks', $resolvedTemplate, $stagingTemplate
-    )
-
-    $stagingModules = Join-Path $stagingTemplate 'node_modules'
-    $linkType = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) { 'Junction' } else { 'SymbolicLink' }
-    New-Item -ItemType $linkType -Path $stagingModules -Target $templateModules | Out-Null
-    & $docsSetupScript -SourcePath $resolvedSource -TemplatePath $stagingTemplate
-}
-
-if ($PSCmdlet.ShouldProcess($stagingTemplate, 'Start the Docusaurus development server')) {
-    $previousDocsSourcePath = [Environment]::GetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', 'Process')
-    [Environment]::SetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', $resolvedSource, 'Process')
-    Push-Location $stagingTemplate
+if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Start the Docusaurus development server')) {
+    Push-Location $resolvedTemplate
     try {
         Invoke-NativeCommand -FilePath 'npx' -ArgumentList $startArguments
     }
     finally {
         Pop-Location
-        [Environment]::SetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', $previousDocsSourcePath, 'Process')
-        $temporaryRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
-        $resolvedStaging = [System.IO.Path]::GetFullPath($stagingTemplate)
-        if ($resolvedStaging.StartsWith($temporaryRoot) -and (Split-Path -Leaf $resolvedStaging) -like 'llms-docs-local-*') {
-            Remove-Item -LiteralPath $resolvedStaging -Recurse -Force
-        }
     }
 }

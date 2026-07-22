@@ -172,6 +172,6 @@ To start the Docusaurus development server locally:
 ./docs-local.ps1
 ```
 
-The local script clones the pinned template into a temporary directory, applies the project configuration there, and serves Markdown directly from `setup/docs`. This keeps live reload independent from the `docs-template` submodule, so Git operations and deployment synchronization cannot replace the running documentation with template content.
+The local script synchronizes the project documentation and configuration into the existing `docs-template` submodule, then starts Docusaurus from that directory. The resulting submodule changes are generated local output and should not be committed.
 
-The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed. Stop any older background instance before restarting the script so the new isolated server can claim the port.
+The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed. Stop any older background instance before restarting the script so the server can claim the port.

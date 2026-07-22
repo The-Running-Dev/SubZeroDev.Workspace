@@ -24,7 +24,7 @@ The complete setup documentation is published at **[llms.subzerodev.com](https:/
 - [Language Starters](setup/docs/reference/language-starters.md) — use or extend the language-specific project starters.
 - [Reflection Mode](setup/docs/reference/reflection-mode.md) — use the guided inquiry prompt for deliberate analysis.
 
-The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to serve it from an isolated temporary copy of the pinned Docusaurus template with live reload enabled.
+The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to synchronize it into the pinned Docusaurus template and serve it locally with live reload enabled.
 
 ## Repository Layout
 
