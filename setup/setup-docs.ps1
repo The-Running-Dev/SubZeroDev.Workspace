@@ -17,6 +17,10 @@ $resolvedTemplate = (Resolve-Path -LiteralPath $TemplatePath -ErrorAction Stop).
 $templatePackage = Join-Path $resolvedTemplate 'package.json'
 $templateDocs = Join-Path $resolvedTemplate 'docs'
 $globalConfigPath = Join-Path $resolvedTemplate 'config/globalConfig.yml'
+$sourceSidebarPath = Join-Path $resolvedSource 'sidebars.ts'
+$sourceDocusaurusConfigPath = Join-Path $resolvedSource 'docusaurus.config.ts'
+$templateSidebarPath = Join-Path $resolvedTemplate 'sidebars.ts'
+$templateDocusaurusConfigPath = Join-Path $resolvedTemplate 'docusaurus.config.ts'
 $landingPagePath = Join-Path $resolvedTemplate 'src/pages/index.md'
 $reactLandingPagePath = Join-Path $resolvedTemplate 'src/pages/index.tsx'
 
@@ -25,6 +29,11 @@ if (-not (Test-Path -LiteralPath $templatePackage -PathType Leaf)) {
 }
 if (-not (Test-Path -LiteralPath $globalConfigPath -PathType Leaf)) {
     throw "Template configuration is missing: $globalConfigPath"
+}
+foreach ($projectConfigPath in @($sourceSidebarPath, $sourceDocusaurusConfigPath)) {
+    if (-not (Test-Path -LiteralPath $projectConfigPath -PathType Leaf)) {
+        throw "Project documentation override is missing: $projectConfigPath"
+    }
 }
 if ($resolvedSource -eq $resolvedTemplate -or $templateDocs -eq $resolvedSource) {
     throw 'The documentation source and template destination must be different directories.'
@@ -37,7 +46,14 @@ if ($PSCmdlet.ShouldProcess($templateDocs, "Replace template documentation with 
     else {
         New-Item -ItemType Directory -Path $templateDocs -Force | Out-Null
     }
-    Copy-Item -Path (Join-Path $resolvedSource '*') -Destination $templateDocs -Recurse -Force
+    Get-ChildItem -LiteralPath $resolvedSource -Force |
+        Where-Object { $_.Name -notin @('sidebars.ts', 'docusaurus.config.ts') } |
+        Copy-Item -Destination $templateDocs -Recurse -Force
+}
+
+if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Apply project-owned Docusaurus configuration overrides')) {
+    Copy-Item -LiteralPath $sourceSidebarPath -Destination $templateSidebarPath -Force
+    Copy-Item -LiteralPath $sourceDocusaurusConfigPath -Destination $templateDocusaurusConfigPath -Force
 }
 
 $normalizedSiteUrl = $SiteUrl.TrimEnd('/')

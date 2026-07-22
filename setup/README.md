@@ -154,6 +154,8 @@ Synchronize `setup/docs` into the template and configure it for this repository'
 ./setup-docs.ps1
 ```
 
+The project-owned `docs/sidebars.ts` and `docs/docusaurus.config.ts` files are copied to the root of `docs-template` during synchronization. Customize those files in `setup/docs`; do not edit the generated submodule working tree. The current navbar override removes the template's CV and Projects entries.
+
 Then build locally with the template's declared pnpm version:
 
 ```powershell
