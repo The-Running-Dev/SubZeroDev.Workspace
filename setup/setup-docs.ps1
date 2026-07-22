@@ -68,7 +68,7 @@ $readmeContent = $readmeContent -replace '\]\(setup/docs/', ']('
 $readmeContent = $readmeContent -replace '\]\(setup/', "]($repositoryUrl/blob/main/setup/"
 $readmeFrontMatter = @"
 ---
-title: LLM Workspace Toolkit
+title: $SiteTitle
 id: template-overview
 sidebar_position: 1
 description: Canonical setup, project-generation, container, and repository guide.
