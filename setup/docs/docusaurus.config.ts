@@ -12,9 +12,11 @@ const config: Config = {
   trailingSlash: false,
   favicon: 'img/favicon.ico',
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
   markdown: {
-    mermaid: true
+    mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn'
+    }
   },
   themes: ['@docusaurus/theme-mermaid'],
   i18n: {

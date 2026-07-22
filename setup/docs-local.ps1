@@ -46,7 +46,7 @@ if (-not $SkipInstall -and -not (Test-Path -LiteralPath $templateModules -PathTy
 }
 
 $startArguments = @(
-    '-y', 'pnpm@9.0.0', 'run', 'start',
+    '-y', 'pnpm@9.0.0', 'exec', 'docusaurus', 'start',
     '--host', $HostName,
     '--port', $Port.ToString()
 )
