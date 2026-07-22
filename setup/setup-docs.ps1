@@ -2,6 +2,7 @@
 param(
     [string]$SourcePath = (Join-Path $PSScriptRoot 'docs'),
     [string]$TemplatePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs-template'),
+    [string]$ReadmePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'README.md'),
     [string]$OrganizationName = 'The-Running-Dev',
     [string]$RepositoryName = 'LLMs',
     [string]$SiteTitle = 'LLM Workspace Toolkit',
@@ -14,8 +15,10 @@ $ErrorActionPreference = 'Stop'
 
 $resolvedSource = (Resolve-Path -LiteralPath $SourcePath -ErrorAction Stop).Path
 $resolvedTemplate = (Resolve-Path -LiteralPath $TemplatePath -ErrorAction Stop).Path
+$resolvedReadme = (Resolve-Path -LiteralPath $ReadmePath -ErrorAction Stop).Path
 $templatePackage = Join-Path $resolvedTemplate 'package.json'
 $templateDocs = Join-Path $resolvedTemplate 'docs'
+$templateDocsIndex = Join-Path $templateDocs 'index.md'
 $globalConfigPath = Join-Path $resolvedTemplate 'config/globalConfig.yml'
 $sourceSidebarPath = Join-Path $resolvedSource 'sidebars.ts'
 $sourceDocusaurusConfigPath = Join-Path $resolvedSource 'docusaurus.config.ts'
@@ -54,6 +57,26 @@ if ($PSCmdlet.ShouldProcess($templateDocs, "Replace template documentation with 
 if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Apply project-owned Docusaurus configuration overrides')) {
     Copy-Item -LiteralPath $sourceSidebarPath -Destination $templateSidebarPath -Force
     Copy-Item -LiteralPath $sourceDocusaurusConfigPath -Destination $templateDocusaurusConfigPath -Force
+}
+
+$readmeContent = Get-Content -LiteralPath $resolvedReadme -Raw
+$repositoryUrl = "https://github.com/$OrganizationName/$RepositoryName"
+$readmeContent = $readmeContent -replace '\]\(setup/docs/\)', '](.)'
+$readmeContent = $readmeContent -replace '\]\(setup/\)', "]($repositoryUrl/tree/main/setup)"
+$readmeContent = $readmeContent -replace '\]\(docs-template/\)', "]($repositoryUrl/tree/main/docs-template)"
+$readmeContent = $readmeContent -replace '\]\(setup/docs/', ']('
+$readmeContent = $readmeContent -replace '\]\(setup/', "]($repositoryUrl/blob/main/setup/"
+$readmeFrontMatter = @"
+---
+title: $SiteTitle
+id: template-overview
+sidebar_position: 1
+description: Canonical setup, project-generation, container, and repository guide.
+---
+
+"@
+if ($PSCmdlet.ShouldProcess($templateDocsIndex, "Generate the documentation index from $resolvedReadme")) {
+    Set-Content -LiteralPath $templateDocsIndex -Value ($readmeFrontMatter + $readmeContent) -NoNewline
 }
 
 $normalizedSiteUrl = $SiteUrl.TrimEnd('/')

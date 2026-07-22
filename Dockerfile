@@ -15,6 +15,7 @@ RUN apt-get update \
 
 WORKDIR /opt/llms
 COPY setup ./setup
+COPY README.md ./README.md
 COPY docs-template ./docs-template
 
 RUN corepack enable \
@@ -23,7 +24,7 @@ RUN corepack enable \
     && HUSKY=0 pnpm install --frozen-lockfile \
     && HUSKY=0 NODE_ENV=production pnpm run build:prod
 
-FROM node:20-bookworm-slim AS runtime
+FROM node:20-bookworm-slim AS runtime-base
 
 ARG POWERSHELL_VERSION=7.4.12
 
@@ -39,7 +40,6 @@ RUN apt-get update \
 WORKDIR /opt/llms
 COPY setup ./setup
 COPY README.md ./README.md
-COPY --from=docs-build /opt/llms/docs-template/artifacts /var/www/html
 COPY container-entrypoint.ps1 ./container-entrypoint.ps1
 
 VOLUME ["/workspace", "/root/.config"]
@@ -47,3 +47,9 @@ EXPOSE 8080
 
 ENTRYPOINT ["pwsh", "-NoLogo", "-NoProfile", "-File", "/opt/llms/container-entrypoint.ps1"]
 CMD ["docs"]
+
+FROM runtime-base AS runtime-prebuilt
+COPY docs-template/artifacts /var/www/html
+
+FROM runtime-base AS runtime
+COPY --from=docs-build /opt/llms/docs-template/artifacts /var/www/html
