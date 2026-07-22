@@ -1,10 +1,10 @@
 ---
-title: Modular architecture
+title: Modular Architecture
 sidebar_position: 2
 description: Package boundaries and responsibilities for the setup toolkit.
 ---
 
-# Modular project setup architecture
+# Modular Project Setup Architecture
 
 **Complete guide to the new project setup system**
 
@@ -68,11 +68,11 @@ setup/
 
 ## How It Works
 
-### Workstation orchestration
+### Workstation Orchestration
 
 `setup.ps1` detects Windows, macOS, or Linux and delegates to its platform script. Each platform script installs missing prerequisites and invokes `setup-workstation.ps1`. The shared orchestrator runs the OS-independent component installers. MCP commands use `cmd /c npx` on Windows and invoke `npx` directly on macOS and Linux.
 
-### Project orchestration (`setup-project.ps1`)
+### Project Orchestration (`setup-project.ps1`)
 
 The main script:
 1. Imports `Common.ps1` for utility functions
@@ -199,7 +199,7 @@ cd D:\Projects\LLMs\setup
 - Only creates common files and client instructions
 - No Git operations, language starters, or validation
 
-### Test (WhatIf mode)
+### Test (`WhatIf` Mode)
 
 ```powershell
 .\setup-project.ps1 `
@@ -290,7 +290,7 @@ You can now use setup-project.ps1 for Phase 2 and Phase 3 project creation.
 
 ## Troubleshooting
 
-### Module import fails
+### Module Import Fails
 
 **Error:** `ProjectSetup module not found`
 
@@ -306,7 +306,7 @@ Test-Path .\modules\ProjectSetup.psm1
 .\setup-project.ps1 ...
 ```
 
-### Language starter not found
+### Language Starter Not Found
 
 **Warning:** `Language starter script not found`
 
@@ -315,7 +315,7 @@ Test-Path .\modules\ProjectSetup.psm1
 - Or skip with `-SkipLanguageStarter`
 - See [Language starters](../reference/language-starters.md) for details
 
-### Git config not found
+### Git Config Not Found
 
 **Error:** `Cannot determine Git user.name`
 
@@ -329,7 +329,7 @@ git config --global user.email 'your@email.com'
 .\setup-project.ps1 ... -GitUserName 'Your Name' -GitUserEmail 'your@email.com'
 ```
 
-### Build/test validation fails
+### Build/Test Validation Fails
 
 **Warning:** `Build validation skipped or failed`
 

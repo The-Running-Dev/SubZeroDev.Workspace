@@ -1,12 +1,12 @@
 ---
-title: AI coding workspace setup
+title: AI Coding Workspace Setup
 id: template-overview
 slug: /
 sidebar_position: 1
 description: Install and configure shared tooling for Claude Code and Codex on Windows, macOS, and Ubuntu.
 ---
 
-# AI coding workspace setup
+# AI Coding Workspace Setup
 
 These scripts implement the staged workspace described in the [workspace blueprint](./architecture/workspace-blueprint.md). Run them from PowerShell as your normal user and review every script before execution. Windows supports Windows PowerShell 5.1 or PowerShell 7; macOS and Linux require PowerShell 7.
 
@@ -22,7 +22,7 @@ The combined setup detects the host OS, installs missing command-line prerequisi
 
 `setup.ps1` is the recommended entry point because it dispatches to the appropriate platform script. The platform entry points are useful for explicit automation and troubleshooting. The shared `setup-workstation.ps1` assumes prerequisites already exist and configures only Graphify, memory, and MCP integrations.
 
-## Combined setup
+## Combined Setup
 
 Preview actions first:
 
@@ -56,7 +56,7 @@ Include a narrowly scoped filesystem server:
 
 The filesystem integration is not enabled by default because Codex and Claude Code already have native file access.
 
-## Database integration
+## Database Integration
 
 No generic database MCP package is installed. Select and security-review a maintained server first, then provide its installed command explicitly:
 
@@ -72,11 +72,11 @@ No generic database MCP package is installed. Select and security-review a maint
 
 Use a read-only development database account. Keep connection strings and passwords out of script arguments, command history, and source control.
 
-## GitHub authentication
+## GitHub Authentication
 
 GitHub MCP runs through `docker/docker-compose.yml` and reads its settings from the git-ignored `docker/.env` file. Add a narrowly scoped token to `GITHUB_PERSONAL_ACCESS_TOKEN` in `docker/.env` before using the server. The checked-in `docker/.env.example` documents the required variables without containing a real secret.
 
-### GitHub MCP access controls
+### GitHub MCP Access Controls
 
 ```dotenv
 GITHUB_READ_ONLY=1
@@ -95,7 +95,7 @@ GITHUB_TOOLSETS=context,repos,issues,pull_requests,actions
 
 Add another toolset only when its capabilities are required. Avoid `all` unless broad GitHub access is intentional, because it exposes substantially more tools to the agent.
 
-## Individual installers
+## Individual Installers
 
 - `setup-windows.ps1`
 - `setup-macos.ps1`
@@ -111,7 +111,7 @@ Add another toolset only when its capabilities are required. Avoid `all` unless 
 
 Most component scripts preserve existing MCP registrations. The GitHub installer intentionally replaces the existing `github` registration so it points to the Compose-managed service.
 
-## Platform prerequisites
+## Platform Prerequisites
 
 - Windows requires Winget. Docker Desktop must be installed separately for GitHub MCP.
 - macOS requires [Homebrew](https://brew.sh). Docker Desktop must be installed and started separately for GitHub MCP.

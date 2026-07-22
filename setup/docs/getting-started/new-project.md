@@ -1,14 +1,14 @@
 ---
-title: Start a new project
+title: Start a New Project
 sidebar_position: 2
 description: Set up a repository for Claude Desktop, Claude Code, and Codex.
 ---
 
-# Starting a new AI-assisted project
+# Starting a New AI-Assisted Project
 
 This guide assumes the workspace tooling in this directory has already been installed on Windows, macOS, or Ubuntu/Debian. It covers the shared project setup and the first-run workflow for Claude Desktop, Claude Code, and Codex.
 
-## 1. Install the workstation tools once
+## 1. Install the Workstation Tools Once
 
 Run this from the repository's `setup` directory in PowerShell:
 
@@ -23,7 +23,7 @@ This installs or configures the command-line prerequisites, Graphify, Claude mem
 
 After changing MCP registrations, restart Claude Code and Codex or begin a new session so they load the new tool definitions.
 
-## 2. Create the project
+## 2. Create the Project
 
 Choose a directory inside the allowed filesystem root. For example:
 
@@ -59,7 +59,7 @@ git add .
 git commit -m "Initial project scaffold"
 ```
 
-## 3. Write shared project instructions
+## 3. Write Shared Project Instructions
 
 Use checked-in files for durable rules. Do not rely on chat history or memory as the only copy of important project decisions.
 
@@ -108,7 +108,7 @@ Use the same concrete commands and constraints, adapting only tool-specific inst
 
 Keep architecture rationale in versioned documentation or ADRs. Memory may point to those documents, but it should not become their only home.
 
-## 4. First run with Claude Code
+## 4. First Run with Claude Code
 
 Open PowerShell at the repository root:
 
@@ -139,7 +139,7 @@ the smallest next implementation task.
 
 Before accepting changes, ask Claude Code to run the relevant build, test, and lint commands and summarize the diff.
 
-## 5. First run with Codex
+## 5. First Run with Codex
 
 ### Codex CLI
 
@@ -150,7 +150,7 @@ Set-Location 'D:\Dropbox\Projects\MyProject'
 codex
 ```
 
-### Codex desktop app
+### Codex Desktop App
 
 Open the repository folder as the task workspace, then create a new task. Codex should discover the root `AGENTS.md`; nested `AGENTS.md` files apply to their directory trees.
 
@@ -172,11 +172,11 @@ instructions before proposing changes.
 
 Codex uses prompt context for one-off instructions, `AGENTS.md` for durable repository guidance, and MCP servers/connectors for live external data. See [Codex MCP customization](https://learn.chatgpt.com/docs/concepts/customization#mcp).
 
-## 6. First run with Claude Desktop
+## 6. First Run with Claude Desktop
 
 Claude Desktop is not the same working model as a terminal agent rooted in a repository. Choose one of these approaches.
 
-### Recommended for local project work: Cowork
+### Recommended for Local Project Work: Cowork
 
 1. Open Claude Desktop and select Cowork.
 2. Create a task and explicitly grant access to `D:\Dropbox\Projects\MyProject`.
@@ -185,7 +185,7 @@ Claude Desktop is not the same working model as a terminal agent rooted in a rep
 
 Cowork limits file access to folders you connect. See [Install Claude Desktop and use Cowork](https://support.claude.com/en/articles/10065433-install-claude-desktop).
 
-### Normal Desktop chat
+### Normal Desktop Chat
 
 For discussion and document review, create a Claude Project and add the relevant project documents, or attach files directly to a conversation. Treat uploaded files as snapshots: they do not automatically track later repository changes.
 
@@ -204,7 +204,7 @@ built, tested, and run, then identify missing documentation and the safest first
 task.
 ```
 
-## 7. Normal development loop
+## 7. Normal Development Loop
 
 At the beginning of a task:
 
@@ -230,7 +230,7 @@ git diff --check
 
 Then run the project’s build, test, and lint commands; review the complete diff; update documentation or ADRs; and commit only intentional files.
 
-## 8. Quick troubleshooting
+## 8. Quick Troubleshooting
 
 - **Instructions did not load:** confirm the client was opened at the repository root and that the filename is exactly `AGENTS.md` or `CLAUDE.md`.
 - **MCP server missing:** restart the client or start a new session, then inspect `/mcp` in Codex or the MCP list in Claude Code.

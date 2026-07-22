@@ -1,10 +1,10 @@
 ---
-title: Setup specification
+title: Setup Specification
 sidebar_position: 3
 description: Functional specification for workstation and per-project setup.
 ---
 
-# Setup scripts specification
+# Setup Scripts Specification
 
 **Document Version:** 1.0  
 **Last Updated:** 2026-07-22  
@@ -233,7 +233,7 @@ npm start
 See `docs/architecture.md` in the generated project for detailed design decisions.
 ```
 
-### 5.2 `CLAUDE.md` (Required for Claude Code projects)
+### 5.2 `CLAUDE.md` (Required for Claude Code Projects)
 
 **Purpose:** Claude Code-specific repository instructions
 
@@ -288,7 +288,7 @@ Available tools:
 ```
 ```
 
-### 5.3 `AGENTS.md` (Required for Codex projects)
+### 5.3 `AGENTS.md` (Required for Codex Projects)
 
 **Purpose:** Codex-specific repository working agreement
 
@@ -515,17 +515,17 @@ git log --all --pretty=format: --name-only | sort -u | grep -E '\.env|secrets|\.
 
 ## 9. File Dependencies & References
 
-### Input Files (read by users/scripts)
+### Input Files (Read by Users/Scripts)
 
 - `.env` (from `FilesystemPath`) — Contains `GITHUB_PERSONAL_ACCESS_TOKEN`
 - `.env.example` — Template for new projects
 
-### Output Files (created/modified by setup)
+### Output Files (Created/Modified by Setup)
 
 - MCP configuration (client-specific: Claude Code config, Codex local registrations)
 - `.gitignore` — Must exist before first commit
 
-### Version-Controlled Files (created per project)
+### Version-Controlled Files (Created per Project)
 
 - `README.md` — Required
 - `CLAUDE.md` — Required (Claude Code projects)

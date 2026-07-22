@@ -46,17 +46,9 @@ const config: Config = {
       items: [
         {
           type: 'doc',
-          docId: 'template-overview',
+          docId: 'getting-started/quickstart',
           position: 'left',
           label: 'Docs'
-        },
-        {
-          type: 'custom-Portfolio',
-          position: 'left'
-        },
-        {
-          type: 'custom-NavBarLinks',
-          position: 'left'
         },
         {
           type: 'custom-VersionDisplay',

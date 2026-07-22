@@ -1,10 +1,10 @@
 ---
-title: Language starters
+title: Language Starters
 sidebar_position: 1
 description: Patterns for extending project generation to additional languages.
 ---
 
-# Language starter scripts
+# Language Starter Scripts
 
 **Documentation for extending setup-project.ps1 with language-specific setup**
 
@@ -217,14 +217,14 @@ Write-Success "C# starter setup complete"
 
 ## Troubleshooting
 
-### Starter script not found
+### Starter Script Not Found
 
 If `setup-starter-<language>.ps1` doesn't exist for your chosen language:
 - The `setup-project.ps1` will skip language-specific setup
 - You'll need to manually create language config files
 - Consider creating the starter script using the template above
 
-### Starter script fails
+### Starter Script Fails
 
 If a starter script errors during execution:
 - The orchestrator catches and reports the error

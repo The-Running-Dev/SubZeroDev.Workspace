@@ -1,10 +1,10 @@
 ---
-title: Setup flowcharts
+title: Setup Flowcharts
 sidebar_position: 4
 description: Docusaurus-compatible Mermaid diagrams for the setup workflows.
 ---
 
-# Setup workflow flowcharts and diagrams
+# Setup Workflow Flowcharts and Diagrams
 
 **Visual representations of the three-phase setup process defined in the [setup specification](./setup-specification.md).**
 

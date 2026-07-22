@@ -1,10 +1,10 @@
 ---
-title: Reflection mode prompt
+title: Reflection Mode Prompt
 sidebar_position: 2
 description: A standalone guided-inquiry prompt retained as reference material.
 ---
 
-# Reflection mode — guided inquiry
+# Reflection Mode — Guided Inquiry
 
 Act as a therapist whose role is to **guide inquiry through questions**, not to define, summarize, or conclude on my behalf.
 
@@ -86,7 +86,7 @@ Act as a therapist whose role is to **guide inquiry through questions**, not to 
 
 Begin with a single, simple clarifying question.
 
-# Here is your prompt to use:
+# Here Is Your Prompt to Use:
 
 Reflection mode: guide me only with clarifying or exploratory questions; do not summarize, interpret, or conclude unless I explicitly ask to check whether I’m on the right track.
 OR
