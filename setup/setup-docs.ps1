@@ -4,7 +4,9 @@ param(
     [string]$TemplatePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs-template'),
     [string]$OrganizationName = 'The-Running-Dev',
     [string]$RepositoryName = 'LLMs',
-    [string]$SiteTitle = 'LLM Workspace Toolkit'
+    [string]$SiteTitle = 'LLM Workspace Toolkit',
+    [string]$SiteUrl = 'https://llms.subzerodev.com',
+    [string]$BaseUrl = '/'
 )
 
 Set-StrictMode -Version Latest
@@ -38,14 +40,15 @@ if ($PSCmdlet.ShouldProcess($templateDocs, "Replace template documentation with 
     Copy-Item -Path (Join-Path $resolvedSource '*') -Destination $templateDocs -Recurse -Force
 }
 
-$siteUrl = "https://$($OrganizationName.ToLowerInvariant()).github.io"
-$baseUrl = "/$RepositoryName/"
+$normalizedSiteUrl = $SiteUrl.TrimEnd('/')
+$normalizedBaseUrl = "/$($BaseUrl.Trim('/'))/"
+if ($normalizedBaseUrl -eq '//') { $normalizedBaseUrl = '/' }
 $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
 $configReplacements = [ordered]@{
     '(?m)^  title: .*$' = "  title: $SiteTitle"
     '(?m)^  tagline: .*$' = '  tagline: Cross-platform setup for Codex and Claude Code'
-    '(?m)^  url: .*$' = "  url: $siteUrl"
-    '(?m)^  baseUrl: .*$' = "  baseUrl: $baseUrl"
+    '(?m)^  url: .*$' = "  url: $normalizedSiteUrl"
+    '(?m)^  baseUrl: .*$' = "  baseUrl: $normalizedBaseUrl"
     '(?m)^  organizationName: .*$' = "  organizationName: $OrganizationName"
     '(?m)^  projectName: .*$' = "  projectName: $RepositoryName"
     '(?m)^    title: .*$' = "    title: $SiteTitle"
@@ -67,7 +70,7 @@ slug: /
 
 Cross-platform PowerShell tooling for configuring Codex and Claude Code and scaffolding new AI-assisted projects.
 
-[Open the setup documentation](${baseUrl}docs/)
+[Open the setup documentation](${normalizedBaseUrl}docs/)
 "@
 
 if ($PSCmdlet.ShouldProcess($landingPagePath, 'Create the documentation landing page')) {
@@ -82,5 +85,5 @@ if ($WhatIfPreference) {
 }
 else {
     Write-Host "Documentation synchronized to $templateDocs" -ForegroundColor Green
-    Write-Host "Configured GitHub Pages URL: $siteUrl$baseUrl"
+    Write-Host "Configured documentation URL: $normalizedSiteUrl$normalizedBaseUrl"
 }

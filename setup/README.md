@@ -170,4 +170,4 @@ To synchronize the docs and start the Docusaurus development server locally:
 ./docs-local.ps1
 ```
 
-The default address is `http://localhost:3000/LLMs/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed.
+The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed.

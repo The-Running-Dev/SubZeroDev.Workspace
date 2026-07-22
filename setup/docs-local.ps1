@@ -52,7 +52,7 @@ $startArguments = @(
 )
 if ($NoOpen) { $startArguments += '--no-open' }
 
-$localUrl = "http://$HostName`:$Port/LLMs/"
+$localUrl = "http://$HostName`:$Port/"
 Write-Host "Starting documentation at $localUrl" -ForegroundColor Green
 Write-Host 'Press Ctrl+C to stop the development server.'
 
