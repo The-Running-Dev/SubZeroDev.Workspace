@@ -59,13 +59,32 @@ if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Apply project-owned Docusaurus c
     Copy-Item -LiteralPath $sourceDocusaurusConfigPath -Destination $templateDocusaurusConfigPath -Force
 }
 
-$readmeContent = Get-Content -LiteralPath $resolvedReadme -Raw
+$normalizedSiteUrl = $SiteUrl.TrimEnd('/')
+$normalizedBaseUrl = "/$($BaseUrl.Trim('/'))/"
+if ($normalizedBaseUrl -eq '//') { $normalizedBaseUrl = '/' }
+
+function Convert-ReadmeLinks {
+    param(
+        [Parameter(Mandatory)][string]$Content,
+        [Parameter(Mandatory)][string]$DocumentationBase
+    )
+
+    $converted = $Content -replace '\]\(setup/docs/index\.md\)', "]($DocumentationBase/)"
+    $converted = $converted -replace '\]\(setup/docs/\)', "]($DocumentationBase/)"
+    $converted = $converted -replace '\]\(setup/\)', "]($repositoryUrl/tree/main/setup)"
+    $converted = $converted -replace '\]\(docs-template/\)', "]($repositoryUrl/tree/main/docs-template)"
+    $converted = $converted -replace '\]\(setup/docs/', "]($DocumentationBase/"
+    $converted = $converted -replace '\]\(setup/', "]($repositoryUrl/blob/main/setup/"
+    if ($DocumentationBase -ne '.') {
+        $escapedDocumentationBase = [regex]::Escape($DocumentationBase)
+        $converted = $converted -replace "(\]\($escapedDocumentationBase/[^)\s]+)\.md\)", '$1/)'
+    }
+    $converted
+}
+
+$rootReadmeContent = Get-Content -LiteralPath $resolvedReadme -Raw
 $repositoryUrl = "https://github.com/$OrganizationName/$RepositoryName"
-$readmeContent = $readmeContent -replace '\]\(setup/docs/\)', '](.)'
-$readmeContent = $readmeContent -replace '\]\(setup/\)', "]($repositoryUrl/tree/main/setup)"
-$readmeContent = $readmeContent -replace '\]\(docs-template/\)', "]($repositoryUrl/tree/main/docs-template)"
-$readmeContent = $readmeContent -replace '\]\(setup/docs/', ']('
-$readmeContent = $readmeContent -replace '\]\(setup/', "]($repositoryUrl/blob/main/setup/"
+$readmeContent = Convert-ReadmeLinks -Content $rootReadmeContent -DocumentationBase '.'
 $readmeFrontMatter = @"
 ---
 title: $SiteTitle
@@ -79,9 +98,6 @@ if ($PSCmdlet.ShouldProcess($templateDocsIndex, "Generate the documentation inde
     Set-Content -LiteralPath $templateDocsIndex -Value ($readmeFrontMatter + $readmeContent) -NoNewline
 }
 
-$normalizedSiteUrl = $SiteUrl.TrimEnd('/')
-$normalizedBaseUrl = "/$($BaseUrl.Trim('/'))/"
-if ($normalizedBaseUrl -eq '//') { $normalizedBaseUrl = '/' }
 $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
 $configReplacements = [ordered]@{
     '(?m)^  title: .*$' = "  title: $SiteTitle"
@@ -105,11 +121,7 @@ title: $SiteTitle
 slug: /
 ---
 
-# $SiteTitle
-
-Cross-platform PowerShell tooling for configuring Codex and Claude Code and scaffolding new AI-assisted projects.
-
-[Open the setup documentation](${normalizedBaseUrl}docs/)
+$(Convert-ReadmeLinks -Content $rootReadmeContent -DocumentationBase "${normalizedBaseUrl}docs")
 "@
 
 if ($PSCmdlet.ShouldProcess($landingPagePath, 'Create the documentation landing page')) {
