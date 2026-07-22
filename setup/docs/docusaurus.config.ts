@@ -7,6 +7,7 @@ import { GlobalConfig } from './src/entities';
 import { globalConfig as configData } from './data/';
 
 const globalConfig = getData<GlobalConfig>(configData);
+const docsPath = process.env.LLMS_DOCS_SOURCE_PATH || 'docs';
 const config: Config = {
   ...globalConfig.site,
   trailingSlash: false,
@@ -29,7 +30,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          path: 'docs',
+          path: docsPath,
           id: 'default',
           routeBasePath: 'docs'
         },

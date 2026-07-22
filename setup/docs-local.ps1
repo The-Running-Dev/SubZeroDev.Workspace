@@ -1,5 +1,6 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
+    [string]$SourcePath = (Join-Path $PSScriptRoot 'docs'),
     [string]$TemplatePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs-template'),
     [ValidateRange(1, 65535)][int]$Port = 3000,
     [string]$HostName = 'localhost',
@@ -13,6 +14,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'modules/Common.ps1')
 
 $resolvedTemplate = (Resolve-Path -LiteralPath $TemplatePath -ErrorAction Stop).Path
+$resolvedSource = (Resolve-Path -LiteralPath $SourcePath -ErrorAction Stop).Path
 $templatePackage = Join-Path $resolvedTemplate 'package.json'
 $templateModules = Join-Path $resolvedTemplate 'node_modules'
 $docsSetupScript = Join-Path $PSScriptRoot 'setup-docs.ps1'
@@ -28,7 +30,7 @@ Assert-CommandAvailable -Name 'node' -InstallHint 'Install Node.js 18 or later.'
 Assert-CommandAvailable -Name 'npx' -InstallHint 'Install npm/npx with Node.js.'
 
 if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Synchronize repository documentation')) {
-    & $docsSetupScript -TemplatePath $resolvedTemplate
+    & $docsSetupScript -SourcePath $resolvedSource -TemplatePath $resolvedTemplate
 }
 
 if (-not $SkipInstall -and -not (Test-Path -LiteralPath $templateModules -PathType Container)) {
@@ -57,11 +59,14 @@ Write-Host "Starting documentation at $localUrl" -ForegroundColor Green
 Write-Host 'Press Ctrl+C to stop the development server.'
 
 if ($PSCmdlet.ShouldProcess($resolvedTemplate, 'Start the Docusaurus development server')) {
+    $previousDocsSourcePath = [Environment]::GetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', 'Process')
+    [Environment]::SetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', $resolvedSource, 'Process')
     Push-Location $resolvedTemplate
     try {
         Invoke-NativeCommand -FilePath 'npx' -ArgumentList $startArguments
     }
     finally {
         Pop-Location
+        [Environment]::SetEnvironmentVariable('LLMS_DOCS_SOURCE_PATH', $previousDocsSourcePath, 'Process')
     }
 }
