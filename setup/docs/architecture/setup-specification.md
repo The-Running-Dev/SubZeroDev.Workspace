@@ -73,6 +73,22 @@ The setup script installs and configures:
 | **Claude Memory** | Persistent memory system (claude-mem) | Claude Code, Codex | Yes |
 | **GitHub MCP** | GitHub API access via Docker | Claude Code, Codex | Yes |
 | **Playwright MCP** | Browser automation | Claude Code, Codex | Yes |
+
+## Container Architecture
+
+The root Dockerfile is a multi-stage build. The build stage installs PowerShell, synchronizes `setup/docs` into the pinned Docusaurus submodule, installs the locked frontend dependencies, and generates the static site. The runtime stage contains PowerShell, the setup source, nginx, and only the generated site output needed for documentation serving.
+
+`container-entrypoint.ps1` is the PowerShell entry point and exposes three modes:
+
+| Mode | Behavior |
+|------|----------|
+| `docs` | Default; serves the prebuilt site through nginx on port 8080 |
+| `setup` | Forwards remaining arguments to the cross-platform `setup.ps1` dispatcher |
+| `pwsh` | Starts PowerShell for direct inspection or script execution |
+
+Container setup is isolated from the host. `/root/.config` and `/workspace` are declared as persistence points. Docker-based MCP integrations require an explicit host socket mount, which grants the container control of the host Docker daemon.
+
+The GitHub workflow validates the documentation and container independently. Pull requests produce a downloadable OCI archive without publishing it. On `main`, the workflow also authenticates with `GITHUB_TOKEN` and publishes SHA and `latest` image tags to GitHub Container Registry.
 | **Filesystem MCP** | Local file system access | Claude Code, Codex | Conditional |
 
 ### 3.4 Output & Configuration

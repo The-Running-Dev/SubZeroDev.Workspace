@@ -118,4 +118,6 @@ Most component scripts preserve existing MCP registrations. The GitHub installer
 
 The platform setup also installs [`act`](https://nektosact.com/) for local GitHub Actions validation. With Docker running, execute `./docs-workflow-local.ps1` from `setup` to run the documentation workflow's pull-request `build` job locally. Use `./docs-local.ps1` instead when you want the live-reload documentation server.
 
+If PowerShell is not installed on the host, use the published Docker image instead. It can [run the setup inside a Linux container](getting-started/container.md) or serve this documentation on port 8080.
+
 Use `-SkipGraphify`, `-SkipClaudeMem`, `-SkipGitHub`, or `-SkipPlaywright` when a component is not wanted. `-Client Codex` avoids installing or checking Claude Code; `-Client ClaudeCode` does the converse.

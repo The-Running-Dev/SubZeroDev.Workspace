@@ -176,6 +176,20 @@ The local script synchronizes the project documentation and configuration into t
 
 The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed. Stop any older background instance before restarting the script so the server can claim the port.
 
+### Run with Docker
+
+The repository image packages PowerShell, all setup scripts, and a production build of this documentation. Build it locally with `docker build -t llms-toolkit .` from the repository root, or use `ghcr.io/the-running-dev/llms:latest` after it has been published from `main`.
+
+```bash
+# Documentation server
+docker run --rm -p 8080:8080 ghcr.io/the-running-dev/llms:latest
+
+# Containerized setup
+docker run --rm -it ghcr.io/the-running-dev/llms:latest setup -Client Both -SkipGitHub
+```
+
+The image entry point is PowerShell. Its commands are `docs` (the default), `setup`, and `pwsh`. Setup affects the container, not the host. Mount `/root/.config` to retain client configuration and `/workspace` for generated files. GitHub MCP additionally needs the host Docker socket and a token file; follow the [container quick start](docs/getting-started/container.md) before enabling it.
+
 ### Test the GitHub Actions Workflow Locally
 
 The platform setup scripts install [`act`](https://nektosact.com/), which runs GitHub Actions jobs in Docker. Start Docker Desktop or Docker Engine, then run this command from `setup`:

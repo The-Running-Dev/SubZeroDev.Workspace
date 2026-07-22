@@ -28,6 +28,23 @@ The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-
 
 To test the same documentation build job used by GitHub Actions, start Docker and run `setup/docs-workflow-local.ps1`. The script uses [`act`](https://nektosact.com/) to execute the workflow's pull-request build job locally; it does not deploy to GitHub Pages.
 
+## Container Usage
+
+The published container includes PowerShell, the setup scripts, and the prebuilt documentation. No host PowerShell installation is required.
+
+```bash
+# Serve the documentation at http://localhost:8080
+docker run --rm -p 8080:8080 ghcr.io/the-running-dev/llms:latest
+
+# Run the setup inside the container
+docker run --rm -it ghcr.io/the-running-dev/llms:latest setup -Client Codex -SkipGitHub
+
+# Open an interactive PowerShell session
+docker run --rm -it ghcr.io/the-running-dev/llms:latest pwsh
+```
+
+Container setup changes the container environment. Mount `/root/.config` and `/workspace` when configuration or generated projects must persist. See the [container quick start](setup/docs/getting-started/container.md) for volume and Docker-socket examples.
+
 ## Repository Layout
 
 | Path | Purpose |

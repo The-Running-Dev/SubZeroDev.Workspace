@@ -13,14 +13,26 @@ $ErrorActionPreference = 'Stop'
 
 if (-not $IsLinux) { throw 'setup-ubuntu.ps1 can only run on Linux.' }
 Assert-CommandAvailable 'apt-get' 'This setup supports Ubuntu and Debian-derived distributions with apt-get.'
-Assert-CommandAvailable 'sudo' 'Install sudo or run the prerequisite package commands as root.'
+if ([System.Environment]::UserName -ne 'root') {
+    Assert-CommandAvailable 'sudo' 'Install sudo or run the prerequisite package commands as root.'
+}
 
 $script:AptPackageIndexUpdated = $false
 
 function Update-AptPackageIndex {
     if ($script:AptPackageIndexUpdated) { return }
-    Invoke-NativeCommand 'sudo' @('apt-get', 'update')
+    Invoke-PrivilegedCommand 'apt-get' @('update')
     $script:AptPackageIndexUpdated = $true
+}
+
+function Invoke-PrivilegedCommand {
+    param([Parameter(Mandatory)][string]$FilePath, [string[]]$ArgumentList = @())
+    if ([System.Environment]::UserName -eq 'root') {
+        Invoke-NativeCommand $FilePath $ArgumentList
+    }
+    else {
+        Invoke-NativeCommand 'sudo' (@($FilePath) + $ArgumentList)
+    }
 }
 
 function Install-AptCommand {
@@ -29,7 +41,7 @@ function Install-AptCommand {
     if (Test-CommandAvailable $Command) { Write-Success "$DisplayName is already installed."; return }
     if ($PSCmdlet.ShouldProcess($DisplayName, "Install apt package(s): $($Package -join ', ')")) {
         Update-AptPackageIndex
-        Invoke-NativeCommand 'sudo' (@('apt-get', 'install', '--yes') + $Package)
+        Invoke-PrivilegedCommand 'apt-get' (@('install', '--yes') + $Package)
         Update-SessionPath
         Assert-CommandAvailable $Command "$DisplayName was installed, but '$Command' is not on PATH. Start a new shell and rerun."
     }
@@ -52,7 +64,7 @@ function Install-ActCommand {
         $installerPath = Join-Path ([System.IO.Path]::GetTempPath()) "install-act-$PID.sh"
         try {
             Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/nektos/act/master/install.sh' -OutFile $installerPath
-            Invoke-NativeCommand 'sudo' @('bash', $installerPath)
+            Invoke-PrivilegedCommand 'bash' @($installerPath)
         }
         finally {
             if (Test-Path -LiteralPath $installerPath) { Remove-Item -LiteralPath $installerPath -Force }
