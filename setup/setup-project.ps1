@@ -85,10 +85,10 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # Import common functions
-. (Join-Path $PSScriptRoot 'modules\Common.ps1')
+. (Join-Path $PSScriptRoot 'modules/Common.ps1')
 
 # Import ProjectSetup module
-$modulePath = Join-Path $PSScriptRoot 'modules\ProjectSetup.psm1'
+$modulePath = Join-Path $PSScriptRoot 'modules/ProjectSetup.psm1'
 if (-not (Test-Path $modulePath)) {
     throw "ProjectSetup module not found: $modulePath"
 }

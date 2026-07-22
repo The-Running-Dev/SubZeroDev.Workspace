@@ -1,7 +1,7 @@
 [CmdletBinding(SupportsShouldProcess)]
 param()
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step 'Installing optional third-party claude-mem'
 Assert-CommandAvailable -Name 'node' -InstallHint 'Install the current Node.js LTS release first.'
@@ -26,9 +26,13 @@ if (-not $WhatIfPreference) {
         throw 'Could not determine the global npm command directory.'
     }
 
-    $claudeMemCommand = Join-Path $npmPrefix 'claude-mem.cmd'
+    $claudeMemCommand = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
+        Join-Path $npmPrefix 'claude-mem.cmd'
+    } else { Join-Path $npmPrefix 'bin/claude-mem' }
     if (-not (Test-Path -LiteralPath $claudeMemCommand -PathType Leaf)) {
-        throw "claude-mem was installed, but its command shim was not found at: $claudeMemCommand"
+        $resolvedCommand = Get-Command 'claude-mem' -ErrorAction SilentlyContinue
+        if (-not $resolvedCommand) { throw "claude-mem was installed, but its command could not be found under: $npmPrefix" }
+        $claudeMemCommand = $resolvedCommand.Source
     }
 
     if ($PSCmdlet.ShouldProcess('claude-mem', 'Install hooks and worker')) {

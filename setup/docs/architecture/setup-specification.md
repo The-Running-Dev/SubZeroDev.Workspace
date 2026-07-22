@@ -1,10 +1,10 @@
 ---
-title: Setup specification
+title: Setup Specification
 sidebar_position: 3
 description: Functional specification for workstation and per-project setup.
 ---
 
-# Setup scripts specification
+# Setup Scripts Specification
 
 **Document Version:** 1.0  
 **Last Updated:** 2026-07-22  
@@ -39,22 +39,28 @@ This specification defines the requirements and workflow for initializing a new 
 
 Before running the setup script, verify:
 
-- **Operating System:** Windows (PowerShell 5.1 or later, or PowerShell 7+)
-- **Docker Desktop:** Installed and running
+- **Operating System:** Windows, macOS, or an Ubuntu/Debian-derived Linux distribution
+- **PowerShell:** Windows PowerShell 5.1+ on Windows, or PowerShell 7+ on any supported OS
+- **Package manager:** Winget (Windows), Homebrew (macOS), or apt/pipx (Ubuntu/Debian)
+- **Docker:** Docker Desktop or Docker Engine installed and running when GitHub MCP or local workflow testing is used
 - **Git:** Installed and available in PATH
 - **Node.js:** Installed (required by some MCP servers)
 - **Python:** Installed (optional, for some tools)
 
-**Validation script:** `scripts/workstation/install-prerequisites.ps1`
+**Platform scripts:** `setup-windows.ps1`, `setup-macos.ps1`, and `setup-ubuntu.ps1`
 
 ### 3.2 Input Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `-Client` | Enum | Yes | — | Target clients: `Both`, `Code` (Claude Code only), `Codex` (Codex only) |
+| `-Client` | Enum | No | `Both` | Target clients: `Both`, `ClaudeCode`, or `Codex` |
 | `-IncludeFilesystem` | Switch | No | $false | Enable Filesystem MCP for project access |
-| `-FilesystemPath` | String | Conditional | — | Root directory for Filesystem MCP (required if `-IncludeFilesystem` is true); e.g., `D:\Dropbox` |
-| `-EnvFile` | String | No | `$PSScriptRoot\.env` | Path to environment file containing `GITHUB_PERSONAL_ACCESS_TOKEN` |
+| `-FilesystemPath` | String[] | Conditional | — | One or more roots for Filesystem MCP; required with `-IncludeFilesystem` |
+| `-SkipGraphify` | Switch | No | $false | Skip Graphify and its `uv` prerequisite |
+| `-SkipClaudeMem` | Switch | No | $false | Skip optional third-party `claude-mem` |
+| `-SkipGitHub` | Switch | No | $false | Skip GitHub CLI and GitHub MCP setup |
+| `-SkipPlaywright` | Switch | No | $false | Skip Playwright MCP registration |
+| `-IncludeDatabase` | Switch | No | $false | Register a separately reviewed database MCP server |
 
 ### 3.3 Installation Components
 
@@ -62,11 +68,27 @@ The setup script installs and configures:
 
 | Component | Purpose | Registration | Auto-run |
 |-----------|---------|--------------|----------|
-| **Command-line prerequisites** | Git, Node.js, Python validation | System | Yes |
+| **Command-line prerequisites** | Node.js, selected clients, GitHub CLI, act, and uv | Platform package manager | Yes |
 | **Graphify** | Repository knowledge graph indexing | Claude Code, Codex | Yes |
 | **Claude Memory** | Persistent memory system (claude-mem) | Claude Code, Codex | Yes |
 | **GitHub MCP** | GitHub API access via Docker | Claude Code, Codex | Yes |
 | **Playwright MCP** | Browser automation | Claude Code, Codex | Yes |
+
+## Container Architecture
+
+The root Dockerfile is a multi-stage build. The build stage installs PowerShell, synchronizes `setup/docs` into the pinned Docusaurus submodule, installs the locked frontend dependencies, and generates the static site. The runtime stage contains PowerShell, the setup source, nginx, and only the generated site output needed for documentation serving.
+
+`container-entrypoint.ps1` is the PowerShell entry point and exposes three modes:
+
+| Mode | Behavior |
+|------|----------|
+| `docs` | Default; serves the prebuilt site through nginx on port 8080 |
+| `setup` | Forwards remaining arguments to the cross-platform `setup.ps1` dispatcher |
+| `pwsh` | Starts PowerShell for direct inspection or script execution |
+
+Container setup is isolated from the host. `/root/.config` and `/workspace` are declared as persistence points. Docker-based MCP integrations require an explicit host socket mount, which grants the container control of the host Docker daemon.
+
+The GitHub workflow validates the documentation and container independently. Pull requests produce a downloadable OCI archive without publishing it. On `main`, the workflow also authenticates with `GITHUB_TOKEN` and publishes SHA and `latest` image tags to GitHub Container Registry.
 | **Filesystem MCP** | Local file system access | Claude Code, Codex | Conditional |
 
 ### 3.4 Output & Configuration
@@ -87,7 +109,7 @@ After running the setup script:
 
 1. Restart Claude Code and Codex (or start new sessions) to load MCP registrations
 2. Verify MCP tools are available: run `/mcp` in Codex or check MCP list in Claude Code
-3. Confirm GitHub MCP is functional: Docker Desktop must remain running
+3. Confirm GitHub MCP is functional: Docker Desktop or Docker Engine must remain running
 
 ---
 
@@ -227,7 +249,7 @@ npm start
 See `docs/architecture.md` in the generated project for detailed design decisions.
 ```
 
-### 5.2 `CLAUDE.md` (Required for Claude Code projects)
+### 5.2 `CLAUDE.md` (Required for Claude Code Projects)
 
 **Purpose:** Claude Code-specific repository instructions
 
@@ -282,7 +304,7 @@ Available tools:
 ```
 ```
 
-### 5.3 `AGENTS.md` (Required for Codex projects)
+### 5.3 `AGENTS.md` (Required for Codex Projects)
 
 **Purpose:** Codex-specific repository working agreement
 
@@ -497,9 +519,9 @@ git log --all --pretty=format: --name-only | sort -u | grep -E '\.env|secrets|\.
 
 | Issue | Cause | Resolution |
 |-------|-------|-----------|
-| **Setup script fails** | Prerequisites missing | Run `install-prerequisites.ps1` and verify Docker Desktop is running |
+| **Setup script fails** | Prerequisites missing | Run the matching platform setup script and verify Docker Desktop or Docker Engine is running |
 | **MCP tools not visible** | Client not restarted after setup | Restart Claude Code or Codex; start a new Codex session |
-| **GitHub MCP fails** | Docker not running or token invalid | Ensure Docker Desktop is running; verify `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env` |
+| **GitHub MCP fails** | Docker not running or token invalid | Ensure Docker Desktop or Docker Engine is running; verify `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env` |
 | **Filesystem MCP cannot access project** | Project not under allowed root | Move project under `FilesystemPath` configured in setup or re-run setup with correct path |
 | **Instructions not loading** | Wrong filename or wrong directory | Verify exact filenames (`AGENTS.md`, `CLAUDE.md`) and client was opened at repository root |
 | **Graph information stale** | Graphify cache outdated | Re-run `/graphify .` after moving files or major refactoring |
@@ -509,17 +531,17 @@ git log --all --pretty=format: --name-only | sort -u | grep -E '\.env|secrets|\.
 
 ## 9. File Dependencies & References
 
-### Input Files (read by users/scripts)
+### Input Files (Read by Users/Scripts)
 
 - `.env` (from `FilesystemPath`) — Contains `GITHUB_PERSONAL_ACCESS_TOKEN`
 - `.env.example` — Template for new projects
 
-### Output Files (created/modified by setup)
+### Output Files (Created/Modified by Setup)
 
 - MCP configuration (client-specific: Claude Code config, Codex local registrations)
 - `.gitignore` — Must exist before first commit
 
-### Version-Controlled Files (created per project)
+### Version-Controlled Files (Created per Project)
 
 - `README.md` — Required
 - `CLAUDE.md` — Required (Claude Code projects)

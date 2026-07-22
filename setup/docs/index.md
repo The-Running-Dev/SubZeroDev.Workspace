@@ -1,25 +1,35 @@
 ---
-title: AI coding workspace setup
-slug: /
+title: AI Coding Workspace Setup
+id: template-overview
 sidebar_position: 1
-description: Install and configure the shared Windows tooling used by Claude Code and Codex.
+description: Install and configure shared tooling for Claude Code and Codex on Windows, macOS, and Ubuntu.
 ---
 
-# AI coding workspace setup
+# AI Coding Workspace Setup
 
-These scripts implement the staged workspace described in the [workspace blueprint](./architecture/workspace-blueprint.md). Run them from PowerShell 7 or Windows PowerShell as your normal user. Review every script before execution.
+These scripts implement the staged workspace described in the [workspace blueprint](./architecture/workspace-blueprint.md). Run them from PowerShell as your normal user and review every script before execution. Windows supports Windows PowerShell 5.1 or PowerShell 7; macOS and Linux require PowerShell 7.
 
 For the project-by-project workflow, see [Starting a new AI-assisted project](./getting-started/new-project.md).
 
-The combined setup first ensures the required Windows command-line tools are available. It installs Node.js LTS, Codex CLI, Claude Code, and GitHub CLI through their official Winget packages when the corresponding commands are missing. Existing installations are left unchanged.
+The combined setup detects the host OS, installs missing command-line prerequisites with the platform package manager, and then runs the shared MCP and assistant configuration. Existing commands are left unchanged.
 
-## Combined setup
+| Platform | Direct entry point | Package tooling |
+|----------|--------------------|-----------------|
+| Windows | `setup-windows.ps1` | Winget |
+| macOS | `setup-macos.ps1` | Homebrew and npm |
+| Ubuntu/Debian | `setup-ubuntu.ps1` | apt, pipx, and npm |
+
+`setup.ps1` is the recommended entry point because it dispatches to the appropriate platform script. The platform entry points are useful for explicit automation and troubleshooting. The shared `setup-workstation.ps1` assumes prerequisites already exist and configures only Graphify, memory, and MCP integrations.
+
+## Combined Setup
 
 Preview actions first:
 
 ```powershell
 .\setup.ps1 -Client Both -WhatIf
 ```
+
+The platform preview reports prerequisite installation actions and stops before shared integrations, because commands intentionally skipped by `-WhatIf` cannot be used to inspect MCP registration safely.
 
 Install Graphify, check Claude built-in memory, install claude-mem, register the official GitHub MCP server, and register Playwright MCP:
 
@@ -40,12 +50,12 @@ Include a narrowly scoped filesystem server:
   -Client Both `
   -SkipClaudeMem `
   -IncludeFilesystem `
-  -FilesystemPath 'C:\Projects\MyApp'
+  -FilesystemPath '/path/to/MyApp'
 ```
 
 The filesystem integration is not enabled by default because Codex and Claude Code already have native file access.
 
-## Database integration
+## Database Integration
 
 No generic database MCP package is installed. Select and security-review a maintained server first, then provide its installed command explicitly:
 
@@ -61,11 +71,11 @@ No generic database MCP package is installed. Select and security-review a maint
 
 Use a read-only development database account. Keep connection strings and passwords out of script arguments, command history, and source control.
 
-## GitHub authentication
+## GitHub Authentication
 
 GitHub MCP runs through `docker/docker-compose.yml` and reads its settings from the git-ignored `docker/.env` file. Add a narrowly scoped token to `GITHUB_PERSONAL_ACCESS_TOKEN` in `docker/.env` before using the server. The checked-in `docker/.env.example` documents the required variables without containing a real secret.
 
-### GitHub MCP access controls
+### GitHub MCP Access Controls
 
 ```dotenv
 GITHUB_READ_ONLY=1
@@ -84,9 +94,12 @@ GITHUB_TOOLSETS=context,repos,issues,pull_requests,actions
 
 Add another toolset only when its capabilities are required. Avoid `all` unless broad GitHub access is intentional, because it exposes substantially more tools to the agent.
 
-## Individual installers
+## Individual Installers
 
-- `scripts/workstation/install-prerequisites.ps1`
+- `setup-windows.ps1`
+- `setup-macos.ps1`
+- `setup-ubuntu.ps1`
+- `setup-workstation.ps1`
 - `scripts/workstation/install-graphify.ps1`
 - `scripts/workstation/install-claude-memory.ps1`
 - `scripts/workstation/install-claude-mem.ps1`
@@ -96,3 +109,15 @@ Add another toolset only when its capabilities are required. Avoid `all` unless 
 - `scripts/workstation/install-database-mcp.ps1`
 
 Most component scripts preserve existing MCP registrations. The GitHub installer intentionally replaces the existing `github` registration so it points to the Compose-managed service.
+
+## Platform Prerequisites
+
+- Windows requires Winget. Docker Desktop must be installed separately for GitHub MCP.
+- macOS requires [Homebrew](https://brew.sh). Docker Desktop must be installed and started separately for GitHub MCP.
+- Ubuntu/Debian requires `apt-get` and `sudo`. Install Docker Engine or Docker Desktop separately and ensure the current user can run `docker`.
+
+The platform setup also installs [`act`](https://nektosact.com/) for local GitHub Actions validation. With Docker running, execute `./docs-workflow-local.ps1` from `setup` to run the documentation workflow's pull-request `build` job locally. Use `./docs-local.ps1` instead when you want the live-reload documentation server.
+
+If PowerShell is not installed on the host, use the published Docker image instead. It can [run the setup inside a Linux container](getting-started/container.md) or serve this documentation on port 8080.
+
+Use `-SkipGraphify`, `-SkipClaudeMem`, `-SkipGitHub`, or `-SkipPlaywright` when a component is not wanted. `-Client Codex` avoids installing or checking Claude Code; `-Client ClaudeCode` does the converse.

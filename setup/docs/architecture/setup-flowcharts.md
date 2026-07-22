@@ -1,10 +1,10 @@
 ---
-title: Setup flowcharts
+title: Setup Flowcharts
 sidebar_position: 4
 description: Docusaurus-compatible Mermaid diagrams for the setup workflows.
 ---
 
-# Setup workflow flowcharts and diagrams
+# Setup Workflow Flowcharts and Diagrams
 
 **Visual representations of the three-phase setup process defined in the [setup specification](./setup-specification.md).**
 
@@ -70,7 +70,7 @@ graph TD
 graph TD
     P1Start["Phase 1: Workstation Setup"] --> Check["Check Prerequisites"]
     
-    Check --> CheckPS["PowerShell 5.1+?"]
+    Check --> CheckPS["Supported PowerShell?<br/>Windows 5.1+ or pwsh 7+"]
     CheckPS -->|No| FailPS["❌ Install PowerShell"]
     FailPS --> End1["Retry from Check"]
     
@@ -79,7 +79,7 @@ graph TD
     FailGit --> End2["Retry from Check"]
     
     CheckGit -->|Yes| CheckDocker["Docker running?"]
-    CheckDocker -->|No| FailDocker["❌ Start Docker Desktop"]
+    CheckDocker -->|No| FailDocker["❌ Start Docker Desktop or Engine"]
     FailDocker --> End3["Retry from Check"]
     
     CheckDocker -->|Yes| RunSetup["Run setup.ps1"]
@@ -170,7 +170,7 @@ graph TD
     GenClaude --> GenAgents
     GenAgents --> GitInit["Initialize Git Repository"]
     
-    GitInit --> GitCheck{-NoGit flag?}
+    GitInit --> GitCheck{-SkipGit flag?}
     GitCheck -->|Yes| SkipGit["Skip Git init"]
     GitCheck -->|No| DoGitInit["git init"]
     
@@ -384,7 +384,7 @@ graph TD
     P1Q2 -->|Yes| P1A2["✓ Verify Docker running<br/>✓ Check GITHUB_PERSONAL_ACCESS_TOKEN"]
     P1Q2 -->|No| P1Q3{"Setup script<br/>errors?"}
     
-    P1Q3 -->|Yes| P1A3["✓ Run install-prerequisites.ps1<br/>✓ Verify Docker Desktop"]
+    P1Q3 -->|Yes| P1A3["✓ Run platform setup<br/>✓ Verify Docker Desktop or Engine"]
     P1Q3 -->|No| P1Q4{"Filesystem MCP<br/>cannot access?"}
     
     P1Q4 -->|Yes| P1A4["✓ Move project to allowed root<br/>✓ Re-run setup.ps1"]

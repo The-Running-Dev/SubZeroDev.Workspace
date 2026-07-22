@@ -1,5 +1,5 @@
 ---
-title: Workspace blueprint
+title: Workspace Blueprint
 sidebar_position: 1
 description: Architecture and staged rollout for a persistent, cross-tool AI coding workspace.
 ---
@@ -9,11 +9,11 @@ description: Architecture and staged rollout for a persistent, cross-tool AI cod
 > A practical, staged design for giving coding agents a structural map of the code, durable project knowledge, and controlled access to live systems—without confusing any one of those capabilities with “memory.”
 
 **Status checked:** 22 July 2026  
-**Primary environment:** Windows, VS Code, Claude Code/Desktop, Codex, GitHub Copilot, Warp, .NET, PowerShell, and multiple repositories
+**Supported workstation environments:** Windows, macOS, and Ubuntu/Debian with PowerShell, VS Code, Claude Code, Codex, and multiple repositories
 
 ---
 
-## Executive summary
+## Executive Summary
 
 Ben’s concept is a persistent, cross-tool workspace in which an AI assistant can quickly recover:
 
@@ -44,7 +44,7 @@ Do **not** begin with Neo4j, a custom nightly indexer, Brainspike, and several o
 
 ---
 
-## The idea: a persistent project brain, not a larger prompt
+## The Idea: a Persistent Project Brain, Not a Larger Prompt
 
 The objective is not to pour every available fact into every conversation. That would increase context usage and make instructions harder to follow. The objective is to retrieve the smallest trustworthy slice needed for the current task.
 
@@ -70,7 +70,7 @@ The objective is not to pour every available fact into every conversation. That 
                          └──────────────────────────┘
 ```
 
-### What belongs where
+### What Belongs Where
 
 - Put **non-negotiable commands and conventions** in a checked-in instruction file such as `CLAUDE.md` (and the equivalent supported by other agents).
 - Put **architectural decisions and their rationale** in ADRs or project documentation. Memory may point to them; it should not become their only home.
@@ -80,7 +80,7 @@ The objective is not to pour every available fact into every conversation. That 
 
 ---
 
-## Graphify: the structural map
+## Graphify: the Structural Map
 
 Graphify is currently presented by its publisher as a free, MIT-licensed command-line tool that parses a repository locally and produces a knowledge graph. Its current documentation says it supports 36 languages and registers a `/graphify` skill with 17 coding assistants, including Claude Code, Codex, Cursor, GitHub Copilot, and Gemini CLI.
 
@@ -94,7 +94,7 @@ Its value is strongest for questions such as:
 
 It is less valuable for a tiny repository, a single-file edit, new code with little existing structure, or questions that require runtime rather than static relationships.
 
-### Verified installation on Windows
+### Verified Installation on Windows
 
 Graphify’s current quickstart recommends `uv`, with `pipx` and `pip` as alternatives. If `uv` is already installed:
 
@@ -134,7 +134,7 @@ For deeper analysis:
 
 Before committing, decide whether `graphify-out/` is a shared artifact or a local generated artifact. If local, add it to `.gitignore`. Review generated reports before trusting them; parsing and inferred relationships can be incomplete, especially around reflection, dependency injection, generated code, and runtime configuration.
 
-### What the token-reduction claim really means
+### What the Token-Reduction Claim Really Means
 
 Graphify can reduce context for structural navigation when an agent queries a compact graph instead of repeatedly reading many files. That mechanism is credible. A headline such as “70% reduction” is **not a guaranteed workspace-wide result**, however. Savings depend on repository size, language support, question type, index freshness, and whether the agent actually uses the graph.
 
@@ -152,9 +152,9 @@ Track these values on a few representative tasks:
 
 ---
 
-## Memory: decisions and learning, not a substitute for the code graph
+## Memory: Decisions and Learning, Not a Substitute for the Code Graph
 
-### Recommended default: Claude Code’s built-in memory
+### Recommended Default: Claude Code’s Built-In Memory
 
 Claude Code now officially provides two persistent mechanisms:
 
@@ -207,7 +207,7 @@ Keep rationales and durable decisions in ADRs, for example `docs/adr/0007-messag
 
 **Authoritative reference:** [Claude Code: How Claude remembers your project](https://code.claude.com/docs/en/memory)
 
-### Optional: claude-mem
+### Optional: Claude-Mem
 
 `claude-mem` is an active third-party project, not an Anthropic product. It captures coding-session activity, compresses it, stores searchable observations, and can inject relevant context into later sessions. Its documentation currently describes support for Claude Code and other agents, plus a Claude Desktop skill for searching the stored memory.
 
@@ -241,7 +241,7 @@ Run a two-week built-in-memory trial before installing it. Two memory systems th
 
 **Authoritative references:** [claude-mem repository and current quickstart](https://github.com/thedotmack/claude-mem), [claude-mem documentation](https://docs.claude-mem.ai/)
 
-### Claude Desktop: important distinction
+### Claude Desktop: Important Distinction
 
 Claude Desktop and Claude Code are different hosts. A Claude Code plugin or hook is not automatically a Claude Desktop extension.
 
@@ -256,17 +256,17 @@ claude-mem currently advertises a Claude Desktop search skill, but it remains a 
 
 **Authoritative reference:** [Anthropic: Getting started with local MCP servers on Claude Desktop](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop)
 
-### Brainspike status
+### Brainspike Status
 
 Brainspike should be treated as experimental. The discoverable material is principally a community project/post rather than mature vendor documentation. Automatic prompt injection also carries a direct context-cost and trust tradeoff. It is not part of the recommended rollout until it has a stable release process, clear storage/privacy documentation, and a measurable advantage over built-in memory or claude-mem.
 
 ---
 
-## MCP tools: live capabilities
+## MCP Tools: Live Capabilities
 
 MCP lets an assistant discover and invoke tools or resources. It does not automatically make the assistant remember previous work. Memory only exists if a particular MCP server deliberately stores and retrieves it.
 
-### 1. GitHub MCP server — install early
+### 1. GitHub MCP Server — Install Early
 
 GitHub maintains an official MCP server for repositories, issues, pull requests, Actions, and related workflows. Prefer the remote server with OAuth when the chosen client supports it. Otherwise use the official local container or binary and a least-privilege token.
 
@@ -282,7 +282,7 @@ Security defaults:
 
 **Authoritative reference:** [GitHub’s official MCP server](https://github.com/github/github-mcp-server)
 
-### 2. Filesystem MCP — usually redundant for coding agents
+### 2. Filesystem MCP — Usually Redundant for Coding Agents
 
 Claude Code, Codex, and IDE coding agents already have scoped filesystem access. Adding another filesystem MCP server may duplicate tools and expand the attack surface.
 
@@ -292,7 +292,7 @@ Never grant a filesystem tool an entire drive or user profile. Grant only the re
 
 **Authoritative references:** [MCP Filesystem reference server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem), [MCP example servers and maintenance status](https://modelcontextprotocol.io/examples)
 
-### 3. Database tools — select deliberately
+### 3. Database Tools — Select Deliberately
 
 The earlier blanket recommendation to “install PostgreSQL / SQLite MCP” is too vague. The MCP project’s example catalog distinguishes maintained reference servers from archived examples, and an archived demonstration is not automatically a suitable production tool.
 
@@ -307,7 +307,7 @@ Minimum controls:
 - Keep credentials in the operating system’s secret store or the host’s encrypted extension settings.
 - Require separate, explicit authorization for migrations and writes.
 
-### 4. Playwright MCP — add when UI work justifies it
+### 4. Playwright MCP — Add When UI Work Justifies It
 
 Microsoft’s Playwright MCP server gives an agent structured browser automation for navigation, inspection, form interaction, and UI testing.
 
@@ -331,9 +331,9 @@ Use isolated browser profiles for test automation. Do not expose an everyday sig
 
 ---
 
-## Recommended stack for Ben
+## Recommended Stack for Ben
 
-### Core stack
+### Core Stack
 
 | Component | Recommendation | Why |
 |---|---|---|
@@ -346,14 +346,14 @@ Use isolated browser profiles for test automation. Do not expose an everyday sig
 | Local files | Native coding-agent tools | Fewer redundant tools and permissions |
 | Database | Native CLI first; reviewed MCP later | Safer and easier to constrain |
 
-### Optional after measurement
+### Optional After Measurement
 
 - **claude-mem:** if searchable cross-session history materially outperforms built-in auto-memory.
 - **Cross-agent instruction generation:** a small script or canonical policy source that produces the appropriate Claude, Codex, and Copilot instruction files without copying stale prose by hand.
 - **Central architecture catalog:** if dozens of repositories need an inventory of owners, services, environments, and links.
 - **Neo4j-backed cross-repository graph:** only when cross-repo relationship queries justify operating a graph database and custom ingestion pipeline.
 
-### Not recommended initially
+### Not Recommended Initially
 
 - Multiple automatic memory injectors at once.
 - A custom Graphify clone.
@@ -365,9 +365,9 @@ Use isolated browser profiles for test automation. Do not expose an everyday sig
 
 ---
 
-## Day-to-day workflow
+## Day-to-Day Workflow
 
-### Starting or returning to a repository
+### Starting or Returning to a Repository
 
 1. Pull the latest changes and check the worktree state.
 2. Open the repository at its root.
@@ -385,7 +385,7 @@ issue and open PRs. Give me the proposed files, tests, risks, and unresolved
 questions before editing.
 ```
 
-### During implementation
+### During Implementation
 
 1. Use the graph for exploration and change-impact hypotheses.
 2. Verify important claims in source code and tests.
@@ -393,7 +393,7 @@ questions before editing.
 4. Use Playwright only for relevant UI behavior.
 5. Ask before any consequential external write.
 
-### Finishing a task
+### Finishing a Task
 
 1. Run proportional build, test, and lint checks.
 2. Update specs or ADRs when the contract or rationale changed.
@@ -403,9 +403,9 @@ questions before editing.
 
 ---
 
-## Staged rollout
+## Staged Rollout
 
-### Stage 0 — baseline (one week)
+### Stage 0 — Baseline (One Week)
 
 - Select two medium-sized representative repositories.
 - Record navigation time, files opened, approximate context/token use, and answer quality for 10 recurring tasks.
@@ -414,7 +414,7 @@ questions before editing.
 
 **Exit criterion:** a usable baseline and a list of the three most common context failures.
 
-### Stage 1 — native memory hygiene (week two)
+### Stage 1 — Native Memory Hygiene (Week Two)
 
 - Upgrade Claude Code to a version that supports auto-memory.
 - Create or trim `CLAUDE.md` with `/init` and manual review.
@@ -424,7 +424,7 @@ questions before editing.
 
 **Exit criterion:** repeated corrections decline, and important instructions are reliably loaded.
 
-### Stage 2 — Graphify pilot (weeks two to three)
+### Stage 2 — Graphify Pilot (Weeks Two to Three)
 
 - Install Graphify on one representative .NET repository and one mixed-language repository.
 - Build the initial graph and run the same baseline architecture questions.
@@ -433,7 +433,7 @@ questions before editing.
 
 **Exit criterion:** clear improvement in either navigation time or context use without unacceptable staleness or errors.
 
-### Stage 3 — live GitHub integration (week three)
+### Stage 3 — Live GitHub Integration (Week Three)
 
 - Enable the official GitHub MCP server with read-only, minimal toolsets.
 - Validate repository, issue, PR, and Actions reads.
@@ -441,7 +441,7 @@ questions before editing.
 
 **Exit criterion:** the agent can retrieve live project state without broad credentials or unnecessary tools.
 
-### Stage 4 — task-specific capabilities (weeks four to six)
+### Stage 4 — Task-Specific Capabilities (Weeks Four to Six)
 
 - Add Playwright MCP to frontend repositories that need it.
 - Add a reviewed, read-only database integration only where native tools are inadequate.
@@ -449,7 +449,7 @@ questions before editing.
 
 **Exit criterion:** each added component solves a measured problem and has a named owner, update path, and uninstall path.
 
-### Stage 5 — cross-repository intelligence (later)
+### Stage 5 — Cross-Repository Intelligence (Later)
 
 Build a central catalog or graph only if repeated questions cross repository boundaries, for example:
 
@@ -461,7 +461,7 @@ At that point, ingest repository structure, ADR links, service metadata, and sel
 
 ---
 
-## Security and maintenance rules
+## Security and Maintenance Rules
 
 Persistent context and tool access amplify both good information and malicious instructions. Treat repository text, issues, pull requests, web pages, tool output, and retrieved memories as untrusted data—not authority.
 
@@ -477,7 +477,7 @@ Persistent context and tool access amplify both good information and malicious i
 
 ---
 
-## Success measures
+## Success Measures
 
 Review the pilot after 30 days:
 
@@ -496,7 +496,7 @@ Adopt a component only if its measured benefit exceeds its context, security, an
 
 ---
 
-## Final recommendation
+## Final Recommendation
 
 Build the workspace from the inside out:
 
@@ -511,7 +511,7 @@ The resulting system is not one giant memory. It is a disciplined retrieval arch
 
 ---
 
-## Verification notes and source index
+## Verification Notes and Source Index
 
 The commands and status statements in this document were checked against project or vendor documentation on 22 July 2026:
 

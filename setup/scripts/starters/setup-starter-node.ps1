@@ -19,7 +19,7 @@ param(
     [Parameter(Mandatory)][string]$ProjectName
 )
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step "Setting up Node.js starter files"
 

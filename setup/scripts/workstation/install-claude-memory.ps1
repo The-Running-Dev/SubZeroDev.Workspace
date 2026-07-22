@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param()
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step 'Checking Claude Code built-in memory'
 Assert-CommandAvailable -Name 'claude' -InstallHint "Install or update Claude Code using Anthropic's current official installer, then rerun."

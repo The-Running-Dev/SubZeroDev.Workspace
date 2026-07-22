@@ -1,12 +1,14 @@
 ---
-title: Quick start
+title: Quick Start
 sidebar_position: 1
 description: Create and open a new AI-assisted project with the shortest supported workflow.
 ---
 
-# Quick start
+# Quick Start
 
 **Fast guide to setting up a new AI-assisted project using setup-project.ps1**
+
+The project generator runs on Windows, macOS, and Linux under PowerShell. The examples below use Windows paths; replace them with paths such as `~/Projects/MyApp` on macOS or Linux.
 
 ## TL;DR
 
@@ -97,7 +99,7 @@ claude
 codex
 ```
 
-## Options & Variations
+## Options and Variations
 
 ### Auto-Commit (One-Shot Setup)
 

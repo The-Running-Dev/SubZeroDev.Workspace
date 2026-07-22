@@ -1,23 +1,12 @@
 [CmdletBinding(SupportsShouldProcess)]
 param()
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step 'Installing Graphify'
 
 if (-not (Test-CommandAvailable -Name 'uv')) {
     Update-SessionPath
-}
-
-if (-not (Test-CommandAvailable -Name 'uv')) {
-    Assert-CommandAvailable -Name 'winget' -InstallHint 'Install uv from https://docs.astral.sh/uv/getting-started/installation/ and rerun this script.'
-    if ($PSCmdlet.ShouldProcess('Astral uv', 'Install with winget')) {
-        Invoke-NativeCommand -FilePath 'winget' -ArgumentList @(
-            'install', '--id', 'astral-sh.uv', '--exact',
-            '--accept-package-agreements', '--accept-source-agreements'
-        )
-        Update-SessionPath
-    }
 }
 
 # In preview mode uv has intentionally not been installed, so commands that
@@ -30,14 +19,7 @@ if ($WhatIfPreference -and -not (Test-CommandAvailable -Name 'uv')) {
     return
 }
 
-if (-not (Test-CommandAvailable -Name 'uv')) {
-    $uvCandidate = Join-Path $env:USERPROFILE '.local\bin\uv.exe'
-    if (Test-Path -LiteralPath $uvCandidate) {
-        $env:PATH = "$(Split-Path -Parent $uvCandidate);$env:PATH"
-    }
-}
-
-Assert-CommandAvailable -Name 'uv' -InstallHint 'Restart PowerShell if uv was just installed, then rerun.'
+Assert-CommandAvailable -Name 'uv' -InstallHint 'Run the platform setup script to install uv, or install it from https://docs.astral.sh/uv/getting-started/installation/.'
 
 if ($PSCmdlet.ShouldProcess('graphifyy', 'Install or upgrade uv tool')) {
     $installedTools = & uv tool list 2>&1 | Out-String
@@ -59,8 +41,8 @@ if ($WhatIfPreference -and -not (Test-CommandAvailable -Name 'graphify')) {
 }
 
 if (-not (Test-CommandAvailable -Name 'graphify')) {
-    $uvToolBin = Join-Path $env:USERPROFILE '.local\bin'
-    if (Test-Path -LiteralPath $uvToolBin) { $env:PATH = "$uvToolBin;$env:PATH" }
+    $uvToolBin = Join-Path ([Environment]::GetFolderPath('UserProfile')) '.local/bin'
+    if (Test-Path -LiteralPath $uvToolBin) { $env:PATH = "$uvToolBin$([System.IO.Path]::PathSeparator)$env:PATH" }
 }
 
 Assert-CommandAvailable -Name 'graphify' -InstallHint 'Restart PowerShell so the uv tool directory is added to PATH.'

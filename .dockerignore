@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+docs-template/.git
+docs-template/node_modules
+docs-template/artifacts
+setup/docker/.env
+**/.DS_Store
+**/*.log

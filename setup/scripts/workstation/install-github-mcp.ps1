@@ -4,7 +4,7 @@ param(
     [string]$Client = 'Both'
 )
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 function Test-DockerEngineRunning {
     $serverVersion = & docker info --format '{{.ServerVersion}}' 2>$null
@@ -15,6 +15,10 @@ function Wait-DockerEngine {
     param([int]$TimeoutSeconds = 60)
 
     if (Test-DockerEngineRunning) { return }
+
+    if (-not ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows)) {
+        throw 'The Docker CLI is installed, but its engine is not running. Start Docker Desktop (macOS) or the Docker service (Linux), then rerun the setup.'
+    }
 
     $dockerDesktopPath = @(
         (Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe')
@@ -69,7 +73,7 @@ function Test-DotEnvValueSet {
 Write-Step "Installing GitHub's official MCP server"
 Assert-CommandAvailable -Name 'docker' -InstallHint 'Install Docker Desktop and make sure it is running.'
 
-$dockerRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\docker')).Path
+$dockerRoot = (Resolve-Path (Join-Path $PSScriptRoot '../../docker')).Path
 $composeFile = Join-Path $dockerRoot 'docker-compose.yml'
 $envFile = Join-Path $dockerRoot '.env'
 if (-not (Test-Path -LiteralPath $composeFile -PathType Leaf)) {

@@ -13,7 +13,7 @@ param(
     [string]$Client = 'Both'
 )
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step 'Registering an explicitly selected database MCP server'
 Assert-CommandAvailable -Name $Command -InstallHint 'Install and security-review the selected database MCP server before registering it.'
