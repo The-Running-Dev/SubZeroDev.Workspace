@@ -139,3 +139,27 @@ Useful switches include:
 - [Modular architecture](docs/architecture/modular-architecture.md)
 - [Setup specification](docs/architecture/setup-specification.md)
 - [Language starters](docs/reference/language-starters.md)
+
+## Build the documentation site
+
+Initialize the pinned Docusaurus template after cloning this repository:
+
+```powershell
+git submodule update --init --recursive
+```
+
+Synchronize `setup/docs` into the template and configure it for this repository's GitHub Pages URL:
+
+```powershell
+./setup-docs.ps1
+```
+
+Then build locally with the template's declared pnpm version:
+
+```powershell
+Set-Location ../docs-template
+npx -y pnpm@9.0.0 install --frozen-lockfile
+npx -y pnpm@9.0.0 run build:prod
+```
+
+The build output is written to `docs-template/artifacts`. The `Documentation Pages` workflow validates the build on pull requests and deploys it from `main` using GitHub Pages Actions. Configure the repository's Pages source as **GitHub Actions** before the first deployment.

@@ -1,0 +1,99 @@
+name: Documentation Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/docs-pages.yml'
+      - '.gitmodules'
+      - 'docs-template'
+      - 'README.md'
+      - 'setup/README.md'
+      - 'setup/docs/**'
+      - 'setup/setup-docs.ps1'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/docs-pages.yml'
+      - '.gitmodules'
+      - 'docs-template'
+      - 'README.md'
+      - 'setup/README.md'
+      - 'setup/docs/**'
+      - 'setup/setup-docs.ps1'
+  workflow_dispatch:
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and template
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: docs-template/pnpm-lock.yaml
+
+      - name: Synchronize documentation
+        shell: pwsh
+        run: ./setup/setup-docs.ps1
+
+      - name: Install template dependencies
+        working-directory: docs-template
+        env:
+          HUSKY: 0
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Docusaurus site
+        working-directory: docs-template
+        env:
+          NODE_ENV: production
+          HUSKY: 0
+        run: pnpm run build:prod
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs-template/artifacts
+
+  deploy:
+    name: Deploy documentation
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -8,6 +8,7 @@ This repository contains reusable PowerShell tooling for preparing AI-assisted d
 |------|---------|
 | [`setup/`](setup/) | Cross-platform workstation provisioning, MCP registration, and project scaffolding |
 | [`setup/docs/`](setup/docs/) | Getting-started guides, architecture, reference material, and setup specifications |
+| [`docs-template/`](docs-template/) | Pinned Docusaurus template submodule used to build the documentation site |
 | `LLMs.code-workspace` | VS Code workspace definition |
 
 ## Quick start
@@ -54,3 +55,5 @@ Start with:
 - [New-project workflow](setup/docs/getting-started/new-project.md)
 - [Architecture](setup/docs/architecture/modular-architecture.md)
 - [Setup specification](setup/docs/architecture/setup-specification.md)
+
+The documentation site is assembled from `setup/docs` with `setup/setup-docs.ps1`. GitHub Actions builds the pinned `docs-template` submodule and deploys the result to GitHub Pages after changes merge to `main`.

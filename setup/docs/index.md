@@ -1,5 +1,6 @@
 ---
 title: AI coding workspace setup
+id: template-overview
 slug: /
 sidebar_position: 1
 description: Install and configure shared tooling for Claude Code and Codex on Windows, macOS, and Ubuntu.
