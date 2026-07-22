@@ -164,7 +164,7 @@
           "properties": {
             "Client": {
               "type": "string",
-              "enum": ["Both", "Code", "Codex"],
+              "enum": ["Both", "ClaudeCode", "Codex"],
               "description": "Target clients to configure"
             },
             "IncludeFilesystem": {
@@ -232,7 +232,7 @@
               "default": "Both",
               "description": "Generate instructions for which client(s)"
             },
-            "NoGit": {
+            "SkipGit": {
               "type": "boolean",
               "default": false,
               "description": "Skip Git initialization"

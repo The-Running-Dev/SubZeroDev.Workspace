@@ -6,17 +6,17 @@ description: Set up a repository for Claude Desktop, Claude Code, and Codex.
 
 # Starting a new AI-assisted project
 
-This guide assumes the Windows workspace tooling in this directory has already been installed. It covers the shared project setup and the first-run workflow for Claude Desktop, Claude Code, and Codex.
+This guide assumes the workspace tooling in this directory has already been installed on Windows, macOS, or Ubuntu/Debian. It covers the shared project setup and the first-run workflow for Claude Desktop, Claude Code, and Codex.
 
 ## 1. Install the workstation tools once
 
-Run this from `D:\Projects\LLMs\setup` in PowerShell:
+Run this from the repository's `setup` directory in PowerShell:
 
 ```powershell
 .\setup.ps1 `
   -Client Both `
   -IncludeFilesystem `
-  -FilesystemPath 'D:\Dropbox'
+  -FilesystemPath '/path/to/projects'
 ```
 
 This installs or configures the command-line prerequisites, Graphify, Claude memory, GitHub MCP, Playwright MCP, and filesystem MCP. It configures **Claude Code and Codex**. It does not automatically add command-based local MCP servers to Claude Desktop.
@@ -25,10 +25,10 @@ After changing MCP registrations, restart Claude Code and Codex or begin a new s
 
 ## 2. Create the project
 
-Choose a directory inside the allowed filesystem root. The following example creates a project under `D:\Dropbox\Projects`:
+Choose a directory inside the allowed filesystem root. For example:
 
 ```powershell
-$projectPath = 'D:\Dropbox\Projects\MyProject'
+$projectPath = Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Projects/MyProject'
 New-Item -ItemType Directory -Path $projectPath
 Set-Location $projectPath
 git init
@@ -234,7 +234,7 @@ Then run the project’s build, test, and lint commands; review the complete dif
 
 - **Instructions did not load:** confirm the client was opened at the repository root and that the filename is exactly `AGENTS.md` or `CLAUDE.md`.
 - **MCP server missing:** restart the client or start a new session, then inspect `/mcp` in Codex or the MCP list in Claude Code.
-- **GitHub MCP fails:** confirm Docker Desktop is running and `GITHUB_PERSONAL_ACCESS_TOKEN` is set in `D:\Projects\LLMs\setup\docker\.env`.
+- **GitHub MCP fails:** confirm Docker Desktop or Docker Engine is running and `GITHUB_PERSONAL_ACCESS_TOKEN` is set in `setup/docker/.env`.
 - **GitHub access denied:** verify the token’s repository access and scopes. Read-only mode cannot add permissions the token does not possess.
 - **Filesystem MCP cannot reach the project:** confirm the project is under the configured allowed root, currently `D:\Dropbox`.
 - **Claude Desktop cannot see local MCP tools:** install an appropriate Desktop Extension; Claude Code registrations do not automatically become Desktop registrations.

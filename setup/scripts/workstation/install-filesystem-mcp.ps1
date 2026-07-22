@@ -7,7 +7,7 @@ param(
     [string]$Client = 'Both'
 )
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+. (Join-Path $PSScriptRoot '../../modules/Common.ps1')
 
 Write-Step 'Registering the optional Filesystem MCP server'
 Assert-CommandAvailable -Name 'npx' -InstallHint 'Install the current Node.js LTS release first.'
@@ -24,7 +24,8 @@ $resolvedPaths = foreach ($pathItem in $AllowedPath) {
 }
 
 Write-WarningMessage "The filesystem MCP server can read and write within: $($resolvedPaths -join ', ')"
-$serverArguments = @('/c', 'npx', '-y', '@modelcontextprotocol/server-filesystem') + $resolvedPaths
+$npxCommand = Get-NpxCommand
+$serverArguments = $npxCommand.PrefixArguments + @('-y', '@modelcontextprotocol/server-filesystem') + $resolvedPaths
 
 if ($Client -in @('Codex', 'Both')) {
     Assert-CommandAvailable -Name 'codex' -InstallHint 'Install Codex or rerun with -Client ClaudeCode.'
@@ -32,7 +33,7 @@ if ($Client -in @('Codex', 'Both')) {
         Write-WarningMessage 'Filesystem MCP is already registered in Codex; leaving the existing configuration unchanged.'
     }
     elseif ($PSCmdlet.ShouldProcess('Codex', 'Register restricted Filesystem MCP server')) {
-        Invoke-NativeCommand -FilePath 'codex' -ArgumentList (@('mcp', 'add', 'filesystem', '--', 'cmd') + $serverArguments)
+        Invoke-NativeCommand -FilePath 'codex' -ArgumentList (@('mcp', 'add', 'filesystem', '--', $npxCommand.FilePath) + $serverArguments)
     }
 }
 
@@ -42,7 +43,7 @@ if ($Client -in @('ClaudeCode', 'Both')) {
         Write-WarningMessage 'Filesystem MCP is already registered in Claude Code; leaving the existing configuration unchanged.'
     }
     elseif ($PSCmdlet.ShouldProcess('Claude Code', 'Register restricted Filesystem MCP server')) {
-        Invoke-NativeCommand -FilePath 'claude' -ArgumentList (@('mcp', 'add', '--scope', 'user', 'filesystem', '--', 'cmd') + $serverArguments)
+        Invoke-NativeCommand -FilePath 'claude' -ArgumentList (@('mcp', 'add', '--scope', 'user', 'filesystem', '--', $npxCommand.FilePath) + $serverArguments)
     }
 }
 

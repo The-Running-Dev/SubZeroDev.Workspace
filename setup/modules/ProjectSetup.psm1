@@ -749,7 +749,7 @@ function Invoke-LanguageStarter {
         [Parameter(Mandatory)][string]$ProjectName
     )
 
-    $starterScript = Join-Path $PSScriptRoot "..\scripts\starters\setup-starter-$Language.ps1"
+    $starterScript = Join-Path $PSScriptRoot "../scripts/starters/setup-starter-$Language.ps1"
     
     if (-not (Test-Path $starterScript)) {
         Write-WarningMessage "Language starter script not found: $starterScript"

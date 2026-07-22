@@ -9,7 +9,7 @@ description: Architecture and staged rollout for a persistent, cross-tool AI cod
 > A practical, staged design for giving coding agents a structural map of the code, durable project knowledge, and controlled access to live systems—without confusing any one of those capabilities with “memory.”
 
 **Status checked:** 22 July 2026  
-**Primary environment:** Windows, VS Code, Claude Code/Desktop, Codex, GitHub Copilot, Warp, .NET, PowerShell, and multiple repositories
+**Supported workstation environments:** Windows, macOS, and Ubuntu/Debian with PowerShell, VS Code, Claude Code, Codex, and multiple repositories
 
 ---
 

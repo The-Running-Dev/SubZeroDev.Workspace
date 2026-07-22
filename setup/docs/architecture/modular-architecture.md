@@ -49,7 +49,11 @@ Language Starters
 
 ```text
 setup/
-├── setup.ps1                       # Workstation setup entry point
+├── setup.ps1                       # OS-detecting entry point
+├── setup-windows.ps1               # Winget prerequisites
+├── setup-macos.ps1                 # Homebrew/npm prerequisites
+├── setup-ubuntu.ps1                # apt/pipx/npm prerequisites
+├── setup-workstation.ps1           # Shared integration orchestration
 ├── setup-project.ps1               # Project generator entry point
 ├── modules/
 │   ├── Common.ps1                  # Shared utility functions
@@ -64,7 +68,11 @@ setup/
 
 ## How It Works
 
-### Phase 1: Orchestration (setup-project.ps1)
+### Workstation orchestration
+
+`setup.ps1` detects Windows, macOS, or Linux and delegates to its platform script. Each platform script installs missing prerequisites and invokes `setup-workstation.ps1`. The shared orchestrator runs the OS-independent component installers. MCP commands use `cmd /c npx` on Windows and invoke `npx` directly on macOS and Linux.
+
+### Project orchestration (`setup-project.ps1`)
 
 The main script:
 1. Imports `Common.ps1` for utility functions
@@ -276,7 +284,7 @@ The new system maintains compatibility with existing scripts:
 
 - **Common.ps1** — Shared utility functions used by all scripts
 - **install-*.ps1** — Workstation setup scripts still work
-- **setup.ps1** — Main orchestrator for Phase 1 is unchanged
+- **setup.ps1** — Detects the host OS and delegates Phase 1 to a platform entry point
 
 You can now use setup-project.ps1 for Phase 2 and Phase 3 project creation.
 

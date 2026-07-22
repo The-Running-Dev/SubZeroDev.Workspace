@@ -7,17 +7,20 @@ setup:
   script_name: "setup.ps1"
   
   prerequisites:
-    powershell: "5.1"
+    powershell: "7.0"
     git: "2.30"
     docker: "20.10"
-    nodejs: "16"
+    nodejs: "18"
     python: "3.8"
   
   parameters:
     Client: "Both"
     IncludeFilesystem: true
-    FilesystemPath: "D:\\Dropbox"
-    EnvFile: "${PSScriptRoot}/docker/.env"
+    FilesystemPath: "/path/to/projects"
+    SkipGraphify: false
+    SkipClaudeMem: true
+    SkipGitHub: false
+    SkipPlaywright: false
   
   components:
     - name: "Command-line Prerequisites"
@@ -88,11 +91,11 @@ project:
   script_name: "setup-project.ps1"
   
   parameters:
-    ProjectPath: "D:\\Dropbox\\Projects\\MyProject"
+    ProjectPath: "/path/to/projects/MyProject"
     ProjectName: "MyProject"
     Language: "node"
     Client: "Both"
-    NoGit: false
+    SkipGit: false
   
   directory_structure:
     - "src"
@@ -258,7 +261,7 @@ validation:
 troubleshooting:
   setup_script_fails:
     cause: "Prerequisites missing"
-    resolution: "Run install-prerequisites.ps1 and verify Docker Desktop is running"
+    resolution: "Run the matching platform setup script and verify Docker Desktop or Docker Engine is running"
     phase: "1"
   
   mcp_tools_not_visible:
@@ -268,7 +271,7 @@ troubleshooting:
   
   github_mcp_fails:
     cause: "Docker not running or token invalid"
-    resolution: "Ensure Docker Desktop is running; verify GITHUB_PERSONAL_ACCESS_TOKEN in .env"
+    resolution: "Ensure Docker Desktop or Docker Engine is running; verify GITHUB_PERSONAL_ACCESS_TOKEN in .env"
     phase: "1"
   
   filesystem_mcp_cannot_access:

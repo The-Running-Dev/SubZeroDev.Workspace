@@ -22,14 +22,32 @@ function Test-CommandAvailable {
 }
 
 function Update-SessionPath {
-    $persistentPaths = @(
-        [Environment]::GetEnvironmentVariable('Path', 'Machine')
-        [Environment]::GetEnvironmentVariable('Path', 'User')
-    ) -join ';'
+    $separator = [System.IO.Path]::PathSeparator
+    $persistentPaths = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
+        @(
+            [Environment]::GetEnvironmentVariable('Path', 'Machine')
+            [Environment]::GetEnvironmentVariable('Path', 'User')
+        ) -join $separator
+    }
+    else {
+        @(
+            (Join-Path ([Environment]::GetFolderPath('UserProfile')) '.local/bin')
+            '/opt/homebrew/bin'
+            '/usr/local/bin'
+            '/home/linuxbrew/.linuxbrew/bin'
+        ) -join $separator
+    }
 
     # Preserve process-only entries while making newly installed commands
     # available without requiring the user to restart PowerShell.
-    $env:PATH = "$persistentPaths;$env:PATH"
+    $env:PATH = "$persistentPaths$separator$env:PATH"
+}
+
+function Get-NpxCommand {
+    if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
+        return @{ FilePath = 'cmd'; PrefixArguments = @('/c', 'npx') }
+    }
+    return @{ FilePath = 'npx'; PrefixArguments = @() }
 }
 
 function Assert-CommandAvailable {
