@@ -56,4 +56,4 @@ Start with:
 - [Architecture](setup/docs/architecture/modular-architecture.md)
 - [Setup specification](setup/docs/architecture/setup-specification.md)
 
-The documentation site is assembled from `setup/docs` with `setup/setup-docs.ps1`. GitHub Actions builds the pinned `docs-template` submodule and deploys the result to GitHub Pages after changes merge to `main`.
+The documentation site is assembled from `setup/docs` with `setup/setup-docs.ps1`. Run `setup/docs-local.ps1` to synchronize and serve it locally. GitHub Actions builds the pinned `docs-template` submodule and deploys the result to GitHub Pages after changes merge to `main`.

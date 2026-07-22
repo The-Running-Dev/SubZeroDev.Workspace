@@ -163,3 +163,11 @@ npx -y pnpm@9.0.0 run build:prod
 ```
 
 The build output is written to `docs-template/artifacts`. The `Documentation Pages` workflow validates the build on pull requests and deploys it from `main` using GitHub Pages Actions. Configure the repository's Pages source as **GitHub Actions** before the first deployment.
+
+To synchronize the docs and start the Docusaurus development server locally:
+
+```powershell
+./docs-local.ps1
+```
+
+The default address is `http://localhost:3000/LLMs/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed.
