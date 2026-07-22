@@ -27,7 +27,7 @@ Worth stating plainly, because the backlog below is all problems:
   forward `$PSBoundParameters` — the per-platform scripts stay small and readable.
 - **`-WhatIf` is honored throughout**, including the awkward cases where a preview
   cannot inspect a tool it deliberately declined to install
-  (`install-graphify.ps1:15-20`).
+  (`setup/scripts/workstation/install-graphify.ps1:15-20`).
 - **The documentation is unusually good** for a tooling repo, and the single-source
   README → Docusaurus pipeline (`setup/setup-docs.ps1`) avoids the usual drift.
 - **The workspace blueprint is honest** — it explicitly argues *against* starting
@@ -64,7 +64,7 @@ so `Invoke-Expression` can be dropped entirely (see item 9).
 
 ### 2. `-AutoCommit` commits regardless of validation outcome (S)
 
-`setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
+`setup/setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
 commit if validation succeeds", but the implementation at `:330` is an
 unconditional `if ($AutoCommit)`. `$buildSuccess` and `$testSuccess` are computed
 at `:298-323` and then never read.
@@ -85,8 +85,10 @@ project:
   `tsc` compiles nothing.
 - `main: "src/index.js"` and `start: "node src/index.js"` run the source, while
   `tsc` outputs to `./dist` — the build output is never used.
-- `type: "module"` with `jest@^29` and a CommonJS `jest.config.js` (`:133`);
-  Jest needs explicit ESM configuration to run in this shape.
+- `type: "module"` with `jest@^29`. The generated `jest.config.js` (`:124-133`) is
+  correctly ESM (`export default`), but Jest 29's ESM support for the test files
+  themselves is experimental and needs `NODE_OPTIONS=--experimental-vm-modules`,
+  which the generated `test: "jest"` script does not set.
 - `.eslintrc.json` with `eslint@^8` (`:96-117`). Eslintrc is end-of-life; ESLint 9
   uses flat `eslint.config.js`.
 - `keywords: ["project", "typescript"]` but no `@typescript-eslint` packages.
@@ -100,14 +102,14 @@ project and actually runs `install`/`build`/`test` (see item 4).
 ### 4. Python starter targets a deprecated toolchain (S)
 
 `setup/scripts/starters/setup-starter-python.ps1` generates `setup.py` alongside
-`pyproject.toml`, and the language table in `setup-project.ps1:111` uses
+`pyproject.toml`, and the language table in `setup/setup-project.ps1:111` uses
 `python setup.py build` — deprecated since setuptools 58 and slated for removal.
 Dev dependencies are hard-pinned to mid-2023 (`pytest==7.4.0`, `black==23.7.0`,
 `pylint==2.17.5`).
 
 Notably, the workstation setup already installs Astral `uv`
-(`install-graphify.ps1`), so the toolkit ships a modern Python toolchain and then
-scaffolds projects that ignore it.
+(`setup/scripts/workstation/install-graphify.ps1`), so the toolkit ships a modern
+Python toolchain and then scaffolds projects that ignore it.
 
 **Fix:** `pyproject.toml` only, `uv` for dependency management, `ruff` in place of
 `black` + `pylint`, and floor constraints (`>=`) rather than frozen `==` pins in a
@@ -173,11 +175,12 @@ Nothing in the setup path is version-pinned:
 | Component | Location | Current |
 |---|---|---|
 | GitHub MCP server | `setup/docker/docker-compose.yml:3` | `:latest` |
-| claude-mem | `install-claude-mem.ps1:18` | `@latest` |
-| Playwright MCP | `install-playwright-mcp.ps1:13` | `@latest` |
-| Filesystem MCP | `install-filesystem-mcp.ps1:28` | `npx -y`, unversioned |
-| Codex CLI / Claude Code | platform scripts | unversioned npm global |
-| graphifyy | `install-graphify.ps1:30` | unversioned `uv tool install` |
+| claude-mem | `setup/scripts/workstation/install-claude-mem.ps1:18` | `@latest` |
+| Playwright MCP | `setup/scripts/workstation/install-playwright-mcp.ps1:13` | `@latest` |
+| Filesystem MCP | `setup/scripts/workstation/install-filesystem-mcp.ps1:28` | `npx -y`, unversioned |
+| Codex CLI / Claude Code | `setup/setup-macos.ps1:43-44`, `setup/setup-ubuntu.ps1:85-86` | unversioned npm global |
+| Codex CLI / Claude Code | `setup/setup-windows.ps1:31-32` | unversioned Winget package |
+| graphifyy | `setup/scripts/workstation/install-graphify.ps1:30` | unversioned `uv tool install` |
 
 A repo whose documentation argues for least-privilege tokens and deliberate
 security review of database servers should not silently execute whatever those
@@ -191,7 +194,7 @@ behavior, and a renovate/dependabot config to bump the pins via PR.
 
 ### 9. `Invoke-Expression` on command strings (S)
 
-`ProjectSetup.psm1:787` and `:819` execute build/test commands via
+`setup/modules/ProjectSetup.psm1:787` and `:819` execute build/test commands via
 `Invoke-Expression`. The strings come from a fixed table in `setup-project.ps1`, so
 this is not currently exploitable — but it is the reason exit codes are lost
 (item 1), and it makes any future user-supplied command a shell-injection vector.
@@ -226,9 +229,10 @@ a plain environment variable.
 
 ### 12. `-Client` accepts different values in different scripts (S)
 
-Every workstation script uses `'Codex' | 'ClaudeCode' | 'Both'`. `setup-project.ps1:69`
-alone uses `'Both' | 'Code' | 'Codex'`. Someone who learns `-Client ClaudeCode` from
-the README hits a validation error the first time they scaffold a project.
+Every workstation script uses `'Codex' | 'ClaudeCode' | 'Both'`.
+`setup/setup-project.ps1:69` alone uses `'Both' | 'Code' | 'Codex'`. Someone who
+learns `-Client ClaudeCode` from the README hits a validation error the first time
+they scaffold a project.
 
 **Fix:** standardize on `ClaudeCode`, and accept `Code` as a deprecated alias for one
 release.
@@ -244,9 +248,9 @@ reference anywhere is a file listing in
 This is a fork in the road, not a cleanup:
 
 - **Implement it** — have `setup-project.ps1` and `setup.ps1` load the YAML so the
-  language table (`setup-project.ps1:101-144`) and component list become data rather
-  than hardcoded hashtables. This is the more interesting option and would make
-  adding C#/Rust/Java/Go starters a config change.
+  language table (`setup/setup-project.ps1:101-144`) and component list become
+  data rather than hardcoded hashtables. This is the more interesting option and
+  would make adding C#/Rust/Java/Go starters a config change.
 - **Delete it** — if the declarative direction is abandoned, remove both files so
   they stop implying a capability that does not exist.
 
@@ -254,10 +258,11 @@ Pick one. Leaving it as-is is the worst option.
 
 ### 14. Four of six advertised languages have no starter (M)
 
-`setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the README
-lists them as "supported command profiles". Only `node` and `python` have starter
-scripts; the other four hit the warning path at `ProjectSetup.psm1:754-758` and
-produce a project with a README, a `.gitignore`, and nothing else.
+`setup/setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the
+README lists them as "supported command profiles". Only `node` and `python` have
+starter scripts; the other four hit the warning path at
+`setup/modules/ProjectSetup.psm1:754-758` and produce a project with a README, a
+`.gitignore`, and nothing else.
 
 **Fix:** either write the four starters (the convention-based
 `setup-starter-<language>.ps1` delegation makes this mechanical) or split the
@@ -334,9 +339,10 @@ of claude-mem, Playwright MCP, or a database registration is currently a manual
 
 ### 21. Idempotency and re-run guarantees (S)
 
-Most installers check `Test-CommandAvailable` and skip, but `install-github-mcp.ps1`
-deliberately removes and re-adds the registration each run
-(`:105-108`, `:115-118`), and `install-claude-mem.ps1` runs `claude-mem install` and
+Most installers check `Test-CommandAvailable` and skip, but
+`setup/scripts/workstation/install-github-mcp.ps1` deliberately removes and
+re-adds the registration each run (`:105-108`, `:115-118`), and
+`setup/scripts/workstation/install-claude-mem.ps1` runs `claude-mem install` and
 `start` unconditionally. There is no stated contract for what a second run does.
 
 **Fix:** document the intended behavior per component, and add a `-Force` switch for
@@ -359,7 +365,7 @@ context layers — but nothing in the toolkit uses it. Natural extensions:
   and reference `graphify-out/GRAPH_REPORT.md` from the generated `CLAUDE.md`.
 - Ship the post-commit auto-rebuild hook as an opt-in `-EnableGraphifyHook` switch.
 - Add `graphify-out/` to the generated `.gitignore` (`New-Gitignore`,
-  `ProjectSetup.psm1:87`).
+  `setup/modules/ProjectSetup.psm1:87`).
 
 ### 24. Cross-platform CI for the container (S)
 
