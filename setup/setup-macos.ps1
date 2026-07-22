@@ -37,6 +37,7 @@ function Install-NpmCommand {
 
 Write-Step 'Installing macOS prerequisites with Homebrew and npm'
 if (-not (Test-CommandAvailable 'npm') -or -not (Test-CommandAvailable 'npx')) { Install-BrewCommand 'npm' 'node' 'Node.js LTS' }
+Install-BrewCommand 'act' 'act' 'act local GitHub Actions runner'
 if (-not $SkipGitHub) { Install-BrewCommand 'gh' 'gh' 'GitHub CLI' }
 if (-not $SkipGraphify) { Install-BrewCommand 'uv' 'uv' 'Astral uv' }
 if ($Client -in @('Codex', 'Both')) { Install-NpmCommand 'codex' '@openai/codex' 'Codex CLI' }

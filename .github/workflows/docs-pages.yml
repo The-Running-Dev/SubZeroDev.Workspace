@@ -11,6 +11,7 @@ on:
       - 'README.md'
       - 'setup/README.md'
       - 'setup/docs/**'
+      - 'setup/docs-workflow-local.ps1'
       - 'setup/setup-docs.ps1'
   pull_request:
     branches:
@@ -22,6 +23,7 @@ on:
       - 'README.md'
       - 'setup/README.md'
       - 'setup/docs/**'
+      - 'setup/docs-workflow-local.ps1'
       - 'setup/setup-docs.ps1'
   workflow_dispatch:
 

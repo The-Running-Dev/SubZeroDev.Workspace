@@ -116,4 +116,6 @@ Most component scripts preserve existing MCP registrations. The GitHub installer
 - macOS requires [Homebrew](https://brew.sh). Docker Desktop must be installed and started separately for GitHub MCP.
 - Ubuntu/Debian requires `apt-get` and `sudo`. Install Docker Engine or Docker Desktop separately and ensure the current user can run `docker`.
 
+The platform setup also installs [`act`](https://nektosact.com/) for local GitHub Actions validation. With Docker running, execute `./docs-workflow-local.ps1` from `setup` to run the documentation workflow's pull-request `build` job locally. Use `./docs-local.ps1` instead when you want the live-reload documentation server.
+
 Use `-SkipGraphify`, `-SkipClaudeMem`, `-SkipGitHub`, or `-SkipPlaywright` when a component is not wanted. `-Client Codex` avoids installing or checking Claude Code; `-Client ClaudeCode` does the converse.

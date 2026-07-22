@@ -26,6 +26,8 @@ The complete setup documentation is published at **[llms.subzerodev.com](https:/
 
 The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to synchronize it into the pinned Docusaurus template and serve it locally with live reload enabled.
 
+To test the same documentation build job used by GitHub Actions, start Docker and run `setup/docs-workflow-local.ps1`. The script uses [`act`](https://nektosact.com/) to execute the workflow's pull-request build job locally; it does not deploy to GitHub Pages.
+
 ## Repository Layout
 
 | Path | Purpose |

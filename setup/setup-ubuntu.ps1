@@ -45,8 +45,26 @@ function Install-NpmCommand {
     }
 }
 
+function Install-ActCommand {
+    Update-SessionPath
+    if (Test-CommandAvailable 'act') { Write-Success 'act is already installed.'; return }
+    if ($PSCmdlet.ShouldProcess('act', 'Install the latest release with the official nektos installer')) {
+        $installerPath = Join-Path ([System.IO.Path]::GetTempPath()) "install-act-$PID.sh"
+        try {
+            Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/nektos/act/master/install.sh' -OutFile $installerPath
+            Invoke-NativeCommand 'sudo' @('bash', $installerPath)
+        }
+        finally {
+            if (Test-Path -LiteralPath $installerPath) { Remove-Item -LiteralPath $installerPath -Force }
+        }
+        Update-SessionPath
+        Assert-CommandAvailable 'act' 'act was installed, but it is not on PATH. Start a new shell and rerun.'
+    }
+}
+
 Write-Step 'Installing Ubuntu prerequisites with apt, pipx, and npm'
 if (-not (Test-CommandAvailable 'npm') -or -not (Test-CommandAvailable 'npx')) { Install-AptCommand 'npm' @('nodejs', 'npm') 'Node.js and npm' }
+Install-ActCommand
 if (-not $SkipGitHub) { Install-AptCommand 'gh' @('gh') 'GitHub CLI' }
 if (-not $SkipGraphify -and -not (Test-CommandAvailable 'uv')) {
     Install-AptCommand 'pipx' @('pipx') 'pipx'

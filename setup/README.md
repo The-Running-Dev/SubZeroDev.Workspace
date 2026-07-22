@@ -38,7 +38,7 @@ Recommended first run without third-party session memory:
 The default setup installs or configures:
 
 - Node.js and the selected assistant CLIs
-- GitHub CLI and Astral `uv`
+- GitHub CLI, [`act`](https://nektosact.com/), and Astral `uv`
 - Graphify
 - Claude Code built-in memory checks
 - optional `claude-mem`
@@ -175,3 +175,21 @@ To start the Docusaurus development server locally:
 The local script synchronizes the project documentation and configuration into the existing `docs-template` submodule, then starts Docusaurus from that directory. The resulting submodule changes are generated local output and should not be committed.
 
 The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed. Stop any older background instance before restarting the script so the server can claim the port.
+
+### Test the GitHub Actions Workflow Locally
+
+The platform setup scripts install [`act`](https://nektosact.com/), which runs GitHub Actions jobs in Docker. Start Docker Desktop or Docker Engine, then run this command from `setup`:
+
+```powershell
+./docs-workflow-local.ps1
+```
+
+The wrapper simulates a `pull_request` event and executes only the `build` job from `.github/workflows/docs-pages.yml`. That job performs the same checkout, submodule initialization, documentation synchronization, dependency installation, and production Docusaurus build used on GitHub. The Pages configuration, artifact upload, and deployment steps are skipped because they run only for non-pull-request events.
+
+The first run downloads the medium `ubuntu-latest` runner image and can take several minutes. On ARM64 hosts, including Apple Silicon, the wrapper requests `linux/amd64` to match the available runner image. Use `-ReuseRunnerImage` after the image and actions are cached:
+
+```powershell
+./docs-workflow-local.ps1 -ReuseRunnerImage
+```
+
+Use `docs-local.ps1` for interactive live-reload editing. Use `docs-workflow-local.ps1` before pushing changes when you need to validate the GitHub Actions build itself. `act` is a close local approximation of GitHub-hosted runners, but it does not implement every GitHub Actions feature.

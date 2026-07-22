@@ -27,6 +27,7 @@ function Install-WingetCommand {
 
 Write-Step 'Installing Windows prerequisites with Winget'
 if (-not (Test-CommandAvailable 'npm') -or -not (Test-CommandAvailable 'npx')) { Install-WingetCommand 'npm' 'OpenJS.NodeJS.LTS' 'Node.js LTS' }
+Install-WingetCommand 'act' 'nektos.act' 'act local GitHub Actions runner'
 if ($Client -in @('Codex', 'Both')) { Install-WingetCommand 'codex' 'OpenAI.Codex' 'Codex CLI' }
 if ($Client -in @('ClaudeCode', 'Both')) { Install-WingetCommand 'claude' 'Anthropic.ClaudeCode' 'Claude Code' }
 if (-not $SkipGitHub) { Install-WingetCommand 'gh' 'GitHub.cli' 'GitHub CLI' }

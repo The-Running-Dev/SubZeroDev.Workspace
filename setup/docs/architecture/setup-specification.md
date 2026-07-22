@@ -42,7 +42,7 @@ Before running the setup script, verify:
 - **Operating System:** Windows, macOS, or an Ubuntu/Debian-derived Linux distribution
 - **PowerShell:** Windows PowerShell 5.1+ on Windows, or PowerShell 7+ on any supported OS
 - **Package manager:** Winget (Windows), Homebrew (macOS), or apt/pipx (Ubuntu/Debian)
-- **Docker:** Docker Desktop or Docker Engine installed and running when GitHub MCP is enabled
+- **Docker:** Docker Desktop or Docker Engine installed and running when GitHub MCP or local workflow testing is used
 - **Git:** Installed and available in PATH
 - **Node.js:** Installed (required by some MCP servers)
 - **Python:** Installed (optional, for some tools)
@@ -68,7 +68,7 @@ The setup script installs and configures:
 
 | Component | Purpose | Registration | Auto-run |
 |-----------|---------|--------------|----------|
-| **Command-line prerequisites** | Node.js, selected clients, GitHub CLI, and uv | Platform package manager | Yes |
+| **Command-line prerequisites** | Node.js, selected clients, GitHub CLI, act, and uv | Platform package manager | Yes |
 | **Graphify** | Repository knowledge graph indexing | Claude Code, Codex | Yes |
 | **Claude Memory** | Persistent memory system (claude-mem) | Claude Code, Codex | Yes |
 | **GitHub MCP** | GitHub API access via Docker | Claude Code, Codex | Yes |
