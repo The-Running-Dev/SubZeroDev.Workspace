@@ -15,12 +15,20 @@ if (-not $IsLinux) { throw 'setup-ubuntu.ps1 can only run on Linux.' }
 Assert-CommandAvailable 'apt-get' 'This setup supports Ubuntu and Debian-derived distributions with apt-get.'
 Assert-CommandAvailable 'sudo' 'Install sudo or run the prerequisite package commands as root.'
 
+$script:AptPackageIndexUpdated = $false
+
+function Update-AptPackageIndex {
+    if ($script:AptPackageIndexUpdated) { return }
+    Invoke-NativeCommand 'sudo' @('apt-get', 'update')
+    $script:AptPackageIndexUpdated = $true
+}
+
 function Install-AptCommand {
     param([string]$Command, [string[]]$Package, [string]$DisplayName)
     Update-SessionPath
     if (Test-CommandAvailable $Command) { Write-Success "$DisplayName is already installed."; return }
     if ($PSCmdlet.ShouldProcess($DisplayName, "Install apt package(s): $($Package -join ', ')")) {
-        Invoke-NativeCommand 'sudo' (@('apt-get', 'update'))
+        Update-AptPackageIndex
         Invoke-NativeCommand 'sudo' (@('apt-get', 'install', '--yes') + $Package)
         Update-SessionPath
         Assert-CommandAvailable $Command "$DisplayName was installed, but '$Command' is not on PATH. Start a new shell and rerun."

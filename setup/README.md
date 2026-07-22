@@ -116,7 +116,7 @@ The generator creates common source, test, documentation, environment-example, G
 
 Useful switches include:
 
-- `-Client Both|ClaudeCode|Codex`
+- `-Client Both|Code|Codex`
 - `-SkipGit`
 - `-SkipLanguageStarter`
 - `-SkipValidation`
