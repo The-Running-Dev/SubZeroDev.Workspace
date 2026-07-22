@@ -10,7 +10,7 @@ const globalConfig = getData<GlobalConfig>(configData);
 const docsPath = process.env.LLMS_DOCS_SOURCE_PATH || 'docs';
 const config: Config = {
   ...globalConfig.site,
-  trailingSlash: false,
+  trailingSlash: true,
   favicon: 'img/favicon.ico',
   onBrokenLinks: 'warn',
   markdown: {

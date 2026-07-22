@@ -4,27 +4,27 @@ This repository contains reusable PowerShell tooling for preparing AI-assisted d
 
 ## Documentation
 
-The complete setup documentation is published at **[llms.subzerodev.com](https://llms.subzerodev.com/)**. Use these direct links for quick access:
+The complete setup documentation is published at **[llms.subzerodev.com](https://llms.subzerodev.com/)**. The links below open the version stored in this repository, so they also work while reviewing a branch before it is deployed.
 
 ### Getting Started
 
-- [Quick Start](https://llms.subzerodev.com/docs/getting-started/quickstart) — create and open a new AI-assisted project with the shortest supported workflow.
-- [Start a New Project](https://llms.subzerodev.com/docs/getting-started/new-project) — follow the complete Claude Desktop, Claude Code, and Codex workflow.
-- [Setup Overview](https://llms.subzerodev.com/docs/template-overview) — understand the combined setup, authentication, integrations, and platform prerequisites.
+- [Quick Start](setup/docs/getting-started/quickstart.md) — create and open a new AI-assisted project with the shortest supported workflow.
+- [Start a New Project](setup/docs/getting-started/new-project.md) — follow the complete Claude Desktop, Claude Code, and Codex workflow.
+- [Setup Overview](setup/docs/index.md) — understand the combined setup, authentication, integrations, and platform prerequisites. On the published site, this page is available at [the documentation root](https://llms.subzerodev.com/docs/).
 
 ### Architecture and Setup Design
 
-- [Modular Architecture](https://llms.subzerodev.com/docs/architecture/modular-architecture) — understand the workstation and project setup modules.
-- [Setup Flowcharts](https://llms.subzerodev.com/docs/architecture/setup-flowcharts) — review the installation and project-creation flows visually.
-- [Setup Specification](https://llms.subzerodev.com/docs/architecture/setup-specification) — review inputs, outputs, validation, and required project files.
-- [Workspace Blueprint](https://llms.subzerodev.com/docs/architecture/workspace-blueprint) — review the recommended AI development workspace and rollout plan.
+- [Modular Architecture](setup/docs/architecture/modular-architecture.md) — understand the workstation and project setup modules.
+- [Setup Flowcharts](setup/docs/architecture/setup-flowcharts.md) — review the installation and project-creation flows visually.
+- [Setup Specification](setup/docs/architecture/setup-specification.md) — review inputs, outputs, validation, and required project files.
+- [Workspace Blueprint](setup/docs/architecture/workspace-blueprint.md) — review the recommended AI development workspace and rollout plan.
 
 ### Reference
 
-- [Language Starters](https://llms.subzerodev.com/docs/reference/language-starters) — use or extend the language-specific project starters.
-- [Reflection Mode](https://llms.subzerodev.com/docs/reference/reflection-mode) — use the guided inquiry prompt for deliberate analysis.
+- [Language Starters](setup/docs/reference/language-starters.md) — use or extend the language-specific project starters.
+- [Reflection Mode](setup/docs/reference/reflection-mode.md) — use the guided inquiry prompt for deliberate analysis.
 
-The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to synchronize it into the pinned Docusaurus template and serve it locally.
+The documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to serve it from an isolated temporary copy of the pinned Docusaurus template with live reload enabled.
 
 ## Repository Layout
 

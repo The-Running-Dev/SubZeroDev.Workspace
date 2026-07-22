@@ -154,7 +154,7 @@ Synchronize `setup/docs` into the template and configure it for this repository'
 ./setup-docs.ps1
 ```
 
-The project-owned `docs/sidebars.ts` and `docs/docusaurus.config.ts` files are copied to the root of `docs-template` during synchronization. Customize those files in `setup/docs`; do not edit the generated submodule working tree. The current navbar override removes the template's CV and Projects entries.
+The project-owned `docs/sidebars.ts` and `docs/docusaurus.config.ts` files are copied to the root of `docs-template` during production synchronization. Customize those files in `setup/docs`; do not edit the generated submodule working tree. The current navbar override removes the template's CV, Projects, Portfolio, and Demos entries.
 
 Then build locally with the template's declared pnpm version:
 
@@ -166,10 +166,12 @@ npx -y pnpm@9.0.0 run build:prod
 
 The build output is written to `docs-template/artifacts`. The `Documentation Pages` workflow validates the build on pull requests and deploys it from `main` using GitHub Pages Actions. Configure the repository's Pages source as **GitHub Actions** before the first deployment.
 
-To synchronize the docs and start the Docusaurus development server locally:
+To start the Docusaurus development server locally:
 
 ```powershell
 ./docs-local.ps1
 ```
 
-The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed.
+The local script clones the pinned template into a temporary directory, applies the project configuration there, and serves Markdown directly from `setup/docs`. This keeps live reload independent from the `docs-template` submodule, so Git operations and deployment synchronization cannot replace the running documentation with template content.
+
+The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the local-server behavior. Use `-SkipInstall` only when the template dependencies are already installed. Stop any older background instance before restarting the script so the new isolated server can claim the port.
