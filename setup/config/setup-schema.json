@@ -1,0 +1,365 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI-Assisted Project Setup Configuration Schema",
+  "description": "Configuration schema for workstation and project setup based on docs/architecture/setup-specification.md",
+  "type": "object",
+  "version": "1.0",
+  "definitions": {
+    "mcp_component": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the MCP server component"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "What this component provides"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether to install and enable this component"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether this component is required for setup"
+        },
+        "docker": {
+          "type": "boolean",
+          "description": "Whether this component runs in Docker"
+        },
+        "environment_variables": {
+          "type": "object",
+          "description": "Environment variables required by this component",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["name", "purpose", "enabled"]
+    },
+    "client_config": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["Claude Code", "Codex", "Claude Desktop"]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of MCP server names to register with this client"
+        },
+        "config_path": {
+          "type": "string",
+          "description": "Path to client configuration file"
+        }
+      },
+      "required": ["name", "enabled"]
+    },
+    "language_config": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["node", "python", "csharp", "rust", "java", "go", "other"]
+        },
+        "install_command": {
+          "type": "string",
+          "description": "Command to install project dependencies"
+        },
+        "build_command": {
+          "type": "string",
+          "description": "Command to build the project"
+        },
+        "test_command": {
+          "type": "string",
+          "description": "Command to run tests"
+        },
+        "lint_command": {
+          "type": "string",
+          "description": "Command to lint/format code"
+        },
+        "run_command": {
+          "type": "string",
+          "description": "Command to run the application"
+        }
+      },
+      "required": ["name", "install_command", "build_command", "test_command"]
+    },
+    "project_file": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string",
+          "description": "Relative path from project root"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["configuration", "documentation", "instruction", "source", "test"]
+        },
+        "version_controlled": {
+          "type": "boolean",
+          "description": "Whether this file should be committed to Git"
+        }
+      },
+      "required": ["name", "path", "required"]
+    }
+  },
+  "properties": {
+    "setup": {
+      "type": "object",
+      "title": "Workstation Setup Configuration",
+      "description": "Phase 1: One-time workstation setup",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Setup script version"
+        },
+        "script_name": {
+          "type": "string",
+          "default": "setup.ps1"
+        },
+        "prerequisites": {
+          "type": "object",
+          "description": "Required tools and minimum versions",
+          "properties": {
+            "powershell": {
+              "type": "string",
+              "description": "Minimum PowerShell version",
+              "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
+            },
+            "git": {
+              "type": "string",
+              "description": "Minimum Git version"
+            },
+            "docker": {
+              "type": "string",
+              "description": "Minimum Docker version"
+            },
+            "nodejs": {
+              "type": "string",
+              "description": "Minimum Node.js version (optional)"
+            },
+            "python": {
+              "type": "string",
+              "description": "Minimum Python version (optional)"
+            }
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "description": "setup.ps1 input parameters",
+          "properties": {
+            "Client": {
+              "type": "string",
+              "enum": ["Both", "Code", "Codex"],
+              "description": "Target clients to configure"
+            },
+            "IncludeFilesystem": {
+              "type": "boolean",
+              "description": "Enable Filesystem MCP",
+              "default": false
+            },
+            "FilesystemPath": {
+              "type": "string",
+              "description": "Root directory for Filesystem MCP access"
+            },
+            "EnvFile": {
+              "type": "string",
+              "description": "Path to .env file with GITHUB_PERSONAL_ACCESS_TOKEN"
+            }
+          },
+          "required": ["Client"]
+        },
+        "components": {
+          "type": "array",
+          "description": "MCP servers and tools to install",
+          "items": {
+            "$ref": "#/definitions/mcp_component"
+          }
+        },
+        "clients": {
+          "type": "array",
+          "description": "Client configurations",
+          "items": {
+            "$ref": "#/definitions/client_config"
+          }
+        }
+      },
+      "required": ["version", "prerequisites", "parameters", "components"]
+    },
+    "project": {
+      "type": "object",
+      "title": "Project Setup Configuration",
+      "description": "Phase 2 & 3: New project structure and instructions",
+      "properties": {
+        "script_name": {
+          "type": "string",
+          "default": "setup-project.ps1"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "setup-project.ps1 input parameters",
+          "properties": {
+            "ProjectPath": {
+              "type": "string",
+              "description": "Absolute path for the new project (must be under Filesystem MCP allowed root)"
+            },
+            "ProjectName": {
+              "type": "string",
+              "description": "Display name of the project"
+            },
+            "Language": {
+              "type": "string",
+              "enum": ["node", "python", "csharp", "rust", "java", "go", "other"],
+              "description": "Primary programming language/framework"
+            },
+            "Client": {
+              "type": "string",
+              "enum": ["Both", "Code", "Codex"],
+              "default": "Both",
+              "description": "Generate instructions for which client(s)"
+            },
+            "NoGit": {
+              "type": "boolean",
+              "default": false,
+              "description": "Skip Git initialization"
+            }
+          },
+          "required": ["ProjectPath", "ProjectName", "Language"]
+        },
+        "directory_structure": {
+          "type": "array",
+          "description": "Required directory structure",
+          "items": {
+            "type": "string"
+          },
+          "default": ["src", "tests", "docs/decisions", ".github"]
+        },
+        "required_files": {
+          "type": "array",
+          "description": "Files that must exist in every project",
+          "items": {
+            "$ref": "#/definitions/project_file"
+          }
+        },
+        "languages": {
+          "type": "array",
+          "description": "Supported languages and their default commands",
+          "items": {
+            "$ref": "#/definitions/language_config"
+          }
+        },
+        "git_config": {
+          "type": "object",
+          "description": "Default Git configuration",
+          "properties": {
+            "user.name": {
+              "type": "string"
+            },
+            "user.email": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": ["parameters", "directory_structure", "required_files"]
+    },
+    "validation": {
+      "type": "object",
+      "title": "Validation & Verification Rules",
+      "description": "Checks to verify successful setup",
+      "properties": {
+        "phase1_checks": {
+          "type": "array",
+          "description": "Validation checks for Phase 1 (workstation setup)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "command": {
+                "type": "string"
+              },
+              "expected_output": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "phase2_checks": {
+          "type": "array",
+          "description": "Validation checks for Phase 2 (project creation)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "check_type": {
+                "type": "string",
+                "enum": ["file_exists", "directory_exists", "git_initialized"]
+              },
+              "path": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "phase3_checks": {
+          "type": "array",
+          "description": "Validation checks for Phase 3 (first run)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "client": {
+                "type": "string",
+                "enum": ["Claude Code", "Codex", "Claude Desktop"]
+              },
+              "command": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "troubleshooting": {
+      "type": "object",
+      "title": "Troubleshooting Guide",
+      "description": "Common issues and resolutions",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string",
+            "enum": ["1", "2", "3"]
+          }
+        }
+      }
+    }
+  },
+  "required": ["setup", "project", "validation"]
+}

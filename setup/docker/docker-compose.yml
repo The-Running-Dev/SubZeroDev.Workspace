@@ -1,0 +1,8 @@
+services:
+  github-mcp:
+    image: ghcr.io/github/github-mcp-server:latest
+    stdin_open: true
+    environment:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN:?Set GITHUB_PERSONAL_ACCESS_TOKEN in .env}
+      GITHUB_READ_ONLY: ${GITHUB_READ_ONLY:-1}
+      GITHUB_TOOLSETS: ${GITHUB_TOOLSETS:-context,repos,issues,pull_requests,actions}

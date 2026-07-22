@@ -1,0 +1,292 @@
+# Setup Configuration Example
+# Conforms to setup-schema.json
+# Customize these values for your workstation/project
+
+setup:
+  version: "1.0"
+  script_name: "setup.ps1"
+  
+  prerequisites:
+    powershell: "5.1"
+    git: "2.30"
+    docker: "20.10"
+    nodejs: "16"
+    python: "3.8"
+  
+  parameters:
+    Client: "Both"
+    IncludeFilesystem: true
+    FilesystemPath: "D:\\Dropbox"
+    EnvFile: "${PSScriptRoot}/docker/.env"
+  
+  components:
+    - name: "Command-line Prerequisites"
+      purpose: "Git, Node.js, Python validation"
+      enabled: true
+      required: true
+      docker: false
+    
+    - name: "Graphify"
+      purpose: "Repository knowledge graph indexing"
+      enabled: true
+      required: false
+      docker: false
+    
+    - name: "Claude Memory"
+      purpose: "Persistent memory system (claude-mem)"
+      enabled: true
+      required: false
+      docker: false
+    
+    - name: "GitHub MCP"
+      purpose: "GitHub API access"
+      enabled: true
+      required: true
+      docker: true
+      environment_variables:
+        GITHUB_PERSONAL_ACCESS_TOKEN: "${env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+    
+    - name: "Playwright MCP"
+      purpose: "Browser automation"
+      enabled: true
+      required: false
+      docker: false
+    
+    - name: "Filesystem MCP"
+      purpose: "Local file system access"
+      enabled: true
+      required: false
+      docker: false
+      environment_variables:
+        FILESYSTEM_ALLOWED_ROOT: "${FilesystemPath}"
+  
+  clients:
+    - name: "Claude Code"
+      enabled: true
+      mcp_servers:
+        - "github"
+        - "playwright"
+        - "filesystem"
+        - "graphify"
+      config_path: "~/.anthropic/claude-code-config.json"
+    
+    - name: "Codex"
+      enabled: true
+      mcp_servers:
+        - "github"
+        - "playwright"
+        - "filesystem"
+      config_path: "${env:CODEX_CONFIG_DIR}"
+    
+    - name: "Claude Desktop"
+      enabled: false
+      mcp_servers:
+        - "github"
+      config_path: "~/.claude/claude.json"
+
+project:
+  script_name: "setup-project.ps1"
+  
+  parameters:
+    ProjectPath: "D:\\Dropbox\\Projects\\MyProject"
+    ProjectName: "MyProject"
+    Language: "node"
+    Client: "Both"
+    NoGit: false
+  
+  directory_structure:
+    - "src"
+    - "tests"
+    - "docs/decisions"
+    - ".github"
+  
+  required_files:
+    - name: ".gitignore"
+      path: ".gitignore"
+      required: true
+      category: "configuration"
+      version_controlled: true
+    
+    - name: ".env.example"
+      path: ".env.example"
+      required: true
+      category: "configuration"
+      version_controlled: true
+    
+    - name: "README.md"
+      path: "README.md"
+      required: true
+      category: "documentation"
+      version_controlled: true
+    
+    - name: "CLAUDE.md"
+      path: "CLAUDE.md"
+      required: true
+      category: "instruction"
+      version_controlled: true
+    
+    - name: "AGENTS.md"
+      path: "AGENTS.md"
+      required: true
+      category: "instruction"
+      version_controlled: true
+    
+    - name: "Architecture Documentation"
+      path: "docs/architecture.md"
+      required: true
+      category: "documentation"
+      version_controlled: true
+    
+    - name: "ADR Template"
+      path: "docs/decisions/0001-project-setup.md"
+      required: true
+      category: "documentation"
+      version_controlled: true
+    
+    - name: ".gitkeep (src)"
+      path: "src/.gitkeep"
+      required: true
+      category: "source"
+      version_controlled: true
+    
+    - name: ".gitkeep (tests)"
+      path: "tests/.gitkeep"
+      required: true
+      category: "test"
+      version_controlled: true
+  
+  languages:
+    - name: "node"
+      install_command: "npm install"
+      build_command: "npm run build"
+      test_command: "npm test"
+      lint_command: "npm run lint"
+      run_command: "npm start"
+    
+    - name: "python"
+      install_command: "pip install -r requirements.txt"
+      build_command: "python setup.py build"
+      test_command: "pytest"
+      lint_command: "pylint src/"
+      run_command: "python -m src.main"
+    
+    - name: "csharp"
+      install_command: "dotnet restore"
+      build_command: "dotnet build"
+      test_command: "dotnet test"
+      lint_command: "dotnet format --verify-no-changes"
+      run_command: "dotnet run"
+    
+    - name: "rust"
+      install_command: "cargo fetch"
+      build_command: "cargo build --release"
+      test_command: "cargo test"
+      lint_command: "cargo clippy"
+      run_command: "cargo run --release"
+    
+    - name: "java"
+      install_command: "mvn install"
+      build_command: "mvn clean package"
+      test_command: "mvn test"
+      lint_command: "mvn checkstyle:check"
+      run_command: "java -jar target/app.jar"
+  
+  git_config:
+    user.name: "Your Name"
+    user.email: "your@email.com"
+
+validation:
+  phase1_checks:
+    - name: "Verify Git"
+      command: "git --version"
+      expected_output: "git version"
+    
+    - name: "Verify Docker"
+      command: "docker --version"
+      expected_output: "Docker version"
+    
+    - name: "Verify Node.js"
+      command: "node --version"
+      expected_output: "v"
+    
+    - name: "Verify MCP tools"
+      command: "/mcp"
+      expected_output: "github"
+  
+  phase2_checks:
+    - name: "Project directory exists"
+      check_type: "directory_exists"
+      path: "${ProjectPath}"
+    
+    - name: "README.md exists"
+      check_type: "file_exists"
+      path: "${ProjectPath}/README.md"
+    
+    - name: "CLAUDE.md exists"
+      check_type: "file_exists"
+      path: "${ProjectPath}/CLAUDE.md"
+    
+    - name: "Git initialized"
+      check_type: "git_initialized"
+      path: "${ProjectPath}"
+    
+    - name: "src/ directory exists"
+      check_type: "directory_exists"
+      path: "${ProjectPath}/src"
+    
+    - name: "tests/ directory exists"
+      check_type: "directory_exists"
+      path: "${ProjectPath}/tests"
+  
+  phase3_checks:
+    - name: "Claude Code context loads"
+      client: "Claude Code"
+      command: "/context"
+    
+    - name: "Codex MCP available"
+      client: "Codex"
+      command: "/mcp"
+    
+    - name: "Project builds"
+      client: "Both"
+      command: "npm run build"
+    
+    - name: "Tests pass"
+      client: "Both"
+      command: "npm test"
+
+troubleshooting:
+  setup_script_fails:
+    cause: "Prerequisites missing"
+    resolution: "Run install-prerequisites.ps1 and verify Docker Desktop is running"
+    phase: "1"
+  
+  mcp_tools_not_visible:
+    cause: "Client not restarted after setup"
+    resolution: "Restart Claude Code or Codex; start a new Codex session"
+    phase: "1"
+  
+  github_mcp_fails:
+    cause: "Docker not running or token invalid"
+    resolution: "Ensure Docker Desktop is running; verify GITHUB_PERSONAL_ACCESS_TOKEN in .env"
+    phase: "1"
+  
+  filesystem_mcp_cannot_access:
+    cause: "Project not under allowed root"
+    resolution: "Move project under FilesystemPath or re-run setup with correct path"
+    phase: "2"
+  
+  instructions_not_loading:
+    cause: "Wrong filename or wrong directory"
+    resolution: "Verify exact filenames (AGENTS.md, CLAUDE.md) and client opened at repository root"
+    phase: "3"
+  
+  graph_information_stale:
+    cause: "Graphify cache outdated"
+    resolution: "Re-run /graphify . after moving files or major refactoring"
+    phase: "3"
+  
+  secrets_leaked_to_git:
+    cause: ".gitignore not set before commit"
+    resolution: "Remove from tracked files and history; rotate secrets; verify .gitignore"
+    phase: "2"
