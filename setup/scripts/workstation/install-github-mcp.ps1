@@ -70,6 +70,18 @@ function Test-DotEnvValueSet {
     return $false
 }
 
+function Remove-ClaudeMcpServerFromScope {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][ValidateSet('local', 'user', 'project')][string]$Scope
+    )
+
+    $output = & claude mcp remove $Name --scope $Scope 2>&1 | Out-String
+    if ($LASTEXITCODE -eq 0) { return }
+    if ($output -match '(?i)not found|does not exist|no MCP server') { return }
+    throw "Failed to remove Claude MCP server '$Name' from the $Scope scope: $($output.Trim())"
+}
+
 Write-Step "Installing GitHub's official MCP server"
 Assert-CommandAvailable -Name 'docker' -InstallHint 'Install Docker Desktop and make sure it is running.'
 
@@ -113,7 +125,9 @@ if ($Client -in @('ClaudeCode', 'Both')) {
     Assert-CommandAvailable -Name 'claude' -InstallHint 'Install Claude Code or rerun with -Client Codex.'
     if ($PSCmdlet.ShouldProcess('Claude Code', 'Replace the GitHub MCP registration with Docker Compose')) {
         if (Test-McpServerRegistered -Client 'claude' -ServerName 'github') {
-            Invoke-NativeCommand -FilePath 'claude' -ArgumentList @('mcp', 'remove', 'github')
+            foreach ($scope in @('local', 'user', 'project')) {
+                Remove-ClaudeMcpServerFromScope -Name 'github' -Scope $scope
+            }
         }
         Invoke-NativeCommand -FilePath 'claude' -ArgumentList (@('mcp', 'add', '--scope', 'user', 'github', '--', 'docker') + $dockerArguments)
     }
