@@ -23,7 +23,7 @@ if ($PSCmdlet.ShouldProcess('claude-mem', 'Install the official npm package glob
 if (-not $WhatIfPreference) {
     $npmPrefix = (& npm prefix --global 2>&1 | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefix)) {
-        throw 'Could not determine the global npm command directory.'
+        throw 'Could not determine the global npm prefix.'
     }
 
     # npm's generated Windows .cmd shim can double-quote `node` and fail with
