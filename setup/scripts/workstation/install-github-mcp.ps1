@@ -85,7 +85,7 @@ function Remove-ClaudeMcpServerFromScope {
 Write-Step "Installing GitHub's official MCP server"
 Assert-CommandAvailable -Name 'docker' -InstallHint 'Install Docker Desktop and make sure it is running.'
 
-$dockerRoot = Resolve-OrCreatePath -Path (Join-Path $PWD.Path 'setup/docker') -PathKind Directory
+$dockerRoot = Resolve-OrCreatePath -Path (Join-Path $PSScriptRoot '../../docker') -PathKind Directory
 $composeFile = Join-Path $dockerRoot 'docker-compose.yml'
 $envFile = Join-Path $dockerRoot '.env'
 if (-not (Test-Path -LiteralPath $composeFile -PathType Leaf)) {
