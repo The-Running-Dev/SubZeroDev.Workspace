@@ -13,7 +13,7 @@ This guide assumes the workspace tooling in this directory has already been inst
 Run this from the repository's `setup` directory in PowerShell:
 
 ```powershell
-.\setup.ps1 `
+.\scripts\setup.ps1 `
   -Client Both `
   -IncludeFilesystem `
   -FilesystemPath '/path/to/projects'

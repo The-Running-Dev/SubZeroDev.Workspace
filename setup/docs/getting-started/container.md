@@ -20,7 +20,7 @@ Open [http://localhost:8080](http://localhost:8080). The default `docs` command 
 
 ## Run the Setup
 
-Use the `setup` command to pass arguments to `setup/setup.ps1` inside the Linux container:
+Use the `setup` command to pass arguments to `setup/scripts/setup.ps1` inside the Linux container:
 
 ```bash
 docker run --rm -it \
@@ -71,7 +71,7 @@ Initialize the documentation submodule before building:
 
 ```bash
 git submodule update --init --recursive
-docker build -t llms-toolkit .
+docker build -f setup/Dockerfile -t llms-toolkit .
 docker run --rm -p 8080:8080 llms-toolkit
 ```
 

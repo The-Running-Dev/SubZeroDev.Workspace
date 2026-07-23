@@ -39,7 +39,7 @@ This allows projects to have:
 
 **Usage:**
 ```powershell
-.\setup-project.ps1 -ProjectPath 'D:\Projects\MyApp' -ProjectName 'MyApp' -Language 'node'
+.\scripts\setup-project.ps1 -ProjectPath 'D:\Projects\MyApp' -ProjectName 'MyApp' -Language 'node'
 ```
 
 ### Python — `setup-starter-python.ps1`
@@ -57,7 +57,7 @@ This allows projects to have:
 
 **Usage:**
 ```powershell
-.\setup-project.ps1 -ProjectPath 'D:\Projects\MyApp' -ProjectName 'MyApp' -Language 'python'
+.\scripts\setup-project.ps1 -ProjectPath 'D:\Projects\MyApp' -ProjectName 'MyApp' -Language 'python'
 ```
 
 ## Creating a New Language Starter
@@ -88,8 +88,9 @@ param(
     [Parameter(Mandatory)][string]$ProjectName
 )
 
-# Import Common functions
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+# Import shared setup module functions
+$modulePath = Join-Path $PSScriptRoot '..\modules\Setup.psm1'
+Import-Module $modulePath -Force
 
 Write-Step "Setting up [Language] starter files"
 
@@ -145,9 +146,10 @@ Each starter should typically generate:
 
 ### Best Practices
 
-1. **Use Common functions**
+1. **Use shared setup module functions**
    ```powershell
-   . (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+   $modulePath = Join-Path $PSScriptRoot '..\modules\Setup.psm1'
+   Import-Module $modulePath -Force
    Write-Step, Write-Success, Write-WarningMessage
    ```
 
@@ -178,7 +180,8 @@ param(
     [Parameter(Mandatory)][string]$ProjectName
 )
 
-. (Join-Path $PSScriptRoot '..\..\modules\Common.ps1')
+$modulePath = Join-Path $PSScriptRoot '..\modules\Setup.psm1'
+Import-Module $modulePath -Force
 
 Write-Step "Setting up C# starter files"
 
@@ -241,13 +244,12 @@ To add support for another language:
 3. **Add the language to** `setup-project.ps1` parameter validation if needed
 4. **Test it:**
    ```powershell
-   .\setup-project.ps1 -ProjectPath 'D:\Test\Project' -ProjectName 'Test' -Language '<language>'
+   .\scripts\setup-project.ps1 -ProjectPath 'D:\Test\Project' -ProjectName 'Test' -Language '<language>'
    ```
 5. **Document it** in this README
 
 ## References
 
-- `modules/ProjectSetup.psm1` — Core functions for file generation
-- `setup-project.ps1` — Main orchestrator
-- `modules/Common.ps1` — Shared utility functions
+- `scripts/modules/Setup.psm1` — Shared utility + core functions for file generation
+- `scripts/setup-project.ps1` — Main orchestrator
 - [Setup specification](../architecture/setup-specification.md) — Overall setup specification

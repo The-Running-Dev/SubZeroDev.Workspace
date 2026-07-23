@@ -15,7 +15,7 @@ The setup scripts have been refactored into a modular, extensible system followi
 ```
 setup-project.ps1 (Orchestrator)
         ↓
-ProjectSetup.psm1 (Core Module)
+Setup.psm1 (Core Module)
         ↓
 ├── New-ProjectStructure()
 ├── New-Gitignore()
@@ -29,7 +29,7 @@ ProjectSetup.psm1 (Core Module)
 ├── Test-ProjectTestable()
 └── New-ProjectInitialCommit()
 
-Common.ps1 (Shared Utilities)
+Utility functions exported by Setup.psm1
 ├── Write-Step()
 ├── Write-Success()
 ├── Write-WarningMessage()
@@ -49,16 +49,15 @@ Language Starters
 
 ```text
 setup/
-├── setup.ps1                       # OS-detecting entry point
-├── setup-windows.ps1               # Winget prerequisites
-├── setup-macos.ps1                 # Homebrew/npm prerequisites
-├── setup-ubuntu.ps1                # apt/pipx/npm prerequisites
-├── setup-workstation.ps1           # Shared integration orchestration
-├── setup-project.ps1               # Project generator entry point
-├── modules/
-│   ├── Common.ps1                  # Shared utility functions
-│   └── ProjectSetup.psm1           # Project creation module
 ├── scripts/
+│   ├── setup.ps1                   # OS-detecting entry point
+│   ├── setup-windows.ps1           # Winget prerequisites
+│   ├── setup-macos.ps1             # Homebrew/npm prerequisites
+│   ├── setup-ubuntu.ps1            # apt/pipx/npm prerequisites
+│   ├── setup-workstation.ps1       # Shared integration orchestration
+│   ├── setup-project.ps1           # Project generator entry point
+│   ├── modules/
+│   │   └── Setup.psm1              # Shared utility + project creation module
 │   ├── workstation/                # Component installers
 │   └── starters/                   # Language-specific generators
 ├── docker/                         # GitHub MCP Compose and secret files
@@ -75,8 +74,8 @@ setup/
 ### Project Orchestration (`setup-project.ps1`)
 
 The main script:
-1. Imports `Common.ps1` for utility functions
-2. Imports `ProjectSetup.psm1` for core functions
+1. Imports `Setup.psm1`
+2. Uses exported utility and core project functions
 3. Validates input parameters
 4. Gets Git configuration
 5. Calls module functions in sequence
@@ -85,10 +84,10 @@ The main script:
 **Key features:**
 - Uses `[CmdletBinding(SupportsShouldProcess)]` for `-WhatIf` support
 - Follows existing script patterns (parameter validation, error handling)
-- Uses `Common.ps1` functions for consistent output
+- Uses shared utility functions exported by `Setup.psm1` for consistent output
 - Supports multiple switch options: `-SkipGit`, `-SkipValidation`, `-AutoCommit`
 
-### Phase 2: Core Functions (ProjectSetup.psm1)
+### Phase 2: Core Functions (Setup.psm1)
 
 The module contains focused functions, each doing one thing well:
 
@@ -155,7 +154,7 @@ Generates:
 ```powershell
 cd D:\Projects\LLMs\setup
 
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node'
@@ -171,7 +170,7 @@ cd D:\Projects\LLMs\setup
 ### With Auto-Commit
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyBackend' `
   -ProjectName 'Backend' `
   -Language 'csharp' `
@@ -186,7 +185,7 @@ cd D:\Projects\LLMs\setup
 ### Skipping Steps
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\ExistingProject' `
   -ProjectName 'ExistingProject' `
   -Language 'python' `
@@ -202,7 +201,7 @@ cd D:\Projects\LLMs\setup
 ### Test (`WhatIf` Mode)
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\TestProject' `
   -ProjectName 'TestProject' `
   -Language 'node' `
@@ -240,14 +239,14 @@ cd D:\Projects\LLMs\setup
 
 4. **Test**
    ```powershell
-   .\setup-project.ps1 -ProjectPath 'D:\Test\Rust' -ProjectName 'RustApp' -Language 'rust'
+   .\scripts\setup-project.ps1 -ProjectPath 'D:\Test\Rust' -ProjectName 'RustApp' -Language 'rust'
    ```
 
 5. **Document** in [Language starters](../reference/language-starters.md)
 
 ### Add a New Generation Function to ProjectSetup Module
 
-1. **Open ProjectSetup.psm1**
+1. **Open Setup.psm1**
 
 2. **Add your function**
    ```powershell
@@ -274,7 +273,7 @@ cd D:\Projects\LLMs\setup
 
 ### Add a New Validation Check
 
-1. **Add the function** to ProjectSetup.psm1
+1. **Add the function** to Setup.psm1
 2. **Call it** in setup-project.ps1 before/after build/test validation
 3. **Report results** using `Write-Success()` or `Write-WarningMessage()`
 
@@ -282,7 +281,7 @@ cd D:\Projects\LLMs\setup
 
 The new system maintains compatibility with existing scripts:
 
-- **Common.ps1** — Shared utility functions used by all scripts
+- **Setup.psm1** — Shared utility and project functions used by all scripts
 - **install-*.ps1** — Workstation setup scripts still work
 - **setup.ps1** — Detects the host OS and delegates Phase 1 to a platform entry point
 
@@ -292,7 +291,7 @@ You can now use setup-project.ps1 for Phase 2 and Phase 3 project creation.
 
 ### Module Import Fails
 
-**Error:** `ProjectSetup module not found`
+**Error:** `Setup module not found`
 
 **Solution:**
 ```powershell
@@ -300,10 +299,10 @@ You can now use setup-project.ps1 for Phase 2 and Phase 3 project creation.
 cd D:\Projects\LLMs\setup
 
 # Check file exists
-Test-Path .\modules\ProjectSetup.psm1
+Test-Path .\scripts\modules\Setup.psm1
 
 # Try again
-.\setup-project.ps1 ...
+.\scripts\setup-project.ps1 ...
 ```
 
 ### Language Starter Not Found
@@ -326,7 +325,7 @@ git config --global user.name 'Your Name'
 git config --global user.email 'your@email.com'
 
 # Or provide explicitly
-.\setup-project.ps1 ... -GitUserName 'Your Name' -GitUserEmail 'your@email.com'
+.\scripts\setup-project.ps1 ... -GitUserName 'Your Name' -GitUserEmail 'your@email.com'
 ```
 
 ### Build/Test Validation Fails
@@ -342,10 +341,10 @@ npm install  # for Node
 pip install -r requirements.txt  # for Python
 
 # Then run with validation
-.\setup-project.ps1 ... -AutoCommit
+.\scripts\setup-project.ps1 ... -AutoCommit
 
 # Or skip validation for now
-.\setup-project.ps1 ... -SkipValidation
+.\scripts\setup-project.ps1 ... -SkipValidation
 ```
 
 ## Performance
@@ -365,6 +364,5 @@ The system is designed to be fast:
 - [Setup specification](./setup-specification.md) — Requirements and workflows
 - [Setup flowcharts](./setup-flowcharts.md) — Visual process diagrams
 - [Language starters](../reference/language-starters.md) — Creating language-specific setup
-- `modules/Common.ps1` — Shared utilities
-- `modules/ProjectSetup.psm1` — Core module documentation
+- `scripts/modules/Setup.psm1` — Shared utilities and core module documentation
 - `setup-project.ps1` — Script with inline documentation
