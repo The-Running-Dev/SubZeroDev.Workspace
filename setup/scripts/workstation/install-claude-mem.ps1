@@ -23,24 +23,31 @@ if ($PSCmdlet.ShouldProcess('claude-mem', 'Install the official npm package glob
 if (-not $WhatIfPreference) {
     $npmPrefix = (& npm prefix --global 2>&1 | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefix)) {
-        throw 'Could not determine the global npm command directory.'
+        throw 'Could not determine the global npm prefix.'
     }
 
-    $claudeMemCommand = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
-        Join-Path $npmPrefix 'claude-mem.cmd'
-    } else { Join-Path $npmPrefix 'bin/claude-mem' }
-    if (-not (Test-Path -LiteralPath $claudeMemCommand -PathType Leaf)) {
-        $resolvedCommand = Get-Command 'claude-mem' -ErrorAction SilentlyContinue
-        if (-not $resolvedCommand) { throw "claude-mem was installed, but its command could not be found under: $npmPrefix" }
-        $claudeMemCommand = $resolvedCommand.Source
+    # npm's generated Windows .cmd shim can double-quote `node` and fail with
+    # '"node" is not recognized'. Invoke the package entry point through the
+    # resolved Node executable instead. Account for npm's Windows and Unix
+    # global package layouts.
+    $nodeCommand = (Get-Command 'node' -ErrorAction Stop).Source
+    $entrypointCandidates = @(
+        (Join-Path $npmPrefix 'node_modules/claude-mem/dist/npx-cli/index.js'),
+        (Join-Path $npmPrefix 'lib/node_modules/claude-mem/dist/npx-cli/index.js')
+    )
+    $claudeMemEntrypoint = $entrypointCandidates |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+        Select-Object -First 1
+    if (-not $claudeMemEntrypoint) {
+        throw "claude-mem was installed, but its JavaScript entry point could not be found under: $npmPrefix"
     }
 
     if ($PSCmdlet.ShouldProcess('claude-mem', 'Install hooks and worker')) {
-        Invoke-NativeCommand -FilePath $claudeMemCommand -ArgumentList @('install')
+        Invoke-NativeCommand -FilePath $nodeCommand -ArgumentList @($claudeMemEntrypoint, 'install')
     }
 
     if ($PSCmdlet.ShouldProcess('claude-mem worker', 'Start the local memory worker')) {
-        Invoke-NativeCommand -FilePath $claudeMemCommand -ArgumentList @('start')
+        Invoke-NativeCommand -FilePath $nodeCommand -ArgumentList @($claudeMemEntrypoint, 'start')
     }
 }
 else {
@@ -48,4 +55,9 @@ else {
     $null = $PSCmdlet.ShouldProcess('claude-mem worker', 'Start the local memory worker')
 }
 
-Write-Success 'claude-mem installation finished and its worker was started. Restart Claude Code before testing it.'
+if ($WhatIfPreference) {
+    Write-Success 'claude-mem installation preview completed.'
+}
+else {
+    Write-Success 'claude-mem installation finished and its worker was started. Restart Claude Code before testing it.'
+}
