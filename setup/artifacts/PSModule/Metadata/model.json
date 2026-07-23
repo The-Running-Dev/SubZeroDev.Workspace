@@ -1,0 +1,2593 @@
+{
+  "SchemaVersion": 1,
+  "Id": "repository.setup",
+  "ModuleName": "setup",
+  "ModuleVersion": "0.1.0",
+  "ContainerImage": "setup",
+  "Inspection": {
+    "Dockerfiles": [],
+    "ComposeFiles": [],
+    "DotNetProjects": [],
+    "NodeProjects": [],
+    "Readmes": [
+      {
+        "Path": "README.md",
+        "Title": "Setup Documentation Moved",
+        "Headings": [
+          {
+            "Level": 1,
+            "Text": "Setup Documentation Moved"
+          }
+        ],
+        "CodeLanguages": []
+      }
+    ],
+    "PowerShellFiles": [
+      {
+        "Path": "scripts/Modules/Setup.psm1",
+        "Type": "PSM1",
+        "IsCommandCandidate": false,
+        "SuggestedCommandName": null,
+        "Parameters": [],
+        "Functions": [
+          "Write-Step",
+          "Write-Success",
+          "Write-WarningMessage",
+          "Test-CommandAvailable",
+          "Update-SessionPath",
+          "Get-NpxCommand",
+          "Assert-CommandAvailable",
+          "Invoke-NativeCommand",
+          "Test-McpServerRegistered",
+          "Resolve-OrCreatePath",
+          "New-ProjectStructure",
+          "New-ProjectFile",
+          "New-Gitignore",
+          "New-EnvExample",
+          "New-ReadmeFile",
+          "New-ArchitectureFile",
+          "New-AdtTemplate",
+          "New-ClaudeInstructions",
+          "New-AgentsInstructions",
+          "Initialize-ProjectGit",
+          "Invoke-LanguageStarter",
+          "Test-ProjectBuildable",
+          "Test-ProjectTestable",
+          "New-ProjectInitialCommit"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/docs-local.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-DocsLocal",
+        "Parameters": [
+          {
+            "Name": "SourcePath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "TemplatePath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "Port",
+            "Type": "Int32",
+            "Mandatory": false
+          },
+          {
+            "Name": "HostName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "NoOpen",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipInstall",
+            "Type": "switch",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/docs-workflow-local.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-DocsWorkflowLocal",
+        "Parameters": [
+          {
+            "Name": "WorkflowPath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "RunnerImage",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "ReuseRunnerImage",
+            "Type": "switch",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-docs.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupDocs",
+        "Parameters": [
+          {
+            "Name": "SourcePath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "TemplatePath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "ReadmePath",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "OrganizationName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "RepositoryName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SiteTitle",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SiteUrl",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "BaseUrl",
+            "Type": "String",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Convert-ReadmeLinks"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-macos.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupMacos",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipClaudeMem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGitHub",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipPlaywright",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGraphify",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeFilesystem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "FilesystemPath",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeDatabase",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseCommand",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Install-BrewCommand",
+          "Install-NpmCommand"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-project.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupProject",
+        "Parameters": [
+          {
+            "Name": "ProjectPath",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "ProjectName",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "Language",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "GitUserName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "GitUserEmail",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGit",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipLanguageStarter",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipValidation",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "AutoCommit",
+            "Type": "switch",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-ubuntu.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupUbuntu",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipClaudeMem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGitHub",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipPlaywright",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGraphify",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeFilesystem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "FilesystemPath",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeDatabase",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseCommand",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Update-AptPackageIndex",
+          "Invoke-PrivilegedCommand",
+          "Install-AptCommand",
+          "Install-NpmCommand",
+          "Install-ActCommand"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-windows.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupWindows",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipClaudeMem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGitHub",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipPlaywright",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGraphify",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeFilesystem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "FilesystemPath",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeDatabase",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseCommand",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Install-WingetCommand"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup-workstation.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupWorkstation",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipClaudeMem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGitHub",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipPlaywright",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGraphify",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeFilesystem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "FilesystemPath",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeDatabase",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseCommand",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Invoke-SetupScript"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/setup.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-Setup",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipClaudeMem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGitHub",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipPlaywright",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "SkipGraphify",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeFilesystem",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "FilesystemPath",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "IncludeDatabase",
+            "Type": "switch",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseName",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseCommand",
+            "Type": "String",
+            "Mandatory": false
+          },
+          {
+            "Name": "DatabaseArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/starters/setup-starter-node.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupStarterNode",
+        "Parameters": [
+          {
+            "Name": "ProjectPath",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "ProjectName",
+            "Type": "String",
+            "Mandatory": true
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/starters/setup-starter-python.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-SetupStarterPython",
+        "Parameters": [
+          {
+            "Name": "ProjectPath",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "ProjectName",
+            "Type": "String",
+            "Mandatory": true
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-claude-mem.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallClaudeMem",
+        "Parameters": [],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-claude-memory.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallClaudeMemory",
+        "Parameters": [],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-database-mcp.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallDatabaseMcp",
+        "Parameters": [
+          {
+            "Name": "Name",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "Command",
+            "Type": "String",
+            "Mandatory": true
+          },
+          {
+            "Name": "ServerArgument",
+            "Type": "String[]",
+            "Mandatory": false
+          },
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-filesystem-mcp.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallFilesystemMcp",
+        "Parameters": [
+          {
+            "Name": "AllowedPath",
+            "Type": "String[]",
+            "Mandatory": true
+          },
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-github-mcp.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallGithubMcp",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [
+          "Test-DockerEngineRunning",
+          "Wait-DockerEngine",
+          "Test-DotEnvValueSet",
+          "Remove-ClaudeMcpServerFromScope"
+        ],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-graphify.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallGraphify",
+        "Parameters": [],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      },
+      {
+        "Path": "scripts/workstation/install-playwright-mcp.ps1",
+        "Type": "PS1",
+        "IsCommandCandidate": true,
+        "SuggestedCommandName": "Invoke-InstallPlaywrightMcp",
+        "Parameters": [
+          {
+            "Name": "Client",
+            "Type": "String",
+            "Mandatory": false
+          }
+        ],
+        "Functions": [],
+        "Classes": [],
+        "ParseErrors": []
+      }
+    ],
+    "GitHubActions": [],
+    "Nuke": {
+      "IsConfigured": false,
+      "ParameterNames": [],
+      "ProjectPaths": [],
+      "BuildScripts": []
+    },
+    "ConfigurationSchemas": [
+      {
+        "Path": "config/setup-schema.json",
+        "Schema": "http://json-schema.org/draft-07/schema#",
+        "Id": null,
+        "Title": "AI-Assisted Project Setup Configuration Schema",
+        "Type": "object",
+        "Required": [
+          "project",
+          "setup",
+          "validation"
+        ],
+        "Properties": [
+          "project",
+          "setup",
+          "troubleshooting",
+          "validation"
+        ]
+      }
+    ],
+    "OpenApiDocuments": []
+  },
+  "Commands": [
+    {
+      "Id": "script.scripts.docs-local",
+      "Name": "Invoke-DocsLocal",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/docs-local.ps1'.",
+      "Description": "Scaffolded from 'scripts/docs-local.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "SourcePath",
+          "Description": "Discovered from SourcePath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "TemplatePath",
+          "Description": "Discovered from TemplatePath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Port",
+          "Description": "Discovered from Port.",
+          "Type": "Int32",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "HostName",
+          "Description": "Discovered from HostName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "NoOpen",
+          "Description": "Discovered from NoOpen.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipInstall",
+          "Description": "Discovered from SkipInstall.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.docs-workflow-local",
+      "Name": "Invoke-DocsWorkflowLocal",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/docs-workflow-local.ps1'.",
+      "Description": "Scaffolded from 'scripts/docs-workflow-local.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "WorkflowPath",
+          "Description": "Discovered from WorkflowPath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "RunnerImage",
+          "Description": "Discovered from RunnerImage.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ReuseRunnerImage",
+          "Description": "Discovered from ReuseRunnerImage.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.write-step",
+      "Name": "Write-Step",
+      "Synopsis": "Runs the discovered module command 'Write-Step'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Message",
+          "Description": "Discovered from Message.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.write-success",
+      "Name": "Write-Success",
+      "Synopsis": "Runs the discovered module command 'Write-Success'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Message",
+          "Description": "Discovered from Message.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.write-warningmessage",
+      "Name": "Write-WarningMessage",
+      "Synopsis": "Runs the discovered module command 'Write-WarningMessage'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Message",
+          "Description": "Discovered from Message.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.test-commandavailable",
+      "Name": "Test-CommandAvailable",
+      "Synopsis": "Runs the discovered module command 'Test-CommandAvailable'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Name",
+          "Description": "Discovered from Name.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.update-sessionpath",
+      "Name": "Update-SessionPath",
+      "Synopsis": "Runs the discovered module command 'Update-SessionPath'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": []
+    },
+    {
+      "Id": "module.setup.get-npxcommand",
+      "Name": "Get-NpxCommand",
+      "Synopsis": "Runs the discovered module command 'Get-NpxCommand'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": []
+    },
+    {
+      "Id": "module.setup.assert-commandavailable",
+      "Name": "Assert-CommandAvailable",
+      "Synopsis": "Runs the discovered module command 'Assert-CommandAvailable'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Name",
+          "Description": "Discovered from Name.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "InstallHint",
+          "Description": "Discovered from InstallHint.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.invoke-nativecommand",
+      "Name": "Invoke-NativeCommand",
+      "Synopsis": "Runs the discovered module command 'Invoke-NativeCommand'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "FilePath",
+          "Description": "Discovered from FilePath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ArgumentList",
+          "Description": "Discovered from ArgumentList.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.test-mcpserverregistered",
+      "Name": "Test-McpServerRegistered",
+      "Synopsis": "Runs the discovered module command 'Test-McpServerRegistered'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ServerName",
+          "Description": "Discovered from ServerName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.resolve-orcreatepath",
+      "Name": "Resolve-OrCreatePath",
+      "Synopsis": "Runs the discovered module command 'Resolve-OrCreatePath'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Path",
+          "Description": "Discovered from Path.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "PathKind",
+          "Description": "Discovered from PathKind.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-projectstructure",
+      "Name": "New-ProjectStructure",
+      "Synopsis": "Runs the discovered module command 'New-ProjectStructure'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Directories",
+          "Description": "Discovered from Directories.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-projectfile",
+      "Name": "New-ProjectFile",
+      "Synopsis": "Runs the discovered module command 'New-ProjectFile'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "RelativePath",
+          "Description": "Discovered from RelativePath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Content",
+          "Description": "Discovered from Content.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Force",
+          "Description": "Discovered from Force.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-gitignore",
+      "Name": "New-Gitignore",
+      "Synopsis": "Runs the discovered module command 'New-Gitignore'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Language",
+          "Description": "Discovered from Language.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-envexample",
+      "Name": "New-EnvExample",
+      "Synopsis": "Runs the discovered module command 'New-EnvExample'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-readmefile",
+      "Name": "New-ReadmeFile",
+      "Synopsis": "Runs the discovered module command 'New-ReadmeFile'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Commands",
+          "Description": "Discovered from Commands.",
+          "Type": "Hashtable",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-architecturefile",
+      "Name": "New-ArchitectureFile",
+      "Synopsis": "Runs the discovered module command 'New-ArchitectureFile'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-adttemplate",
+      "Name": "New-AdtTemplate",
+      "Synopsis": "Runs the discovered module command 'New-AdtTemplate'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-claudeinstructions",
+      "Name": "New-ClaudeInstructions",
+      "Synopsis": "Runs the discovered module command 'New-ClaudeInstructions'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Commands",
+          "Description": "Discovered from Commands.",
+          "Type": "Hashtable",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-agentsinstructions",
+      "Name": "New-AgentsInstructions",
+      "Synopsis": "Runs the discovered module command 'New-AgentsInstructions'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Commands",
+          "Description": "Discovered from Commands.",
+          "Type": "Hashtable",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.initialize-projectgit",
+      "Name": "Initialize-ProjectGit",
+      "Synopsis": "Runs the discovered module command 'Initialize-ProjectGit'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "UserName",
+          "Description": "Discovered from UserName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "UserEmail",
+          "Description": "Discovered from UserEmail.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipInit",
+          "Description": "Discovered from SkipInit.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.invoke-languagestarter",
+      "Name": "Invoke-LanguageStarter",
+      "Synopsis": "Runs the discovered module command 'Invoke-LanguageStarter'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Language",
+          "Description": "Discovered from Language.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.test-projectbuildable",
+      "Name": "Test-ProjectBuildable",
+      "Synopsis": "Runs the discovered module command 'Test-ProjectBuildable'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "BuildCommand",
+          "Description": "Discovered from BuildCommand.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.test-projecttestable",
+      "Name": "Test-ProjectTestable",
+      "Synopsis": "Runs the discovered module command 'Test-ProjectTestable'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "TestCommand",
+          "Description": "Discovered from TestCommand.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "module.setup.new-projectinitialcommit",
+      "Name": "New-ProjectInitialCommit",
+      "Synopsis": "Runs the discovered module command 'New-ProjectInitialCommit'.",
+      "Description": "Scaffolded from 'scripts/Modules/Setup.psm1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Message",
+          "Description": "Discovered from Message.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-docs",
+      "Name": "Invoke-SetupDocs",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-docs.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-docs.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "SourcePath",
+          "Description": "Discovered from SourcePath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "TemplatePath",
+          "Description": "Discovered from TemplatePath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ReadmePath",
+          "Description": "Discovered from ReadmePath.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "OrganizationName",
+          "Description": "Discovered from OrganizationName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "RepositoryName",
+          "Description": "Discovered from RepositoryName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SiteTitle",
+          "Description": "Discovered from SiteTitle.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SiteUrl",
+          "Description": "Discovered from SiteUrl.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "BaseUrl",
+          "Description": "Discovered from BaseUrl.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-macos",
+      "Name": "Invoke-SetupMacos",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-macos.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-macos.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipClaudeMem",
+          "Description": "Discovered from SkipClaudeMem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGitHub",
+          "Description": "Discovered from SkipGitHub.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipPlaywright",
+          "Description": "Discovered from SkipPlaywright.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGraphify",
+          "Description": "Discovered from SkipGraphify.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeFilesystem",
+          "Description": "Discovered from IncludeFilesystem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "FilesystemPath",
+          "Description": "Discovered from FilesystemPath.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeDatabase",
+          "Description": "Discovered from IncludeDatabase.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseName",
+          "Description": "Discovered from DatabaseName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseCommand",
+          "Description": "Discovered from DatabaseCommand.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseArgument",
+          "Description": "Discovered from DatabaseArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-project",
+      "Name": "Invoke-SetupProject",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-project.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-project.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Language",
+          "Description": "Discovered from Language.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "GitUserName",
+          "Description": "Discovered from GitUserName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "GitUserEmail",
+          "Description": "Discovered from GitUserEmail.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGit",
+          "Description": "Discovered from SkipGit.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipLanguageStarter",
+          "Description": "Discovered from SkipLanguageStarter.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipValidation",
+          "Description": "Discovered from SkipValidation.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "AutoCommit",
+          "Description": "Discovered from AutoCommit.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-ubuntu",
+      "Name": "Invoke-SetupUbuntu",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-ubuntu.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-ubuntu.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipClaudeMem",
+          "Description": "Discovered from SkipClaudeMem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGitHub",
+          "Description": "Discovered from SkipGitHub.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipPlaywright",
+          "Description": "Discovered from SkipPlaywright.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGraphify",
+          "Description": "Discovered from SkipGraphify.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeFilesystem",
+          "Description": "Discovered from IncludeFilesystem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "FilesystemPath",
+          "Description": "Discovered from FilesystemPath.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeDatabase",
+          "Description": "Discovered from IncludeDatabase.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseName",
+          "Description": "Discovered from DatabaseName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseCommand",
+          "Description": "Discovered from DatabaseCommand.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseArgument",
+          "Description": "Discovered from DatabaseArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-windows",
+      "Name": "Invoke-SetupWindows",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-windows.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-windows.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipClaudeMem",
+          "Description": "Discovered from SkipClaudeMem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGitHub",
+          "Description": "Discovered from SkipGitHub.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipPlaywright",
+          "Description": "Discovered from SkipPlaywright.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGraphify",
+          "Description": "Discovered from SkipGraphify.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeFilesystem",
+          "Description": "Discovered from IncludeFilesystem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "FilesystemPath",
+          "Description": "Discovered from FilesystemPath.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeDatabase",
+          "Description": "Discovered from IncludeDatabase.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseName",
+          "Description": "Discovered from DatabaseName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseCommand",
+          "Description": "Discovered from DatabaseCommand.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseArgument",
+          "Description": "Discovered from DatabaseArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup-workstation",
+      "Name": "Invoke-SetupWorkstation",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup-workstation.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup-workstation.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipClaudeMem",
+          "Description": "Discovered from SkipClaudeMem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGitHub",
+          "Description": "Discovered from SkipGitHub.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipPlaywright",
+          "Description": "Discovered from SkipPlaywright.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGraphify",
+          "Description": "Discovered from SkipGraphify.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeFilesystem",
+          "Description": "Discovered from IncludeFilesystem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "FilesystemPath",
+          "Description": "Discovered from FilesystemPath.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeDatabase",
+          "Description": "Discovered from IncludeDatabase.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseName",
+          "Description": "Discovered from DatabaseName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseCommand",
+          "Description": "Discovered from DatabaseCommand.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseArgument",
+          "Description": "Discovered from DatabaseArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.setup",
+      "Name": "Invoke-Setup",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/setup.ps1'.",
+      "Description": "Scaffolded from 'scripts/setup.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipClaudeMem",
+          "Description": "Discovered from SkipClaudeMem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGitHub",
+          "Description": "Discovered from SkipGitHub.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipPlaywright",
+          "Description": "Discovered from SkipPlaywright.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "SkipGraphify",
+          "Description": "Discovered from SkipGraphify.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeFilesystem",
+          "Description": "Discovered from IncludeFilesystem.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "FilesystemPath",
+          "Description": "Discovered from FilesystemPath.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "IncludeDatabase",
+          "Description": "Discovered from IncludeDatabase.",
+          "Type": "switch",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseName",
+          "Description": "Discovered from DatabaseName.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseCommand",
+          "Description": "Discovered from DatabaseCommand.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "DatabaseArgument",
+          "Description": "Discovered from DatabaseArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.starters.setup-starter-node",
+      "Name": "Invoke-SetupStarterNode",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/starters/setup-starter-node.ps1'.",
+      "Description": "Scaffolded from 'scripts/starters/setup-starter-node.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.starters.setup-starter-python",
+      "Name": "Invoke-SetupStarterPython",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/starters/setup-starter-python.ps1'.",
+      "Description": "Scaffolded from 'scripts/starters/setup-starter-python.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "ProjectPath",
+          "Description": "Discovered from ProjectPath.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ProjectName",
+          "Description": "Discovered from ProjectName.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.workstation.install-claude-mem",
+      "Name": "Invoke-InstallClaudeMem",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-claude-mem.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-claude-mem.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": []
+    },
+    {
+      "Id": "script.scripts.workstation.install-claude-memory",
+      "Name": "Invoke-InstallClaudeMemory",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-claude-memory.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-claude-memory.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": []
+    },
+    {
+      "Id": "script.scripts.workstation.install-database-mcp",
+      "Name": "Invoke-InstallDatabaseMcp",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-database-mcp.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-database-mcp.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Name",
+          "Description": "Discovered from Name.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Command",
+          "Description": "Discovered from Command.",
+          "Type": "String",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "ServerArgument",
+          "Description": "Discovered from ServerArgument.",
+          "Type": "String[]",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.workstation.install-filesystem-mcp",
+      "Name": "Invoke-InstallFilesystemMcp",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-filesystem-mcp.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-filesystem-mcp.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "AllowedPath",
+          "Description": "Discovered from AllowedPath.",
+          "Type": "String[]",
+          "Mandatory": true,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        },
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.workstation.install-github-mcp",
+      "Name": "Invoke-InstallGithubMcp",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-github-mcp.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-github-mcp.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    },
+    {
+      "Id": "script.scripts.workstation.install-graphify",
+      "Name": "Invoke-InstallGraphify",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-graphify.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-graphify.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": []
+    },
+    {
+      "Id": "script.scripts.workstation.install-playwright-mcp",
+      "Name": "Invoke-InstallPlaywrightMcp",
+      "Synopsis": "Runs the discovered PowerShell script 'scripts/workstation/install-playwright-mcp.ps1'.",
+      "Description": "Scaffolded from 'scripts/workstation/install-playwright-mcp.ps1'. Review its container invocation mappings before publishing.",
+      "Notes": null,
+      "Examples": [],
+      "Parameters": [
+        {
+          "Id": null,
+          "Name": "Client",
+          "Description": "Discovered from Client.",
+          "Type": "String",
+          "Mandatory": false,
+          "Completions": [],
+          "Validations": [],
+          "Mappings": []
+        }
+      ]
+    }
+  ]
+}

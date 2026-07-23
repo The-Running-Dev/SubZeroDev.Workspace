@@ -6,7 +6,7 @@ description: Create and open a new AI-assisted project with the shortest support
 
 # Quick Start
 
-**Fast guide to setting up a new AI-assisted project using setup-project.ps1**
+**Fast guide to setting up a new AI-assisted project using setup/scripts/setup-project.ps1**
 
 The project generator runs on Windows, macOS, and Linux under PowerShell. The examples below use Windows paths; replace them with paths such as `~/Projects/MyApp` on macOS or Linux.
 
@@ -15,7 +15,7 @@ The project generator runs on Windows, macOS, and Linux under PowerShell. The ex
 ```powershell
 cd D:\Projects\LLMs\setup
 
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node' `
@@ -26,7 +26,7 @@ Done! Navigate to your project and open with Claude Code or Codex.
 
 ## Prerequisites
 
-✓ Workstation setup complete (`.\setup.ps1` has been run)  
+✓ Workstation setup complete (`.\scripts\setup.ps1` has been run)  
 ✓ Git configured (`git config --global user.name "Your Name"`)  
 ✓ Python/Node.js/etc. installed (for language-specific setup)
 
@@ -43,7 +43,7 @@ cd D:\Projects\LLMs\setup
 Choose your language and project location:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyNewProject' `
   -ProjectName 'MyNewProject' `
   -Language 'node'      # or: python, csharp, rust, java, go
@@ -106,7 +106,7 @@ codex
 Automatically validates and commits after setup:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node' `
@@ -118,7 +118,7 @@ Automatically validates and commits after setup:
 If you want to manually create language files:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node' `
@@ -130,7 +130,7 @@ If you want to manually create language files:
 If dependencies aren't installed yet:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node' `
@@ -142,7 +142,7 @@ If dependencies aren't installed yet:
 See what would happen without making changes:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\Test' `
   -ProjectName 'Test' `
   -Language 'node' `
@@ -154,7 +154,7 @@ See what would happen without making changes:
 For projects with existing Git repos:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\ExistingRepo' `
   -ProjectName 'ExistingRepo' `
   -Language 'node' `
@@ -166,7 +166,7 @@ For projects with existing Git repos:
 Override global Git config:
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
   -ProjectName 'MyApp' `
   -Language 'node' `
@@ -262,7 +262,7 @@ For more details, see:
 ### Example 1: Node.js Web App
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\WebApp' `
   -ProjectName 'WebApp' `
   -Language 'node' `
@@ -277,7 +277,7 @@ npm start
 ### Example 2: Python Data Science
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\DataAnalysis' `
   -ProjectName 'DataAnalysis' `
   -Language 'python'
@@ -291,7 +291,7 @@ python -m src.main
 ### Example 3: Rust Systems Tool
 
 ```powershell
-.\setup-project.ps1 `
+.\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\RustTool' `
   -ProjectName 'RustTool' `
   -Language 'rust' `

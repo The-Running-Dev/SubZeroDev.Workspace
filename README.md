@@ -24,9 +24,9 @@ The complete setup documentation is published at **[llms.subzerodev.com](https:/
 - [Language Starters](setup/docs/reference/language-starters.md) — use or extend the language-specific project starters.
 - [Reflection Mode](setup/docs/reference/reflection-mode.md) — use the guided inquiry prompt for deliberate analysis.
 
-The root README is the canonical documentation index. The remaining documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/docs-local.ps1` to synchronize both into the pinned Docusaurus template and serve them locally with live reload enabled.
+The root README is the canonical documentation index. The remaining documentation source lives in [`setup/docs/`](setup/docs/). Run `setup/scripts/docs-local.ps1` to synchronize both into the pinned Docusaurus template and serve them locally with live reload enabled.
 
-To test the same documentation build job used by GitHub Actions, start Docker and run `setup/docs-workflow-local.ps1`. The script uses [`act`](https://nektosact.com/) to execute the workflow's pull-request build job locally; it does not deploy to GitHub Pages.
+To test the same documentation build job used by GitHub Actions, start Docker and run `setup/scripts/docs-workflow-local.ps1`. The script uses [`act`](https://nektosact.com/) to execute the workflow's pull-request build job locally; it does not deploy to GitHub Pages.
 
 ## Container Usage
 
@@ -72,11 +72,11 @@ The preview command shows prerequisite actions without installing them. The seco
 
 | Platform | Prerequisite installer | Package tooling |
 |----------|------------------------|-----------------|
-| Windows | `setup/setup-windows.ps1` | Winget |
-| macOS | `setup/setup-macos.ps1` | Homebrew and npm |
-| Ubuntu/Debian | `setup/setup-ubuntu.ps1` | apt, pipx, and npm |
+| Windows | `setup/scripts/setup-windows.ps1` | Winget |
+| macOS | `setup/scripts/setup-macos.ps1` | Homebrew and npm |
+| Ubuntu/Debian | `setup/scripts/setup-ubuntu.ps1` | apt, pipx, and npm |
 
-Use `setup/setup.ps1` for normal operation. It detects the OS and dispatches to the matching platform script. `setup/setup-workstation.ps1` contains the shared Graphify, memory, and MCP configuration used after platform prerequisites are available.
+Use `setup/scripts/setup.ps1` for normal operation. It detects the OS and dispatches to the matching platform script. `setup/scripts/setup-workstation.ps1` contains the shared Graphify, memory, and MCP configuration used after platform prerequisites are available.
 
 ### Prerequisites
 
@@ -92,13 +92,13 @@ Run the scripts as your normal user. Review package installations and third-part
 From the repository root, preview platform prerequisite actions:
 
 ```powershell
-./setup/setup.ps1 -Client Both -WhatIf
+./setup/scripts/setup.ps1 -Client Both -WhatIf
 ```
 
 Recommended first run without third-party session memory:
 
 ```powershell
-./setup/setup.ps1 -Client Both -SkipClaudeMem
+./setup/scripts/setup.ps1 -Client Both -SkipClaudeMem
 ```
 
 The default setup installs or configures Node.js, the selected assistant CLIs, GitHub CLI, `act`, Astral `uv`, Graphify, Claude Code memory support, optional `claude-mem`, GitHub MCP, and Playwright MCP.
@@ -106,15 +106,15 @@ The default setup installs or configures Node.js, the selected assistant CLIs, G
 Select one or both supported clients:
 
 ```powershell
-./setup/setup.ps1 -Client Codex
-./setup/setup.ps1 -Client ClaudeCode
-./setup/setup.ps1 -Client Both
+./setup/scripts/setup.ps1 -Client Codex
+./setup/scripts/setup.ps1 -Client ClaudeCode
+./setup/scripts/setup.ps1 -Client Both
 ```
 
 Skip optional components when they are not required:
 
 ```powershell
-./setup/setup.ps1 `
+./setup/scripts/setup.ps1 `
   -Client Both `
   -SkipGraphify `
   -SkipClaudeMem `
@@ -127,7 +127,7 @@ Skip optional components when they are not required:
 Filesystem MCP is disabled by default because the assistants already have native file access. When it is required, grant only the smallest practical directory:
 
 ```powershell
-./setup/setup.ps1 `
+./setup/scripts/setup.ps1 `
   -Client Both `
   -IncludeFilesystem `
   -FilesystemPath '/path/to/project'
@@ -138,7 +138,7 @@ Filesystem MCP is disabled by default because the assistants already have native
 No generic database MCP package is installed. Select and security-review a maintained server first, then provide its installed command explicitly:
 
 ```powershell
-./setup/setup.ps1 `
+./setup/scripts/setup.ps1 `
   -Client Codex `
   -SkipClaudeMem `
   -IncludeDatabase `
@@ -168,7 +168,7 @@ GITHUB_TOOLSETS=context,repos,issues,pull_requests,actions
 `setup/docker/.env` is git-ignored. Start Docker Desktop on Windows/macOS or Docker Engine on Linux before running GitHub setup. To retry only GitHub MCP after supplying the token:
 
 ```powershell
-./setup/setup.ps1 `
+./setup/scripts/setup.ps1 `
   -Client Both `
   -SkipGraphify `
   -SkipClaudeMem `
@@ -181,10 +181,10 @@ GITHUB_TOOLSETS=context,repos,issues,pull_requests,actions
 
 The shared setup orchestrator calls focused installers:
 
-- `setup/setup-windows.ps1`
-- `setup/setup-macos.ps1`
-- `setup/setup-ubuntu.ps1`
-- `setup/setup-workstation.ps1`
+- `setup/scripts/setup-windows.ps1`
+- `setup/scripts/setup-macos.ps1`
+- `setup/scripts/setup-ubuntu.ps1`
+- `setup/scripts/setup-workstation.ps1`
 - `setup/scripts/workstation/install-graphify.ps1`
 - `setup/scripts/workstation/install-claude-memory.ps1`
 - `setup/scripts/workstation/install-claude-mem.ps1`
@@ -200,7 +200,7 @@ Most component scripts preserve existing registrations. The GitHub installer int
 After workstation setup, scaffold a new project with:
 
 ```powershell
-./setup/setup-project.ps1 `
+./setup/scripts/setup-project.ps1 `
   -ProjectPath '/path/to/MyProject' `
   -ProjectName 'MyProject' `
   -Language 'node'
@@ -231,7 +231,7 @@ Initialize the pinned Docusaurus template after cloning:
 
 ```powershell
 git submodule update --init --recursive
-./setup/setup-docs.ps1
+./setup/scripts/setup-docs.ps1
 ```
 
 The synchronization script copies the canonical root README to the Docusaurus `/docs/` index, copies the remaining documentation, and applies the project-owned sidebar and Docusaurus configuration. Do not edit the generated `docs-template` working tree.
@@ -249,7 +249,7 @@ The build output is written to `docs-template/artifacts`. GitHub Actions validat
 For live reload, run:
 
 ```powershell
-./setup/docs-local.ps1
+./setup/scripts/docs-local.ps1
 ```
 
 The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-NoOpen` to change the server behavior, and `-SkipInstall` only when template dependencies are already installed. Stop an older background instance before restarting so the server can claim its port.
@@ -257,7 +257,7 @@ The default address is `http://localhost:3000/`. Use `-Port`, `-HostName`, or `-
 To validate the GitHub documentation build locally with Docker and `act`, run:
 
 ```powershell
-./setup/docs-workflow-local.ps1
+./setup/scripts/docs-workflow-local.ps1
 ```
 
 The first run downloads the runner image and can take several minutes. On Apple Silicon the wrapper requests `linux/amd64`. Use `-ReuseRunnerImage` after the runner image and actions are cached. `act` closely approximates GitHub-hosted runners but does not implement every GitHub Actions feature.

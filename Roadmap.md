@@ -29,7 +29,7 @@ Worth stating plainly, because the backlog below is all problems:
   cannot inspect a tool it deliberately declined to install
   (`setup/scripts/workstation/install-graphify.ps1:15-20`).
 - **The documentation is unusually good** for a tooling repo, and the single-source
-  README → Docusaurus pipeline (`setup/setup-docs.ps1`) avoids the usual drift.
+  README → Docusaurus pipeline (`setup/scripts/setup-docs.ps1`) avoids the usual drift.
 - **The workspace blueprint is honest** — it explicitly argues *against* starting
   with Neo4j, custom indexers, and overlapping memory products, and stages the
   rollout behind measurement.
@@ -41,7 +41,7 @@ Worth stating plainly, because the backlog below is all problems:
 ### 1. Build and test validation always reports success (S)
 
 `Test-ProjectBuildable` and `Test-ProjectTestable`
-(`setup/modules/ProjectSetup.psm1:767` and `:799`) run the command through
+(`setup/scripts/modules/ProjectSetup.psm1:767` and `:799`) run the command through
 `Invoke-Expression` and `return $true` unless a *PowerShell* exception is thrown.
 A native command exiting non-zero does not throw when
 `$PSNativeCommandUseErrorActionPreference` is `$false` — which is the default on
@@ -64,7 +64,7 @@ so `Invoke-Expression` can be dropped entirely (see item 9).
 
 ### 2. `-AutoCommit` commits regardless of validation outcome (S)
 
-`setup/setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
+`setup/scripts/setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
 commit if validation succeeds", but the implementation at `:330` is an
 unconditional `if ($AutoCommit)`. `$buildSuccess` and `$testSuccess` are computed
 at `:298-323` and then never read.
@@ -102,7 +102,7 @@ project and actually runs `install`/`build`/`test` (see item 4).
 ### 4. Python starter targets a deprecated toolchain (S)
 
 `setup/scripts/starters/setup-starter-python.ps1` generates `setup.py` alongside
-`pyproject.toml`, and the language table in `setup/setup-project.ps1:111` uses
+`pyproject.toml`, and the language table in `setup/scripts/setup-project.ps1:111` uses
 `python setup.py build` — deprecated since setuptools 58 and slated for removal.
 Dev dependencies are hard-pinned to mid-2023 (`pytest==7.4.0`, `black==23.7.0`,
 `pylint==2.17.5`).
@@ -122,8 +122,8 @@ starter template.
 ### 5. No CI runs against the PowerShell scripts at all (M)
 
 `.github/workflows/docs-pages.yml` is the only workflow, and its `paths:` filter
-(`:7-18`, `:22-33`) covers `setup/docs/**`, `setup/setup-docs.ps1`,
-`setup/README.md`, the Dockerfile and the submodule — but **not** `setup/setup.ps1`,
+(`:7-18`, `:22-33`) covers `setup/docs/**`, `setup/scripts/setup-docs.ps1`,
+`setup/README.md`, the Dockerfile and the submodule — but **not** `setup/scripts/setup.ps1`,
 `setup/setup-*.ps1`, `setup/modules/**`, or `setup/scripts/**`.
 
 So the ~2,400 lines of provisioning and scaffolding logic that are the actual
@@ -142,7 +142,7 @@ not match the path filter and therefore never triggers a rebuild.
    `Convert-ReadmeLinks`, `New-Gitignore`, the language command table, and the two
    validation functions from item 1. These need no network and no installs.
 4. Add a matrix smoke job (ubuntu + windows + macos) that runs
-   `./setup/setup.ps1 -Client Both -WhatIf` and asserts a clean exit.
+   `./setup/scripts/setup.ps1 -Client Both -WhatIf` and asserts a clean exit.
 
 ### 6. No end-to-end scaffold test (M)
 
@@ -153,7 +153,7 @@ regressions.
 
 ### 7. No test for the docs sync (S)
 
-`setup/setup-docs.ps1` does destructive regex rewriting of the README
+`setup/scripts/setup-docs.ps1` does destructive regex rewriting of the README
 (`Convert-ReadmeLinks`, `:66-83`) and deletes the template `docs/` tree
 (`:47`). It is entirely untested. `Convert-ReadmeLinks` also reads
 `$repositoryUrl` from the caller's scope rather than taking it as a parameter
@@ -178,8 +178,8 @@ Nothing in the setup path is version-pinned:
 | claude-mem | `setup/scripts/workstation/install-claude-mem.ps1:18` | `@latest` |
 | Playwright MCP | `setup/scripts/workstation/install-playwright-mcp.ps1:13` | `@latest` |
 | Filesystem MCP | `setup/scripts/workstation/install-filesystem-mcp.ps1:28` | `npx -y`, unversioned |
-| Codex CLI / Claude Code | `setup/setup-macos.ps1:43-44`, `setup/setup-ubuntu.ps1:85-86` | unversioned npm global |
-| Codex CLI / Claude Code | `setup/setup-windows.ps1:31-32` | unversioned Winget package |
+| Codex CLI / Claude Code | `setup/scripts/setup-macos.ps1:43-44`, `setup/scripts/setup-ubuntu.ps1:85-86` | unversioned npm global |
+| Codex CLI / Claude Code | `setup/scripts/setup-windows.ps1:31-32` | unversioned Winget package |
 | graphifyy | `setup/scripts/workstation/install-graphify.ps1:30` | unversioned `uv tool install` |
 
 A repo whose documentation argues for least-privilege tokens and deliberate
@@ -194,7 +194,7 @@ behavior, and a renovate/dependabot config to bump the pins via PR.
 
 ### 9. `Invoke-Expression` on command strings (S)
 
-`setup/modules/ProjectSetup.psm1:787` and `:819` execute build/test commands via
+`setup/scripts/modules/ProjectSetup.psm1:787` and `:819` execute build/test commands via
 `Invoke-Expression`. The strings come from a fixed table in `setup-project.ps1`, so
 this is not currently exploitable — but it is the reason exit codes are lost
 (item 1), and it makes any future user-supplied command a shell-injection vector.
@@ -204,7 +204,7 @@ and route through the existing `Invoke-NativeCommand`.
 
 ### 10. The `act` installer pipes a downloaded script to sudo without verification (S)
 
-`setup/setup-ubuntu.ps1:60-75` downloads `install.sh` from `master` on GitHub and
+`setup/scripts/setup-ubuntu.ps1:60-75` downloads `install.sh` from `master` on GitHub and
 executes it with elevated privileges, with no checksum or signature check. Windows
 and macOS install `act` from Winget and Homebrew respectively, so Linux is the only
 platform taking this path.
@@ -230,7 +230,7 @@ a plain environment variable.
 ### 12. `-Client` accepts different values in different scripts (S)
 
 Every workstation script uses `'Codex' | 'ClaudeCode' | 'Both'`.
-`setup/setup-project.ps1:69` alone uses `'Both' | 'Code' | 'Codex'`. Someone who
+`setup/scripts/setup-project.ps1:69` alone uses `'Both' | 'Code' | 'Codex'`. Someone who
 learns `-Client ClaudeCode` from the README hits a validation error the first time
 they scaffold a project.
 
@@ -248,7 +248,7 @@ reference anywhere is a file listing in
 This is a fork in the road, not a cleanup:
 
 - **Implement it** — have `setup-project.ps1` and `setup.ps1` load the YAML so the
-  language table (`setup/setup-project.ps1:101-144`) and component list become
+  language table (`setup/scripts/setup-project.ps1:101-144`) and component list become
   data rather than hardcoded hashtables. This is the more interesting option and
   would make adding C#/Rust/Java/Go starters a config change.
 - **Delete it** — if the declarative direction is abandoned, remove both files so
@@ -258,10 +258,10 @@ Pick one. Leaving it as-is is the worst option.
 
 ### 14. Four of six advertised languages have no starter (M)
 
-`setup/setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the
+`setup/scripts/setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the
 README lists them as "supported command profiles". Only `node` and `python` have
 starter scripts; the other four hit the warning path at
-`setup/modules/ProjectSetup.psm1:754-758` and produce a project with a README, a
+`setup/scripts/modules/ProjectSetup.psm1:754-758` and produce a project with a README, a
 `.gitignore`, and nothing else.
 
 **Fix:** either write the four starters (the convention-based
@@ -365,7 +365,7 @@ context layers — but nothing in the toolkit uses it. Natural extensions:
   and reference `graphify-out/GRAPH_REPORT.md` from the generated `CLAUDE.md`.
 - Ship the post-commit auto-rebuild hook as an opt-in `-EnableGraphifyHook` switch.
 - Add `graphify-out/` to the generated `.gitignore` (`New-Gitignore`,
-  `setup/modules/ProjectSetup.psm1:87`).
+  `setup/scripts/modules/ProjectSetup.psm1:87`).
 
 ### 24. Cross-platform CI for the container (S)
 

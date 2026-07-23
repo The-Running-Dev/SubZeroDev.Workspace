@@ -6,31 +6,31 @@ on:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - '.dockerignore'
-      - 'Dockerfile'
-      - 'container-entrypoint.ps1'
+      - 'setup/.dockerignore'
+      - 'setup/Dockerfile'
+      - 'setup/entrypoint.ps1'
       - '.gitmodules'
       - 'docs-template'
       - 'README.md'
       - 'setup/README.md'
       - 'setup/docs/**'
-      - 'setup/docs-workflow-local.ps1'
-      - 'setup/setup-docs.ps1'
+      - 'setup/scripts/docs-workflow-local.ps1'
+      - 'setup/scripts/setup-docs.ps1'
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - '.dockerignore'
-      - 'Dockerfile'
-      - 'container-entrypoint.ps1'
+      - 'setup/.dockerignore'
+      - 'setup/Dockerfile'
+      - 'setup/entrypoint.ps1'
       - '.gitmodules'
       - 'docs-template'
       - 'README.md'
       - 'setup/README.md'
       - 'setup/docs/**'
-      - 'setup/docs-workflow-local.ps1'
-      - 'setup/setup-docs.ps1'
+      - 'setup/scripts/docs-workflow-local.ps1'
+      - 'setup/scripts/setup-docs.ps1'
   workflow_dispatch:
 
 concurrency:
@@ -65,7 +65,7 @@ jobs:
 
       - name: Synchronize documentation
         shell: pwsh
-        run: ./setup/setup-docs.ps1
+        run: ./setup/scripts/setup-docs.ps1
 
       - name: Install template dependencies
         working-directory: docs-template
@@ -155,6 +155,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: setup/Dockerfile
           target: runtime-prebuilt
           push: false
           outputs: type=oci,dest=/tmp/llms-toolkit.tar
@@ -172,6 +173,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: setup/Dockerfile
           target: runtime-prebuilt
           push: true
           tags: ${{ steps.meta.outputs.tags }}
