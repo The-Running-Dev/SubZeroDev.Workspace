@@ -1,10 +1,17 @@
-import { mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { isEntryPoint, runCli } from '../src/cli.js';
+import { isEntryPoint, readVersion, runCli } from '../src/cli.js';
 
 describe('CLI', () => {
   it('prints help when no command is supplied', () => {
@@ -23,6 +30,37 @@ describe('CLI', () => {
 
     expect(runCli(['unknown'])).toBe(2);
     expect(output).toHaveBeenCalledWith(expect.stringContaining('Unknown command: unknown'));
+
+    output.mockRestore();
+  });
+
+  it('reports invalid options instead of throwing', () => {
+    const output = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+    expect(runCli(['--unknown'])).toBe(2);
+    expect(output).toHaveBeenCalledWith(expect.stringContaining('Invalid arguments'));
+
+    output.mockRestore();
+  });
+
+  it('reports an invalid option supplied after a command', () => {
+    const output = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+    expect(runCli(['sync', '--bogus'])).toBe(2);
+    expect(output).toHaveBeenCalledWith(expect.stringContaining('Invalid arguments'));
+
+    output.mockRestore();
+  });
+
+  it('prints the package version rather than a hard-coded string', () => {
+    const output = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    const expected = JSON.parse(
+      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+    ) as { version: string };
+
+    expect(runCli(['--version'])).toBe(0);
+    expect(output).toHaveBeenCalledWith(`${expected.version}\n`);
+    expect(readVersion()).toBe(expected.version);
 
     output.mockRestore();
   });

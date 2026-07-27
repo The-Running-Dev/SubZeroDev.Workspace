@@ -57,6 +57,21 @@ Docker mode mounts `.cache/` at `/data/cache` and `output/` at `/data/output`.
 Override them with `-CachePath` and `-OutputPath`. Reuse an existing image by
 omitting `-BuildImage`, or select another tag with `-ImageName`.
 
+The image runs as UID 10001, so bind-mounted host directories owned by another
+user are not writable. On Linux the runner therefore passes the current host
+user by default. Override it with `-DockerUser`, or set it explicitly when
+invoking Docker directly:
+
+```bash
+docker run --rm --user "$(id -u):$(id -g)" \
+  --volume "$PWD/.cache:/data/cache" \
+  --volume "$PWD/output:/data/output" \
+  subzerodev-automator-plugins-github:local validate
+```
+
+Docker Desktop on macOS and Windows maps ownership automatically, so no
+`--user` flag is needed there.
+
 ### Direct Docker commands
 
 The equivalent commands without the PowerShell wrapper are:

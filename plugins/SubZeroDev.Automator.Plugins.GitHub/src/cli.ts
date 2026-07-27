@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { realpathSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -28,19 +28,64 @@ function isCommandName(value: string): value is CommandName {
   return commandNames.some((command) => command === value);
 }
 
+type ParsedArguments =
+  | {
+      readonly ok: true;
+      readonly values: {
+        readonly help?: boolean;
+        readonly version?: boolean;
+      };
+      readonly positionals: readonly string[];
+    }
+  | { readonly ok: false; readonly message: string };
+
+function parseArguments(argv: readonly string[]): ParsedArguments {
+  try {
+    const { values, positionals } = parseArgs({
+      args: [...argv],
+      allowPositionals: true,
+      strict: true,
+      options: {
+        help: { type: 'boolean', short: 'h' },
+        version: { type: 'boolean', short: 'v' },
+      },
+    });
+
+    return { ok: true, values, positionals };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+export function readVersion(): string {
+  // Resolved from the module rather than hard-coded so it cannot drift from the package.
+  const contents: unknown = JSON.parse(
+    readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+  );
+
+  if (
+    typeof contents !== 'object' ||
+    contents === null ||
+    !('version' in contents) ||
+    typeof contents.version !== 'string'
+  ) {
+    throw new Error('package.json does not declare a string version.');
+  }
+
+  return contents.version;
+}
+
 export function runCli(argv: readonly string[]): number {
-  const { values, positionals } = parseArgs({
-    args: [...argv],
-    allowPositionals: true,
-    strict: true,
-    options: {
-      help: { type: 'boolean', short: 'h' },
-      version: { type: 'boolean', short: 'v' },
-    },
-  });
+  const parsed = parseArguments(argv);
+  if (!parsed.ok) {
+    process.stderr.write(`Invalid arguments: ${parsed.message}\n\n${help}`);
+    return 2;
+  }
+
+  const { values, positionals } = parsed;
 
   if (values.version) {
-    process.stdout.write('0.1.0\n');
+    process.stdout.write(`${readVersion()}\n`);
     return 0;
   }
 

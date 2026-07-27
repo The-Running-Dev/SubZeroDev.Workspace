@@ -29,6 +29,8 @@ param(
 
     [string]$ImageName = 'subzerodev-automator-plugins-github:local',
 
+    [string]$DockerUser = '',
+
     [string]$CachePath = (Join-Path $PSScriptRoot '.cache'),
 
     [string]$OutputPath = (Join-Path $PSScriptRoot 'output'),
@@ -106,9 +108,20 @@ try {
 
             $resolvedCache = (Resolve-Path -LiteralPath $CachePath).Path
             $resolvedOutput = (Resolve-Path -LiteralPath $OutputPath).Path
+            # The image runs as UID 10001, so bind mounts owned by the host user are
+            # unwritable on Linux unless the container runs as that user.
+            $userArguments = @()
+            if ($DockerUser) {
+                $userArguments = @('--user', $DockerUser)
+            }
+            elseif ($IsLinux) {
+                $userArguments = @('--user', "$(& id -u):$(& id -g)")
+            }
+
             $arguments = if ($CliArgument.Count -gt 0) { $CliArgument } else { @('--help') }
             $dockerArguments = @(
-                'run', '--rm',
+                'run', '--rm'
+            ) + $userArguments + @(
                 '--env', 'GITHUB_TOKEN',
                 '--env', 'SUBZERODEV_GITHUB_CACHE=/data/cache',
                 '--env', 'SUBZERODEV_GITHUB_OUTPUT=/data/output',
