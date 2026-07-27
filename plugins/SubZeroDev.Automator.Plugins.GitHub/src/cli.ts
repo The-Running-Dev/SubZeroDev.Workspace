@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -59,7 +60,20 @@ export function runCli(argv: readonly string[]): number {
   return 3;
 }
 
-const entryPoint = process.argv[1];
-if (entryPoint && import.meta.url === pathToFileURL(entryPoint).href) {
+export function isEntryPoint(moduleUrl: string, entryPoint: string | undefined): boolean {
+  if (!entryPoint) {
+    return false;
+  }
+
+  // npm installs the binary as a symlink in node_modules/.bin, and Node resolves
+  // import.meta.url to the real file, so the invoked path must be resolved too.
+  try {
+    return moduleUrl === pathToFileURL(realpathSync(entryPoint)).href;
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint(import.meta.url, process.argv[1])) {
   process.exitCode = runCli(process.argv.slice(2));
 }
