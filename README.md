@@ -52,6 +52,7 @@ Container setup changes the container environment. Mount `/root/.config` and `/w
 | [`setup/`](setup/) | Cross-platform workstation provisioning, MCP registration, and project scaffolding |
 | [`setup/docs/`](setup/docs/) | Getting-started guides, architecture, reference material, and setup specifications |
 | [`docs-template/`](docs-template/) | Pinned Docusaurus template submodule used to build the documentation site |
+| [`plugins/SubZeroDev.Automator.Plugins.GitHub/`](plugins/SubZeroDev.Automator.Plugins.GitHub/) | CLI-first GitHub integration plugin and normalized project model |
 | `LLMs.code-workspace` | VS Code workspace definition |
 
 ## Quick Start
