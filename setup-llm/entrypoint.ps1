@@ -23,7 +23,7 @@ switch ($Mode) {
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
     'setup' {
-        & pwsh -NoLogo -NoProfile -File /opt/llms/setup/scripts/setup.ps1 @RemainingArgument
+        & pwsh -NoLogo -NoProfile -File /opt/workspace/setup-llm/scripts/setup.ps1 @RemainingArgument
         
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }

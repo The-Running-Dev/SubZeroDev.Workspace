@@ -1,7 +1,7 @@
 # SubZeroDev.Automator.Plugins.GitHub — Next Work
 
 This is the working checklist for implementing
-[SubZeroDev.Automator.Plugins.GitHub](setup/docs/specifications/subzerodev-automator-plugins-github.md). Complete it
+[SubZeroDev.Automator.Plugins.GitHub](setup-llm/docs/specifications/subzerodev-automator-plugins-github.md). Complete it
 top to bottom, updating decisions and acceptance criteria as the project
 develops.
 

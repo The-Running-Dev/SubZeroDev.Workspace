@@ -76,14 +76,14 @@ The setup script installs and configures:
 
 ## Container Architecture
 
-`setup/Dockerfile` is a multi-stage build. The build stage installs PowerShell, synchronizes `setup/docs` into the pinned Docusaurus submodule, installs the locked frontend dependencies, and generates the static site. The runtime stage contains PowerShell, the setup source, nginx, and only the generated site output needed for documentation serving.
+`setup-llm/Dockerfile` is a multi-stage build. The build stage installs PowerShell, synchronizes `setup-llm/docs` into the pinned Docusaurus submodule, installs the locked frontend dependencies, and generates the static site. The runtime stage contains PowerShell, the setup source, nginx, and only the generated site output needed for documentation serving.
 
-`setup/entrypoint.ps1` is the PowerShell entry point and exposes three modes:
+`setup-llm/entrypoint.ps1` is the PowerShell entry point and exposes three modes:
 
 | Mode | Behavior |
 |------|----------|
 | `docs` | Default; serves the prebuilt site through nginx on port 8080 |
-| `setup` | Forwards remaining arguments to the cross-platform `setup/scripts/setup.ps1` dispatcher |
+| `setup` | Forwards remaining arguments to the cross-platform `setup-llm/scripts/setup.ps1` dispatcher |
 | `pwsh` | Starts PowerShell for direct inspection or script execution |
 
 Container setup is isolated from the host. `/root/.config` and `/workspace` are declared as persistence points. Docker-based MCP integrations require an explicit host socket mount, which grants the container control of the host Docker daemon.

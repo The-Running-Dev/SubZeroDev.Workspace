@@ -1,14 +1,14 @@
 # Roadmap
 
 A prioritized backlog for the LLM Workspace Toolkit, produced from a full read of
-`setup/`, `.github/`, `Dockerfile`, `container-entrypoint.ps1`, and `setup/docs/`.
+`setup-llm/`, `.github/`, `Dockerfile`, `container-entrypoint.ps1`, and `setup-llm/docs/`.
 
 Each item states the evidence, why it matters, and a proposed fix. Items are
 grouped by priority, not by area. Sizes are rough: **S** under an hour, **M** a
 half day, **L** a day or more.
 
 **How this was assessed:** every PowerShell script and workflow was read; relative
-links in `README.md` and `setup/docs/**` were resolved (all valid); and the two
+links in `README.md` and `setup-llm/docs/**` were resolved (all valid); and the two
 correctness bugs in P0 were reproduced by executing the module directly under
 `pwsh 7.6.3`, not inferred from reading.
 
@@ -20,16 +20,16 @@ Worth stating plainly, because the backlog below is all problems:
 
 - **The security posture is genuinely thought through.** Filesystem MCP is off by
   default and refuses to grant a filesystem root
-  (`setup/scripts/workstation/install-filesystem-mcp.ps1:20`). GitHub MCP defaults to
+  (`setup-llm/scripts/workstation/install-filesystem-mcp.ps1:20`). GitHub MCP defaults to
   `GITHUB_READ_ONLY=1` with an explicit toolset allow-list. No generic database MCP
   is installed. The compose file fails fast on a missing token via `${VAR:?}`.
 - **Platform dispatch is clean.** `setup.ps1` is 31 lines that detect the OS and
   forward `$PSBoundParameters` — the per-platform scripts stay small and readable.
 - **`-WhatIf` is honored throughout**, including the awkward cases where a preview
   cannot inspect a tool it deliberately declined to install
-  (`setup/scripts/workstation/install-graphify.ps1:15-20`).
+  (`setup-llm/scripts/workstation/install-graphify.ps1:15-20`).
 - **The documentation is unusually good** for a tooling repo, and the single-source
-  README → Docusaurus pipeline (`setup/scripts/setup-docs.ps1`) avoids the usual drift.
+  README → Docusaurus pipeline (`setup-llm/scripts/setup-docs.ps1`) avoids the usual drift.
 - **The workspace blueprint is honest** — it explicitly argues *against* starting
   with Neo4j, custom indexers, and overlapping memory products, and stages the
   rollout behind measurement.
@@ -41,7 +41,7 @@ Worth stating plainly, because the backlog below is all problems:
 ### 1. Build and test validation always reports success (S)
 
 `Test-ProjectBuildable` and `Test-ProjectTestable`
-(`setup/scripts/modules/ProjectSetup.psm1:767` and `:799`) run the command through
+(`setup-llm/scripts/modules/ProjectSetup.psm1:767` and `:799`) run the command through
 `Invoke-Expression` and `return $true` unless a *PowerShell* exception is thrown.
 A native command exiting non-zero does not throw when
 `$PSNativeCommandUseErrorActionPreference` is `$false` — which is the default on
@@ -64,7 +64,7 @@ so `Invoke-Expression` can be dropped entirely (see item 9).
 
 ### 2. `-AutoCommit` commits regardless of validation outcome (S)
 
-`setup/scripts/setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
+`setup-llm/scripts/setup-project.ps1:41-42` documents `-AutoCommit` as "Automatically create initial
 commit if validation succeeds", but the implementation at `:330` is an
 unconditional `if ($AutoCommit)`. `$buildSuccess` and `$testSuccess` are computed
 at `:298-323` and then never read.
@@ -77,7 +77,7 @@ change the docstring to match the behavior. Gating is the better default.
 
 ### 3. Generated Node.js starter does not build (M)
 
-`setup/scripts/starters/setup-starter-node.ps1` emits a mutually inconsistent
+`setup-llm/scripts/starters/setup-starter-node.ps1` emits a mutually inconsistent
 project:
 
 - `build: "tsc"` with `tsconfig.json` `rootDir: ./src` and `include: ["src/**/*"]`,
@@ -101,14 +101,14 @@ project and actually runs `install`/`build`/`test` (see item 4).
 
 ### 4. Python starter targets a deprecated toolchain (S)
 
-`setup/scripts/starters/setup-starter-python.ps1` generates `setup.py` alongside
-`pyproject.toml`, and the language table in `setup/scripts/setup-project.ps1:111` uses
+`setup-llm/scripts/starters/setup-starter-python.ps1` generates `setup.py` alongside
+`pyproject.toml`, and the language table in `setup-llm/scripts/setup-project.ps1:111` uses
 `python setup.py build` — deprecated since setuptools 58 and slated for removal.
 Dev dependencies are hard-pinned to mid-2023 (`pytest==7.4.0`, `black==23.7.0`,
 `pylint==2.17.5`).
 
 Notably, the workstation setup already installs Astral `uv`
-(`setup/scripts/workstation/install-graphify.ps1`), so the toolkit ships a modern
+(`setup-llm/scripts/workstation/install-graphify.ps1`), so the toolkit ships a modern
 Python toolchain and then scaffolds projects that ignore it.
 
 **Fix:** `pyproject.toml` only, `uv` for dependency management, `ruff` in place of
@@ -122,27 +122,27 @@ starter template.
 ### 5. No CI runs against the PowerShell scripts at all (M)
 
 `.github/workflows/docs-pages.yml` is the only workflow, and its `paths:` filter
-(`:7-18`, `:22-33`) covers `setup/docs/**`, `setup/scripts/setup-docs.ps1`,
-`setup/README.md`, the Dockerfile and the submodule — but **not** `setup/scripts/setup.ps1`,
-`setup/setup-*.ps1`, `setup/modules/**`, or `setup/scripts/**`.
+(`:7-18`, `:22-33`) covers `setup-llm/docs/**`, `setup-llm/scripts/setup-docs.ps1`,
+`setup-llm/README.md`, the Dockerfile and the submodule — but **not** `setup-llm/scripts/setup.ps1`,
+`setup-llm/setup-*.ps1`, `setup-llm/modules/**`, or `setup-llm/scripts/**`.
 
 So the ~2,400 lines of provisioning and scaffolding logic that are the actual
 product of this repo have zero automated verification. This is how items 1–4
 survived. It also means the published container silently goes stale: the
-`container` job copies `setup/` into the image, but a change to a setup script does
+`container` job copies `setup-llm/` into the image, but a change to a setup script does
 not match the path filter and therefore never triggers a rebuild.
 
 **Fix, in order:**
 
-1. Add `setup/**` (excluding `setup/docs/**`) to the container job's trigger paths,
+1. Add `setup-llm/**` (excluding `setup-llm/docs/**`) to the container job's trigger paths,
    or split the container into its own workflow with correct paths.
-2. Add a `scripts-ci.yml` workflow running **PSScriptAnalyzer** across `setup/`.
+2. Add a `scripts-ci.yml` workflow running **PSScriptAnalyzer** across `setup-llm/`.
    This is near-zero effort and would have caught several items below.
 3. Add **Pester** tests for the pure logic — `Test-DotEnvValueSet`,
    `Convert-ReadmeLinks`, `New-Gitignore`, the language command table, and the two
    validation functions from item 1. These need no network and no installs.
 4. Add a matrix smoke job (ubuntu + windows + macos) that runs
-   `./setup/scripts/setup.ps1 -Client Both -WhatIf` and asserts a clean exit.
+   `./setup-llm/scripts/setup.ps1 -Client Both -WhatIf` and asserts a clean exit.
 
 ### 6. No end-to-end scaffold test (M)
 
@@ -153,7 +153,7 @@ regressions.
 
 ### 7. No test for the docs sync (S)
 
-`setup/scripts/setup-docs.ps1` does destructive regex rewriting of the README
+`setup-llm/scripts/setup-docs.ps1` does destructive regex rewriting of the README
 (`Convert-ReadmeLinks`, `:66-83`) and deletes the template `docs/` tree
 (`:47`). It is entirely untested. `Convert-ReadmeLinks` also reads
 `$repositoryUrl` from the caller's scope rather than taking it as a parameter
@@ -162,7 +162,7 @@ under `Set-StrictMode -Version Latest` any reordering turns it into a runtime
 error.
 
 **Fix:** pass `$repositoryUrl` as a parameter, and add Pester cases for the link
-rewrite rules (relative doc link, `setup/` tree link, `.md` suffix stripping).
+rewrite rules (relative doc link, `setup-llm/` tree link, `.md` suffix stripping).
 
 ---
 
@@ -174,27 +174,27 @@ Nothing in the setup path is version-pinned:
 
 | Component | Location | Current |
 |---|---|---|
-| GitHub MCP server | `setup/docker/docker-compose.yml:3` | `:latest` |
-| claude-mem | `setup/scripts/workstation/install-claude-mem.ps1:18` | `@latest` |
-| Playwright MCP | `setup/scripts/workstation/install-playwright-mcp.ps1:13` | `@latest` |
-| Filesystem MCP | `setup/scripts/workstation/install-filesystem-mcp.ps1:28` | `npx -y`, unversioned |
-| Codex CLI / Claude Code | `setup/scripts/setup-macos.ps1:43-44`, `setup/scripts/setup-ubuntu.ps1:85-86` | unversioned npm global |
-| Codex CLI / Claude Code | `setup/scripts/setup-windows.ps1:31-32` | unversioned Winget package |
-| graphifyy | `setup/scripts/workstation/install-graphify.ps1:30` | unversioned `uv tool install` |
+| GitHub MCP server | `setup-llm/docker/docker-compose.yml:3` | `:latest` |
+| claude-mem | `setup-llm/scripts/workstation/install-claude-mem.ps1:18` | `@latest` |
+| Playwright MCP | `setup-llm/scripts/workstation/install-playwright-mcp.ps1:13` | `@latest` |
+| Filesystem MCP | `setup-llm/scripts/workstation/install-filesystem-mcp.ps1:28` | `npx -y`, unversioned |
+| Codex CLI / Claude Code | `setup-llm/scripts/setup-macos.ps1:43-44`, `setup-llm/scripts/setup-ubuntu.ps1:85-86` | unversioned npm global |
+| Codex CLI / Claude Code | `setup-llm/scripts/setup-windows.ps1:31-32` | unversioned Winget package |
+| graphifyy | `setup-llm/scripts/workstation/install-graphify.ps1:30` | unversioned `uv tool install` |
 
 A repo whose documentation argues for least-privilege tokens and deliberate
 security review of database servers should not silently execute whatever those
 six publishers pushed most recently. This is also why setup is not reproducible:
 two runs a week apart give different workstations.
 
-**Fix:** introduce a single `setup/config/versions.psd1` with pinned versions
+**Fix:** introduce a single `setup-llm/config/versions.psd1` with pinned versions
 (digest for the container image, exact versions for npm packages), consumed by all
 installers. Add a documented `-AllowLatest` switch for people who want the current
 behavior, and a renovate/dependabot config to bump the pins via PR.
 
 ### 9. `Invoke-Expression` on command strings (S)
 
-`setup/scripts/modules/ProjectSetup.psm1:787` and `:819` execute build/test commands via
+`setup-llm/scripts/modules/ProjectSetup.psm1:787` and `:819` execute build/test commands via
 `Invoke-Expression`. The strings come from a fixed table in `setup-project.ps1`, so
 this is not currently exploitable — but it is the reason exit codes are lost
 (item 1), and it makes any future user-supplied command a shell-injection vector.
@@ -204,7 +204,7 @@ and route through the existing `Invoke-NativeCommand`.
 
 ### 10. The `act` installer pipes a downloaded script to sudo without verification (S)
 
-`setup/scripts/setup-ubuntu.ps1:60-75` downloads `install.sh` from `master` on GitHub and
+`setup-llm/scripts/setup-ubuntu.ps1:60-75` downloads `install.sh` from `master` on GitHub and
 executes it with elevated privileges, with no checksum or signature check. Windows
 and macOS install `act` from Winget and Homebrew respectively, so Linux is the only
 platform taking this path.
@@ -214,7 +214,7 @@ and verify its published checksum before executing.
 
 ### 11. GitHub MCP container is unhardened (S)
 
-`setup/docker/docker-compose.yml` runs the MCP server — which holds a GitHub PAT in
+`setup-llm/docker/docker-compose.yml` runs the MCP server — which holds a GitHub PAT in
 its environment — with no `read_only`, `cap_drop`, `security_opt`, `pids_limit`, or
 memory limit, and on the default bridge network.
 
@@ -230,25 +230,25 @@ a plain environment variable.
 ### 12. `-Client` accepts different values in different scripts (S)
 
 Every workstation script uses `'Codex' | 'ClaudeCode' | 'Both'`.
-`setup/scripts/setup-project.ps1:69` alone uses `'Both' | 'Code' | 'Codex'`. Someone who
+`setup-llm/scripts/setup-project.ps1:69` alone uses `'Both' | 'Code' | 'Codex'`. Someone who
 learns `-Client ClaudeCode` from the README hits a validation error the first time
 they scaffold a project.
 
 **Fix:** standardize on `ClaudeCode`, and accept `Code` as a deprecated alias for one
 release.
 
-### 13. `setup/config/` is dead code (S)
+### 13. `setup-llm/config/` is dead code (S)
 
-`setup/config/setup-config.example.yaml` and `setup/config/setup-schema.json` describe
+`setup-llm/config/setup-config.example.yaml` and `setup-llm/config/setup-schema.json` describe
 a full declarative configuration system — languages, required files, validation
 checks, troubleshooting entries, MCP components. Nothing reads either file. The only
 reference anywhere is a file listing in
-`setup/docs/architecture/setup-flowcharts.md:508-509`.
+`setup-llm/docs/architecture/setup-flowcharts.md:508-509`.
 
 This is a fork in the road, not a cleanup:
 
 - **Implement it** — have `setup-project.ps1` and `setup.ps1` load the YAML so the
-  language table (`setup/scripts/setup-project.ps1:101-144`) and component list become
+  language table (`setup-llm/scripts/setup-project.ps1:101-144`) and component list become
   data rather than hardcoded hashtables. This is the more interesting option and
   would make adding C#/Rust/Java/Go starters a config change.
 - **Delete it** — if the declarative direction is abandoned, remove both files so
@@ -258,10 +258,10 @@ Pick one. Leaving it as-is is the worst option.
 
 ### 14. Four of six advertised languages have no starter (M)
 
-`setup/scripts/setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the
+`setup-llm/scripts/setup-project.ps1:65` accepts `csharp`, `rust`, `java`, and `go`, and the
 README lists them as "supported command profiles". Only `node` and `python` have
 starter scripts; the other four hit the warning path at
-`setup/scripts/modules/ProjectSetup.psm1:754-758` and produce a project with a README, a
+`setup-llm/scripts/modules/ProjectSetup.psm1:754-758` and produce a project with a README, a
 `.gitignore`, and nothing else.
 
 **Fix:** either write the four starters (the convention-based
@@ -319,7 +319,7 @@ and add `cookies.txt` to that repo's `.gitignore`.
 ### 19. A `verify` / doctor command (M)
 
 There is no way to answer "is my workstation actually set up correctly?" other than
-rerunning setup. A `setup/verify.ps1` that checks each component — CLI present and
+rerunning setup. A `setup-llm/verify.ps1` that checks each component — CLI present and
 on PATH, MCP server registered in each client, GitHub token valid and read-only,
 Docker engine reachable, Graphify installed — and prints a pass/fail table would be
 the single highest-value addition for day-to-day use.
@@ -330,19 +330,19 @@ It also gives CI something meaningful to assert after a container `setup` run.
 
 The blueprint's own Stage 4 exit criterion requires that each added component have
 "a named owner, update path, and **uninstall path**"
-(`setup/docs/architecture/workspace-blueprint.md`). No uninstall exists. Backing out
+(`setup-llm/docs/architecture/workspace-blueprint.md`). No uninstall exists. Backing out
 of claude-mem, Playwright MCP, or a database registration is currently a manual
 `claude mcp remove` / `npm uninstall -g` exercise the user has to reconstruct.
 
-**Fix:** `setup/uninstall.ps1 -Component claude-mem,playwright` with the same
+**Fix:** `setup-llm/uninstall.ps1 -Component claude-mem,playwright` with the same
 `-WhatIf` support as install.
 
 ### 21. Idempotency and re-run guarantees (S)
 
 Most installers check `Test-CommandAvailable` and skip, but
-`setup/scripts/workstation/install-github-mcp.ps1` deliberately removes and
+`setup-llm/scripts/workstation/install-github-mcp.ps1` deliberately removes and
 re-adds the registration each run (`:105-108`, `:115-118`), and
-`setup/scripts/workstation/install-claude-mem.ps1` runs `claude-mem install` and
+`setup-llm/scripts/workstation/install-claude-mem.ps1` runs `claude-mem install` and
 `start` unconditionally. There is no stated contract for what a second run does.
 
 **Fix:** document the intended behavior per component, and add a `-Force` switch for
@@ -354,7 +354,7 @@ Output is `Write-Host` with ANSI colors. A failed setup on someone else's machin
 produces nothing shareable.
 
 **Fix:** wrap runs in `Start-Transcript` to a timestamped file under
-`setup/logs/` (gitignored), and mention the log path in the failure message.
+`setup-llm/logs/` (gitignored), and mention the log path in the failure message.
 
 ### 23. Make the Graphify integration first-class (M)
 
@@ -365,7 +365,7 @@ context layers — but nothing in the toolkit uses it. Natural extensions:
   and reference `graphify-out/GRAPH_REPORT.md` from the generated `CLAUDE.md`.
 - Ship the post-commit auto-rebuild hook as an opt-in `-EnableGraphifyHook` switch.
 - Add `graphify-out/` to the generated `.gitignore` (`New-Gitignore`,
-  `setup/scripts/modules/ProjectSetup.psm1:87`).
+  `setup-llm/scripts/modules/ProjectSetup.psm1:87`).
 
 ### 24. Cross-platform CI for the container (S)
 
@@ -384,6 +384,6 @@ buildx platforms would let Apple Silicon and ARM servers run it natively.
 3. **Week 3 — fix the starters.** Items 3, 4, 14. Now covered by item 6's smoke test.
 4. **Week 4 — supply chain.** Items 8, 9, 10, 11. Pinning is easiest once CI can
    prove the pins still work.
-5. **Ongoing.** Decide item 13 (implement or delete `setup/config/`), then build
+5. **Ongoing.** Decide item 13 (implement or delete `setup-llm/config/`), then build
    items 19 and 20 — the verify and uninstall commands are what turn this from a
    collection of scripts into a maintainable toolkit.
