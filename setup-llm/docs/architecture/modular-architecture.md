@@ -48,7 +48,7 @@ Language Starters
 ## File Organization
 
 ```text
-setup/
+setup-llm/
 ├── scripts/
 │   ├── setup.ps1                   # OS-detecting entry point
 │   ├── setup-windows.ps1           # Winget prerequisites
@@ -152,7 +152,7 @@ Generates:
 ### Basic Project Creation
 
 ```powershell
-cd D:\Projects\LLMs\setup
+cd D:\Projects\SubZeroDev.Workspace\setup-llm
 
 .\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
@@ -296,7 +296,7 @@ You can now use setup-project.ps1 for Phase 2 and Phase 3 project creation.
 **Solution:**
 ```powershell
 # Ensure you're in the setup directory
-cd D:\Projects\LLMs\setup
+cd D:\Projects\SubZeroDev.Workspace\setup-llm
 
 # Check file exists
 Test-Path .\scripts\modules\Setup.psm1

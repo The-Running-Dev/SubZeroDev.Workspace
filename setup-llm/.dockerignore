@@ -3,6 +3,6 @@
 .vscode
 docs-template/.git
 docs-template/node_modules
-setup/docker/.env
+setup-llm/docker/.env
 **/.DS_Store
 **/*.log

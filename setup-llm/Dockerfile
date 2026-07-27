@@ -13,13 +13,13 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends /tmp/powershell.deb \
     && rm -rf /var/lib/apt/lists/* /tmp/powershell.deb
 
-WORKDIR /opt/llms
-COPY setup ./setup
+WORKDIR /opt/workspace
+COPY setup-llm ./setup-llm
 COPY README.md ./README.md
 COPY docs-template ./docs-template
 
 RUN corepack enable \
-    && pwsh -NoLogo -NoProfile -File ./setup/scripts/setup-docs.ps1 \
+    && pwsh -NoLogo -NoProfile -File ./setup-llm/scripts/setup-docs.ps1 \
     && cd docs-template \
     && HUSKY=0 pnpm install --frozen-lockfile \
     && HUSKY=0 NODE_ENV=production pnpm run build:prod
@@ -37,19 +37,19 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends /tmp/powershell.deb \
     && rm -rf /var/lib/apt/lists/* /tmp/powershell.deb /var/www/html/*
 
-WORKDIR /opt/llms
-COPY setup ./setup
+WORKDIR /opt/workspace
+COPY setup-llm ./setup-llm
 COPY README.md ./README.md
-COPY setup/entrypoint.ps1 ./entrypoint.ps1
+COPY setup-llm/entrypoint.ps1 ./entrypoint.ps1
 
 VOLUME ["/workspace", "/root/.config"]
 EXPOSE 8080
 
-ENTRYPOINT ["pwsh", "-NoLogo", "-NoProfile", "-File", "/opt/llms/entrypoint.ps1"]
+ENTRYPOINT ["pwsh", "-NoLogo", "-NoProfile", "-File", "/opt/workspace/entrypoint.ps1"]
 CMD ["docs"]
 
 FROM runtime-base AS runtime-prebuilt
 COPY docs-template/artifacts /var/www/html
 
 FROM runtime-base AS runtime
-COPY --from=docs-build /opt/llms/docs-template/artifacts /var/www/html
+COPY --from=docs-build /opt/workspace/docs-template/artifacts /var/www/html
