@@ -60,9 +60,8 @@ Container setup changes the container environment. Mount `/root/.config` and `/w
 The setup scripts support Windows, macOS, and Ubuntu/Debian. PowerShell automatically detects the current operating system and selects the appropriate package-installation flow.
 
 ```powershell
-cd setup-llm
-./setup.ps1 -Client Both -WhatIf
-./setup.ps1 -Client Both -SkipClaudeMem
+./setup-llm/scripts/setup.ps1 -Client Both -WhatIf
+./setup-llm/scripts/setup.ps1 -Client Both -SkipClaudeMem
 ```
 
 The preview command shows prerequisite actions without installing them. The second command performs workstation setup while omitting the optional third-party `claude-mem` integration.
