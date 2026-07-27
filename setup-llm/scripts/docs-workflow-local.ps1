@@ -1,6 +1,6 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$WorkflowPath = (Join-Path (Split-Path -Parent $PSScriptRoot) '.github/workflows/docs-pages.yml'),
+    [string]$WorkflowPath = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '.github/workflows/docs-pages.yml'),
     [string]$RunnerImage = 'catthehacker/ubuntu:act-latest',
     [switch]$ReuseRunnerImage
 )

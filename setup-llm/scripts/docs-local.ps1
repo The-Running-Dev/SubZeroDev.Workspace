@@ -1,7 +1,7 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$SourcePath = (Join-Path $PWD.Path 'docs'),
-    [string]$TemplatePath = (Join-Path $PWD.Path 'docs-template'),
+    [string]$SourcePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs'),
+    [string]$TemplatePath = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'docs-template'),
     [ValidateRange(1, 65535)][int]$Port = 3000,
     [string]$HostName = 'localhost',
     [switch]$NoOpen,
@@ -14,7 +14,13 @@ $modulePath = Join-Path $PSScriptRoot 'modules/Setup.psm1'
 Import-Module $modulePath -Force
 
 $resolvedTemplate = Resolve-OrCreatePath -Path $TemplatePath -PathKind Directory
-$resolvedSource = Resolve-OrCreatePath -Path $SourcePath -PathKind Directory
+
+# The source directory must already exist. Resolve-OrCreatePath would otherwise silently
+# create an empty one, which synchronizes over the published docs with nothing in them.
+$resolvedSource = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($SourcePath)
+if (-not (Test-Path -LiteralPath $resolvedSource -PathType Container)) {
+    throw "Documentation Source Directory is Missing: $resolvedSource"
+}
 $templatePackage = Join-Path $resolvedTemplate 'package.json'
 $templateModules = Join-Path $resolvedTemplate 'node_modules'
 $docsSetupScript = Join-Path $PSScriptRoot 'setup-docs.ps1'
