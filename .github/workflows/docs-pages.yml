@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - 'setup-llm/.dockerignore'
+      - '.dockerignore'
       - 'setup-llm/Dockerfile'
       - 'setup-llm/entrypoint.ps1'
       - 'docs-template'
@@ -20,7 +20,7 @@ on:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - 'setup-llm/.dockerignore'
+      - '.dockerignore'
       - 'setup-llm/Dockerfile'
       - 'setup-llm/entrypoint.ps1'
       - 'docs-template'
