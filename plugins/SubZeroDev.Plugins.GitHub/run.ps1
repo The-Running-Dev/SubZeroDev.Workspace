@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-Validates or runs SubZeroDev.Automator.Plugins.GitHub locally or in Docker.
+Validates or runs the SubZeroDev GitHub plugin locally or in Docker.
 
 .EXAMPLE
 ./run.ps1 -Mode Test
@@ -27,7 +27,7 @@ param(
 
     [switch]$SkipInstall,
 
-    [string]$ImageName = 'subzerodev-automator-plugins-github:local',
+    [string]$ImageName = 'subzerodev-github:local',
 
     [string]$DockerUser = '',
 

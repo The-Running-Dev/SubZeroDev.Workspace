@@ -1,4 +1,4 @@
-# ADR-0002: SubZeroDev.Automator.Plugins.GitHub Phase One Boundaries
+# ADR-002: GitHub Plugin Phase One Boundaries
 
 **Status:** Accepted
 **Date:** 2026-07-28

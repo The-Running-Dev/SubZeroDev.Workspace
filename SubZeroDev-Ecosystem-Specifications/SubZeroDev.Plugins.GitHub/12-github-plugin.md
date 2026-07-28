@@ -1,16 +1,25 @@
 # SubZeroDev GitHub Plugin
 
-| Field     | Value                                  |
-| --------- | -------------------------------------- |
-| Version   | 2.0                                    |
-| Status    | Phase One — implementation started     |
-| Plugin ID | `subzerodev.github`                    |
-| CLI       | `subzerodev-github`, alias `sz-github` |
-| Contract  | `SubZeroDev.PluginContract` 1.0        |
-| Decisions | `adr/ADR-001`, `adr/ADR-002`           |
+| Field      | Value                                  |
+| ---------- | -------------------------------------- |
+| Version    | 2.0                                    |
+| Status     | Phase One — implementation started     |
+| Plugin ID  | `subzerodev.github`                    |
+| CLI        | `subzerodev-github`, alias `sz-github` |
+| Contract   | `SubZeroDev.PluginContract` 1.0        |
+| Package    | `@subzerodev/plugin-github`            |
+| Code       | `plugins/SubZeroDev.Plugins.GitHub`    |
+| Build plan | `BUILD-PLAN.md`                        |
+| Decisions  | `adr/ADR-001`, `adr/ADR-002`           |
 
 Merged from the two specifications that previously described this plugin: version 1.1 under
-`setup-llm/docs/` and the ecosystem draft. Both are retired.
+`setup-llm/docs/` and the ecosystem draft. Both are retired, as are the plugin's own
+`IMPLEMENTATION_PLAN.md` and the root `TODO-next.md` — their milestone sequence and completion state
+are now in `BUILD-PLAN.md`.
+
+**The plugin does not require the Automator.** It runs standalone from the CLI or its container, per
+contract ADR-002. It was originally named `SubZeroDev.Automator.Plugins.GitHub`, which implied
+otherwise; that name predated the architecture and is corrected above.
 
 **This document contains only what is specific to GitHub.** Everything generic — exit codes, secret
 handling, output channels, serialization, determinism, configuration precedence, logging, the

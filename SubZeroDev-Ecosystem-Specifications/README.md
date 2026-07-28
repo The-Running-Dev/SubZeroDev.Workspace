@@ -89,17 +89,20 @@ enforce the declared capability model — but it is not the definition of a plug
 
 Recorded here so the documents are read in light of them:
 
-| Decision           | Choice                                                                   |
-| ------------------ | ------------------------------------------------------------------------ |
-| Contract home      | Its own repository, versioned and tagged independently                   |
-| Platform           | Repository exists; specifications split out for manual copying           |
-| Build order        | GitHub plugin → second plugin → Automator MVP                            |
-| CLI naming         | `subzerodev-<name>` canonical, `sz-<name>` alias                         |
-| Repository layout  | Platform, Automator, contract, and one repository per substantial plugin |
-| Platform           | Minimal Platform alongside Automator — six packages, rest deferred       |
-| Second plugin      | Documentation plugin                                                     |
-| Local process host | Out of the Automator MVP                                                 |
-| GitHub plugin      | Moves to its own repository soon; preparation only for now               |
+| Decision            | Choice                                                                  |
+| ------------------- | ----------------------------------------------------------------------- |
+| Contract home       | Its own repository, versioned and tagged independently                  |
+| Contract precedence | The contract outranks plugin specifications                             |
+| Platform            | Minimal — six packages alongside Automator, the rest deferred           |
+| Build order         | GitHub plugin → Backlog plugin → Automator MVP                          |
+| Second plugin       | Backlog — Python, writes externally, needs a direct MCP surface         |
+| Local process host  | Out of the Automator MVP                                                |
+| CLI naming          | `subzerodev-<name>` canonical, `sz-<name>` alias                        |
+| Repository layout   | Platform, Automator, contract, WorkItems, and one repository per plugin |
+| MCP                 | A transport, not a runtime; tools projected from the manifest           |
+| Signing             | Sigstore cosign, keyless; manifest published as a signed attestation    |
+| Secrets             | Environment only — never argv, never config, never tool arguments       |
+| GitHub plugin       | Decoupled from Automator; moves to its own repository soon              |
 
 ## Status of this set
 

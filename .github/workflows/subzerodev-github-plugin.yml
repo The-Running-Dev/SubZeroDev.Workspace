@@ -1,25 +1,25 @@
-name: SubZeroDev Automator GitHub Plugin
+name: SubZeroDev GitHub Plugin
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/subzerodev-automator-github.yml'
-      - 'plugins/SubZeroDev.Automator.Plugins.GitHub/**'
+      - '.github/workflows/subzerodev-github-plugin.yml'
+      - 'plugins/SubZeroDev.Plugins.GitHub/**'
   pull_request:
     branches:
       - main
     paths:
-      - '.github/workflows/subzerodev-automator-github.yml'
-      - 'plugins/SubZeroDev.Automator.Plugins.GitHub/**'
+      - '.github/workflows/subzerodev-github-plugin.yml'
+      - 'plugins/SubZeroDev.Plugins.GitHub/**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: subzerodev-automator-github-${{ github.ref }}
+  group: subzerodev-github-plugin-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
         # bash on the Windows runner too, so the smoke tests below are one
         # script rather than one per platform.
         shell: bash
-        working-directory: plugins/SubZeroDev.Automator.Plugins.GitHub
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -48,7 +48,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: plugins/SubZeroDev.Automator.Plugins.GitHub/package-lock.json
+          cache-dependency-path: plugins/SubZeroDev.Plugins.GitHub/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -81,6 +81,6 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v7
         with:
-          context: plugins/SubZeroDev.Automator.Plugins.GitHub
+          context: plugins/SubZeroDev.Plugins.GitHub
           push: false
-          tags: subzerodev-automator-plugins-github:test
+          tags: subzerodev-github:test
