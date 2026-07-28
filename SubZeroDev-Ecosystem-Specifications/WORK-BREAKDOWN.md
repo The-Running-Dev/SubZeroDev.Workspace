@@ -104,10 +104,22 @@ It tests the contract, not the copy.
 | W2.3 | Wire conformance into plugin CI as a required check                            | S    | W2.1       |
 | W2.4 | Minimal Platform: Abstractions, Core, Hosting                                  | L    | —          |
 | W2.5 | Minimal Platform: Persistence, Observability, Testing                          | L    | W2.4       |
+| W2.6 | Extract the shared GitHub client from the GitHub plugin                        | M    | W1.5       |
+| W2.7 | Repository plugin: plan/apply, inference, rulesets                             | M    | W2.6       |
 
 **W2.2 matters more than it looks.** The secret-leaking and failing fixtures are how you prove the
 suite detects problems rather than merely passing everything you point it at. A conformance suite
 that has never failed is not evidence.
+
+**W2.6 is the extraction guard being satisfied, not bypassed.** The rule is that a capability becomes
+a shared component when a _second_ consumer needs it. The GitHub client now has four candidates — the
+GitHub plugin, the Repository plugin, the Release plugin, and the Backlog plugin — so the condition is
+met several times over. The language boundary limits what sharing can mean: the three Node consumers
+share a package, and Backlog keeps its own Python path. That the answer differs by language is itself
+the argument for the contract being a process boundary rather than a library.
+
+**W2.7 cannot provision its own repository.** The first repositories are created by hand; the plugin
+exists for the ones after, and for reconciling drift in all of them.
 
 **W2.4 and W2.5 run in parallel with the conformance track**, per roadmap Phase 2. These six packages
 are the ones genuinely hard to retrofit — hosting shape, transaction boundaries, observability
