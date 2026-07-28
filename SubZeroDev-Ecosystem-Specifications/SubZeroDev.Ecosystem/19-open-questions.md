@@ -5,89 +5,92 @@ and nobody reopens them by accident.
 
 ## Open
 
-### Plugin contract
+Four questions remain, and none is an engineering call left undone.
 
-1. What signing mechanism is planned? This blocks two of the four trust levels — "signed third-party"
-   and "untrusted" are currently unimplementable, so the contract exposes only first-party and
-   development-local. Needs an ADR covering mechanism, trust root, key distribution, verification
-   point, revocation, and offline behaviour.
-2. Does every plugin need a CLI, or may a plugin be remote-API-only?
-3. How are runtime-specific options represented without leaking host detail into the manifest?
-4. May one manifest declare multiple runtimes for the same command, and if so how does the host choose
-   deterministically?
-5. Should JSON output be implied when stdout is not a TTY, or always explicit? Implicit is friendlier
-   to adapters; explicit is harder to get wrong, and a wrong guess silently corrupts output.
+### Commercial — for the product owner
 
-### Automator
+1. **Which billing provider first — Stripe or Paddle?** Paddle acts as merchant of record and handles
+   sales tax; Stripe gives more control and lower fees but leaves tax compliance to you. Deferrable
+   behind the abstraction, but entitlement modelling follows from it.
+2. **Which license model?** Per-seat, per-node, and feature-tiered imply different enforcement points,
+   and self-hosted licensing must work offline.
+3. **Is `SubZeroDev.Platform` the final root name?** Cheap to change now, expensive after packages
+   publish.
 
-1. Does the control plane execute plugins directly, or always dispatch to an agent? This changes where
-   capability enforcement lives.
-2. What are the default network and filesystem restrictions for a first-party plugin that declares
-   nothing?
-3. Is execution event history append-only forever, or compacted after a retention window?
-4. What are the default lease duration and heartbeat interval for orphan detection?
-5. Are plugins installed globally, per project, or per tenant?
-6. What is the first remote-agent transport?
-7. Does quarantining a plugin version cancel executions already running on it, or only prevent new
-   ones?
+### Owned outside this workspace
 
-### Platform
+4. The Docker plugin's builder — rootless BuildKit, Buildah, or Kaniko — and whether
+   ContainerPSGenerator becomes manifest-driven before or after its inference path.
 
-1. Is `SubZeroDev.Platform` the final root name?
-2. Should identity be based on ASP.NET Core Identity initially?
-3. Which billing provider first — Stripe or Paddle?
-4. Which license model is expected?
-5. Is there a default OTLP collector in self-hosted deployments, or is exporting opt-in?
-
-### Testing and release
-
-1. Is there a coverage threshold, and is it enforced or only reported?
-2. Does the conformance suite gate publication, or only report?
-3. Does `npm audit`, or its equivalent per ecosystem, block a release?
-
-### Plugins
-
-1. **Docker plugin:** which builder — rootless BuildKit, Buildah, or Kaniko? This decides whether
-   Docker socket access is ever granted at all, and is the most consequential open question in the
-   tooling set. _Owned outside this workspace._
-2. **ContainerPSGenerator:** manifest-driven generation first, or keep `--help` inference primary?
-   _Owned outside this workspace._
-3. **Build plugin:** is `package` its job, or purely the package plugin's? Both currently claim it.
-4. **Requirements Compiler:** which AI provider is first, and should publishing require human
-   approval beyond dry-run-by-default?
-5. **GitHub plugin:** should commit activity be grouped by week, month, or year?
+Everything else that was open is now decided and recorded below, or in the document that owns it.
 
 ## Resolved
 
-| Question                                                      | Resolution                                                                            |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Where does the plugin contract live?                          | Its own repository, versioned and tagged independently                                |
-| How does Platform come into existence?                        | Minimal Platform alongside Automator — six packages, rest deferred                    |
-| Which packages belong in the near-term Platform?              | Abstractions, Core, Hosting, Persistence, Observability, Testing                      |
-| Is multi-tenancy required from the first schema?              | Carry the tenant column from the start; defer the feature to Phase 8                  |
-| Repository layout                                             | Platform, Automator, contract, and one repository per substantial plugin              |
-| Are specifications copied between repositories?               | **No.** One home, referenced by tag                                                   |
-| Build order                                                   | GitHub → Documentation plugin → Automator MVP                                         |
-| Which plugin is second?                                       | Documentation — the image exists, so it tests the contract cheaply                    |
-| Is local execution the initial product?                       | Yes; Docker host only, local process host deferred to Phase 6                         |
-| Is the local process host in the MVP?                         | No — it cannot enforce declared capabilities                                          |
-| Manifest serialization                                        | YAML authoring, canonical JSON for validation and signing                             |
-| Is JSON Schema the canonical input/output definition?         | Yes — schemas are normative, generated types are not                                  |
-| Are multiple runtime implementations allowed in one manifest? | Yes; deterministic selection is still open                                            |
-| Version compatibility policy                                  | Same major accepted, higher major refused; unknown capability and secret keys refused |
-| Exit codes                                                    | One table, in the contract only                                                       |
-| Execution states                                              | Six, not thirteen                                                                     |
-| Workflow event naming                                         | Dotted `<Product>.<Aggregate>.<PastTenseVerb>`, catalogued once                       |
-| Artifact identity on re-run                                   | Content-addressed blob shared; registration record per execution                      |
-| Orphaned executions                                           | Lease and heartbeat; terminal state; never auto-retried                               |
-| CLI naming                                                    | `subzerodev-<name>` canonical, `sz-<name>` alias                                      |
-| Introspection command                                         | `manifest`, not `describe` or `capabilities`                                          |
-| CLI output mode                                               | `--output-format`, with `--json` as the short form                                    |
-| Where do generic decisions live?                              | The contract outranks plugin specifications                                           |
-| GitHub: owned repositories only in Phase One?                 | Yes                                                                                   |
-| GitHub: forks, archived, organization, contributed            | Forks excluded by default; archived included; organization and contributed deferred   |
-| GitHub: collection profile default                            | `standard`                                                                            |
-| GitHub: consolidated or per-project output?                   | Consolidated only                                                                     |
-| GitHub: where do portfolio overrides live?                    | Separate file, keyed on the immutable repository ID                                   |
-| GitHub: retain raw API responses?                             | Optional, off by default, excluded from determinism                                   |
-| GitHub: packages and releases capability flags                | Dropped — GitHub exposes neither                                                      |
+| Question                                                      | Resolution                                                                                                        |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Where does the plugin contract live?                          | Its own repository, versioned and tagged independently                                                            |
+| How does Platform come into existence?                        | Minimal Platform alongside Automator — six packages, rest deferred                                                |
+| Which packages belong in the near-term Platform?              | Abstractions, Core, Hosting, Persistence, Observability, Testing                                                  |
+| Is multi-tenancy required from the first schema?              | Carry the tenant column from the start; defer the feature to Phase 8                                              |
+| Repository layout                                             | Platform, Automator, contract, and one repository per substantial plugin                                          |
+| Are specifications copied between repositories?               | **No.** One home, referenced by tag                                                                               |
+| Build order                                                   | GitHub → Documentation plugin → Automator MVP                                                                     |
+| Which plugin is second?                                       | Documentation — the image exists, so it tests the contract cheaply                                                |
+| Is local execution the initial product?                       | Yes; Docker host only, local process host deferred to Phase 6                                                     |
+| Is the local process host in the MVP?                         | No — it cannot enforce declared capabilities                                                                      |
+| Manifest serialization                                        | YAML authoring, canonical JSON for validation and signing                                                         |
+| Is JSON Schema the canonical input/output definition?         | Yes — schemas are normative, generated types are not                                                              |
+| Are multiple runtime implementations allowed in one manifest? | Yes; deterministic selection is still open                                                                        |
+| Version compatibility policy                                  | Same major accepted, higher major refused; unknown capability and secret keys refused                             |
+| Exit codes                                                    | One table, in the contract only                                                                                   |
+| Execution states                                              | Six, not thirteen                                                                                                 |
+| Workflow event naming                                         | Dotted `<Product>.<Aggregate>.<PastTenseVerb>`, catalogued once                                                   |
+| Artifact identity on re-run                                   | Content-addressed blob shared; registration record per execution                                                  |
+| Orphaned executions                                           | Lease and heartbeat; terminal state; never auto-retried                                                           |
+| CLI naming                                                    | `subzerodev-<name>` canonical, `sz-<name>` alias                                                                  |
+| Introspection command                                         | `manifest`, not `describe` or `capabilities`                                                                      |
+| CLI output mode                                               | `--output-format`, with `--json` as the short form                                                                |
+| Where do generic decisions live?                              | The contract outranks plugin specifications                                                                       |
+| GitHub: owned repositories only in Phase One?                 | Yes                                                                                                               |
+| GitHub: forks, archived, organization, contributed            | Forks excluded by default; archived included; organization and contributed deferred                               |
+| GitHub: collection profile default                            | `standard`                                                                                                        |
+| GitHub: consolidated or per-project output?                   | Consolidated only                                                                                                 |
+| GitHub: where do portfolio overrides live?                    | Separate file, keyed on the immutable repository ID                                                               |
+| GitHub: retain raw API responses?                             | Optional, off by default, excluded from determinism                                                               |
+| GitHub: packages and releases capability flags                | Dropped — GitHub exposes neither                                                                                  |
+| Plugin signing and trust root                                 | Sigstore cosign, keyless by default; pinned workflow identity for first-party, operator allowlist for third-party |
+| Manifest available before execution                           | Published as a signed OCI attestation, so capabilities are read without running the container                     |
+| Revocation                                                    | Operator-driven: digest quarantine, revocation list, allowlist removal. Not cryptographic                         |
+| Default capabilities when a plugin declares nothing           | Deny everything, including for first-party                                                                        |
+| Capability review                                             | Automatic for first-party; human approval on install for everything else                                          |
+| Control plane or agent execution                              | Local in the MVP; always via an agent once agents exist                                                           |
+| Event history retention                                       | Append-only for 90 days, then compacted to terminal summaries                                                     |
+| Lease and heartbeat                                           | 30-second heartbeat, 120-second lease                                                                             |
+| Orphaned container on reconnect                               | Reaped if exited, reconciled if still running                                                                     |
+| Quarantine semantics                                          | Prevents new executions; does not cancel running ones                                                             |
+| Event replay                                                  | Deferred until the event schema is stable across a release                                                        |
+| Log caps                                                      | 100 MB per execution, 1 GB per workflow run                                                                       |
+| Automator client surface                                      | PowerShell first; separate CLI with remote agents                                                                 |
+| Generated wrappers and modules                                | Produced at install time; generated code is read-only, extensions live alongside                                  |
+| Notification preferences                                      | Per tenant and per user, user overrides tenant                                                                    |
+| Transport after in-process                                    | Not chosen now; the outbox is transport-agnostic by design                                                        |
+| Trace sampling                                                | Executions always sampled; HTTP ratio-sampled at 10%                                                              |
+| Telemetry export                                              | Opt-in; console and file by default                                                                               |
+| Coverage                                                      | Reported, not enforced, except the contract repository at 90%                                                     |
+| End-to-end targets                                            | Recorded fixtures in CI plus a controlled fixture account on a schedule                                           |
+| Contract-test corpus                                          | Owned and published by the contract repository, consumed by both sides                                            |
+| Documentation site                                            | Architecture repository publishes and owns its pipeline                                                           |
+| Plugin template home                                          | The contract repository, not the GitHub plugin                                                                    |
+| Does every plugin need a CLI?                                 | Yes, unless remote-API-only, which must still serve a manifest                                                    |
+| Multiple runtimes per command                                 | Allowed; resolved by explicit request, then policy, then manifest order                                           |
+| JSON output implied on non-TTY?                               | No — always explicit                                                                                              |
+| Conformance and publication                                   | Conformance gates publication; no self-certified exemptions                                                       |
+| Build plugin `package` command                                | Removed; packaging belongs to the package plugin                                                                  |
+| Build toolchains                                              | Present in the image, never installed at run time                                                                 |
+| Artifact signing location                                     | Package plugin at pack time; the release plugin only attaches                                                     |
+| `push` and `publish` overwrite behaviour                      | Refuse by default; explicit flag required                                                                         |
+| Release approval                                              | A workflow concern, not a plugin one                                                                              |
+| Forge coverage                                                | One release plugin, provider boundary inside                                                                      |
+| Commit activity granularity                                   | Weekly, matching GitHub's own buckets                                                                             |
+| AI summaries                                                  | Stored with provenance, never regenerated on read                                                                 |
+| Screenshots and badges                                        | External, referenced by URL                                                                                       |

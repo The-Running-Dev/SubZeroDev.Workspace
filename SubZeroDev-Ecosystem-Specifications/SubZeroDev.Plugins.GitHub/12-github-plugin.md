@@ -294,10 +294,21 @@ API. These belong to the Automator or to future phases.
 - **Consumers**: portfolio site, resume generator, documentation, dashboards, AI analysis, project
   search, MCP server, REST API
 
-## Open questions
+## Decisions on previously open points
 
-1. Should commit activity be grouped by week, month, or year? Phase One collects no activity series.
-2. Should AI-generated summaries be stored per project or generated on demand?
-3. Should screenshots, logos, and badges be managed here or remain external?
+None of these blocks Phase One — portfolio overrides give all three somewhere to land without a schema
+change — but the answers are settled so nobody relitigates them later.
 
-None blocks Phase One: portfolio overrides give all three somewhere to land without a schema change.
+**Commit activity, when it lands, is weekly.** GitHub's own statistics endpoint returns weekly
+buckets, so weekly is the finest granularity available without reconstructing it from commit
+timestamps. Aggregating weeks into months or years afterwards is lossless; going the other way is
+impossible.
+
+**AI-generated summaries are stored in portfolio overrides with their provenance** — model, prompt
+version, source digest, timestamp — not regenerated on read. Regenerating means output changes without
+input changing, which contradicts the determinism the whole plugin is built around. Stored, a summary
+is data; regenerated, it is a moving target.
+
+**Screenshots, logos, and badges stay external**, referenced by URL from portfolio overrides. Binary
+asset management is a different problem with its own storage, sizing, and retention concerns, and
+folding it in would turn a metadata collector into an asset pipeline.

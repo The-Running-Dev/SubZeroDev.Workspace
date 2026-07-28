@@ -84,23 +84,22 @@ is the worst of both.
 
 ## Trust model
 
-The original document defined four trust levels. Two of them cannot currently be established,
-because there is no trust root and no signing mechanism.
+All four levels are establishable. The mechanism is `SubZeroDev.PluginContract/adr/ADR-004`; this
+document covers what each level is permitted to do.
 
-| Level              | Establishable today                                          | Status             |
-| ------------------ | ------------------------------------------------------------ | ------------------ |
-| First-party        | Yes — published by this organization, pinned by digest       | Supported          |
-| Development-local  | Yes — an explicit local path or image the operator chose     | Supported          |
-| Signed third-party | **No** — requires signing, a trust root, and verification    | Blocked, see below |
-| Untrusted          | **No** — meaningless until the above exists to contrast with | Blocked            |
+| Level              | Established by                                      | Permitted                                                               |
+| ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
+| First-party        | Signature from the pinned release-workflow identity | Any host; declared capabilities granted subject to policy               |
+| Signed third-party | Signature matching the operator's allowlist         | `enforced` hosts only; capabilities require review on install           |
+| Untrusted          | Unsigned or unrecognized identity                   | `enforced` hosts only; no secrets; no network unless explicitly granted |
+| Development-local  | An image or path the operator named                 | Any host, but every execution records that verification was skipped     |
 
-Until signing exists, the contract should expose only the two levels that can be verified. Shipping
-a four-level taxonomy invites code that branches on levels it cannot substantiate, and invites
-operators to believe a "signed third-party" label means something.
+Verification happens at install, by digest equality at run, and again whenever policy changes —
+because an allowlist can shrink.
 
-Establishing the missing half needs an ADR covering: signing mechanism, trust root and key
-distribution, verification point, revocation, and what happens when verification is unavailable
-offline.
+Revocation is operator-driven: digest quarantine, a revocation list, or allowlist removal. None
+reaches a plugin already running; quarantine prevents new executions and stopping current ones is a
+separate explicit action.
 
 ## Secret handling
 
@@ -141,12 +140,20 @@ Actions that must be audited: plugin installation, trust-level change, policy ov
 creation, rotation and access, execution against a host with enforcement level `none`, and any MCP
 exposure change.
 
-## Open questions
+## Decisions on previously open points
 
-1. What is the trust root, and what signs a third-party plugin?
-2. What are the default network and filesystem restrictions for a first-party plugin that declares
-   nothing?
-3. Does the control plane execute plugins directly, or always dispatch to an agent? This changes
-   where enforcement lives.
-4. How are capability permission requests reviewed — automatically by policy, or by a human on
-   install?
+**Trust root.** Settled in `ADR-004`: a pinned OIDC workflow identity for first-party, an
+operator-configured allowlist for third-party. No global registry, no implicit trust.
+
+**Defaults for a plugin that declares nothing.** Deny everything: no network, no filesystem beyond
+its own cache and output, no secrets. This applies to first-party plugins too. Making first-party an
+exception would make declaration optional in practice, and the declaration is the whole mechanism.
+
+**Control plane or agent?** In the MVP the control plane executes locally, because no agent exists
+yet. From the phase that introduces agents, **everything dispatches to an agent**, including a
+co-located one. Two execution paths would put enforcement in two places, and the second one is always
+the one that drifts.
+
+**Capability review.** Automatic by policy for first-party. Human approval on install for signed
+third-party and untrusted plugins, showing the requested capabilities. Policy can check whether a
+capability is permitted; it cannot judge whether a plugin has any business wanting Docker access.

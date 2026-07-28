@@ -71,8 +71,12 @@ Automator already has and none of which the plugin can do as well.
 The one exception worth naming is a plugin that uses a **library** shared with another plugin. That
 is code reuse, not composition, and it does not cross the process boundary.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is `repository.inspect` a separate plugin or part of the build plugin's `detect`?
-2. Do build agents differ from generic execution agents, or is "build agent" just an agent with build
-   plugins cached?
+**`repository.inspect` is the build plugin's `detect`.** A separate plugin whose only job is to look
+at a repository and report what it is would duplicate the adapter detection the build plugin needs
+anyway, and the two would drift on what counts as a Node project.
+
+**A build agent is a generic agent with build plugins cached** and appropriate labels. A distinct
+agent type would mean a second scheduling path, a second health model, and a second set of selection
+rules, for no capability the label does not already express.

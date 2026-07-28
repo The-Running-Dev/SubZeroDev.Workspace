@@ -39,6 +39,17 @@ Asserts: exit 0; stdout is exactly one JSON document; it validates against
 This is the check most likely to fail first, because loading configuration in a shared startup path
 breaks it and that is the natural way to write a CLI.
 
+### C1b — Attested manifest agrees with the runtime manifest
+
+Where the image carries a signed manifest attestation, verify the signature and assert the attested
+manifest is byte-identical to what `manifest` prints.
+
+A plugin that attests one set of capabilities and reports another at runtime is rejected. This is the
+check that makes reading capabilities before execution trustworthy — without it, the attestation is
+a claim rather than a guarantee.
+
+Skipped for local-command targets and for images with no attestation, and reported as skipped.
+
 ### C2 — Universal commands
 
 `--help` exits 0 with non-empty stdout. `--version` exits 0 and prints a semantic version matching
@@ -144,7 +155,13 @@ suite.
 Adding a check is a minor version bump and may fail plugins that previously passed — which is
 correct, and why plugins pin the contract version they claim.
 
-## Open questions
+## Decisions on previously open points
 
-1. Does the suite gate publication, or only report?
-2. Should a plugin be allowed to declare a check inapplicable, and if so who reviews that claim?
+**Conformance gates publication.** A plugin that fails and publishes anyway makes the contract
+advisory, and an advisory contract is one every plugin diverges from in its own direction. Failing
+conformance blocks the release job.
+
+**A plugin cannot declare a check inapplicable.** Checks are skipped only as a consequence of what the
+manifest already declares — a plugin with no container runtime skips the container-hygiene checks
+because it has no container, not because it asked to. A free-form opt-out is self-certification, and
+a suite that accepts self-certification is not testing anything.

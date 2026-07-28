@@ -95,9 +95,14 @@ requiring an explicit flag. The Requirements Compiler's publishing commands are 
 Plugins should be able to emit completion scripts for PowerShell, Bash, Zsh, and Fish. This is
 optional and not conformance-tested.
 
-## Open questions
+## Decisions on previously open points
 
-1. Should `--output-format json` be implied when stdout is not a TTY? Implicit is friendlier to
-   adapters; explicit is harder to get wrong, and a wrong guess silently corrupts output.
-2. Is a plugin permitted to have no CLI at all — a remote-API-only plugin — and if so, what replaces
-   these conventions for it?
+**JSON is never implied. It is always explicit.** Inferring from a non-TTY stdout is friendlier right
+up until it is wrong — a plugin run through a pipe in a shell script would silently switch format,
+and the failure surfaces as a parse error far from its cause. One flag is a small price for a mode
+that never changes underneath anyone.
+
+**A plugin may omit a CLI only if it is remote-API-only.** Any plugin with a container or process
+runtime has one, because the CLI is the normative surface. A remote-API-only plugin must serve an
+equivalent manifest endpoint and honour the same envelope and status semantics; what it is exempt
+from is the argument syntax, not the contract.

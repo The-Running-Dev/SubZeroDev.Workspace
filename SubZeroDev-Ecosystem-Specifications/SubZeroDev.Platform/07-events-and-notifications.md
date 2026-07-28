@@ -144,10 +144,18 @@ fail a sync.
 Delivery is retried with backoff, and a permanently failed notification is recorded and surfaced in
 health rather than retried forever.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is the execution event history append-only and permanently retained, or compacted after a
-   retention window?
-2. Which transport follows in-process — and does that choice need to be made before the outbox
-   ships, or can it stay behind the abstraction?
-3. Do notification preferences live per user, per tenant, or both?
+**Retention.** Append-only within a 90-day window, then compacted to terminal-state summaries. Stated
+once, in `SubZeroDev.Automator/07-execution-events-and-artifacts.md`, since Automator owns the
+execution history that dominates the volume.
+
+**The transport after in-process need not be chosen now.** The outbox is transport-agnostic by
+design — that is most of its value. When the choice arrives, prefer PostgreSQL `LISTEN`/`NOTIFY` or a
+durable queue over a broker: the deployment targets are a homelab and a single server, and a broker
+adds an operational component heavier than the problem it solves at that scale.
+
+**Notification preferences are per tenant and per user, with user overriding tenant.** The tenant sets
+a floor — which categories are on at all — and a user tunes within it. One level alone fails
+predictably: tenant-only cannot silence an individual, user-only cannot enforce an organizational
+policy.

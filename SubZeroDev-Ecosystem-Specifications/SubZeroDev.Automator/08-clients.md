@@ -94,7 +94,12 @@ POSIX options, `--output-format`, stdout for machine output, stderr for logs, no
 Sharing one convention set means a script author learns it once, and it is why those conventions live
 in the contract repository rather than here.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is the Automator CLI a separate binary or a PowerShell-only client in Phase One?
-2. Do generated wrappers ship with the plugin, or are they generated on demand at install time?
+**PowerShell only, initially.** PowerShell 7 is cross-platform and already a first-class client, so a
+separate CLI binary duplicates surface before there is demand for it. A cross-platform CLI arrives
+with remote agents, when scripting from a machine without PowerShell becomes a real case.
+
+**Wrappers are generated at install time**, not shipped with the plugin. Shipping them couples every
+plugin release to a generator version and leaves stale wrappers in circulation; generating on install
+means one generator version per Automator installation, and regeneration is a local operation.

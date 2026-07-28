@@ -86,11 +86,20 @@ Open-source and community modules must not be technically coupled to online lice
 product policy explicitly requires it. An offline-capable homelab deployment that stops working
 because a license server is unreachable is a support burden and a reputational cost.
 
-## Open questions
+## Decided
 
-Carried from `19-open-questions.md`:
+**Multi-tenancy in the first schema: carry the column, defer the feature.** A nullable tenant
+identifier from the first migration, defaulted to a single implicit tenant and never surfaced until
+tenancy ships. Adding the column later is trivial; adding tenant _isolation_ to queries, storage
+paths, and secret scopes after data exists is a correctness migration touching every table at once.
 
-1. Which billing provider is preferred first — Stripe or Paddle?
-2. Which license model is expected?
-3. Is multi-tenancy required from the first schema design? See the recommendation above: carry the
-   column, defer the feature.
+## Still open — commercial decisions
+
+These are not engineering calls and are left for the product owner:
+
+1. **Which billing provider first — Stripe or Paddle?** Paddle acts as merchant of record and handles
+   sales tax; Stripe gives more control and lower fees but leaves tax compliance to you. The
+   abstraction means the choice is deferrable, but not indefinitely, since entitlement modelling
+   follows from it.
+2. **Which license model?** Per-seat, per-node, and feature-tiered each imply different enforcement
+   points, and self-hosted licensing must work offline.

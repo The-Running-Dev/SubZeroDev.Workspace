@@ -95,9 +95,16 @@ Stated so the gaps are deliberate:
 - Chaos and fault injection beyond the specific failure modes listed above.
 - UI, which has no Phase One dependency.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is there a coverage threshold, and is it enforced or reported?
-2. Does end-to-end run against recorded fixtures, a controlled fixture account, or both?
-3. Which repository owns the shared contract-test corpus — the contract repository, presumably, but
-   consumed how?
+**Coverage is reported, not enforced — with one exception.** Enforced thresholds produce tests
+written to satisfy the threshold. The exception is the contract repository's schema and conformance
+code, which enforces 90%, because a defect there is silent and affects every plugin at once.
+
+**End-to-end runs against both.** Recorded fixtures in CI, because they are deterministic and need no
+credentials; a controlled fixture account on a schedule, because that is the only thing that catches
+provider drift. Never a developer's live account, in either.
+
+**The contract repository owns the shared corpus** and publishes it as a versioned package. Both
+sides consume it as a development dependency, so a producer and a consumer are tested against
+literally the same cases rather than two copies that agree until they do not.

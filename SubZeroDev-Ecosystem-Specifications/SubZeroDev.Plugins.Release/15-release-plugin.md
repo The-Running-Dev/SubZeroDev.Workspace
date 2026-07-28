@@ -94,9 +94,17 @@ A forge token with the narrowest scope that permits release creation. It must no
 broad-scope token used for repository reads elsewhere in a pipeline — a token that can publish
 releases is a token that can be used to ship arbitrary code under the project's name.
 
-## Open questions
+## Decisions on previously open points
 
-1. Which forges beyond GitHub — GitLab, Gitea, Forgejo — and does one plugin cover all of them behind
-   a provider boundary?
-2. Does `publish` require an approval step in a workflow, or is dry-run-by-default sufficient?
-3. Are release artifacts signed here, or by the package plugin before they arrive?
+**One plugin covers every forge, behind a provider boundary** — the same pattern the GitHub plugin
+uses internally. Releases differ far less between forges than repository metadata does: a tag, a
+release object, and attached assets exist everywhere. GitHub is first; which forges follow is a
+product question, not an architectural one.
+
+**Approval is the workflow's job, not this plugin's.** Dry-run-by-default is sufficient here, and
+adding an approval gate inside a plugin would be orchestration — the thing plugins must not contain.
+The Automator already has an approval step type for anyone who wants one before `publish`.
+
+**Artifacts arrive already signed** from the package plugin, which holds them at pack time. This
+plugin verifies the signatures it was given and attaches them; it never signs, because by the time
+artifacts reach it the bytes have already travelled.

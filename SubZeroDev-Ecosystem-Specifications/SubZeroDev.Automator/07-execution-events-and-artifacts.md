@@ -159,9 +159,18 @@ run across two agents.
 Configurable per tenant, workflow, or artifact type. Release artifacts should additionally be
 signable.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is execution event history append-only forever, or compacted after a window?
-2. What is the default lease duration and heartbeat interval?
-3. Does an orphaned execution's container get reaped automatically on agent reconnect, or left for an
-   operator?
+**Event history retention.** Append-only within a 90-day window, then compacted to terminal-state
+summaries — one row per execution with its outcome, timing, and artifact references. Intermediate
+events lose diagnostic value within days; terminal outcomes keep audit value indefinitely, and
+unbounded append-only growth on SQLite is a slow failure that only appears once it is expensive.
+
+**Lease and heartbeat.** Heartbeat every 30 seconds, lease 120 seconds — four missed heartbeats.
+Long enough that a transient network loss does not orphan healthy work, short enough that a dead
+agent is detected in two minutes, which is proportionate for jobs measured in minutes.
+
+**Container reaping on reconnect.** Depends on what the agent reports. A container whose process has
+already exited is reaped and the outcome recorded. A container still running is **reconciled, not
+reaped** — the execution leaves `Orphaned` and resumes its lease, because killing work that is about
+to succeed is worse than the tidiness gained.

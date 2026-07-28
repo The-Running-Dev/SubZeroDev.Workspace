@@ -81,10 +81,19 @@ visible as a diff, and the recorded generator version explains why.
 | `module/`                | Generated module files                                    |
 | `generation-report.json` | Source digest, generator version, verb mappings, warnings |
 
-## Open questions
+## Decisions on previously open points
 
-1. Does the generator support manifest-driven generation first, or keep inference as the primary path
-   until more plugins exist to generate from?
-2. Are generated modules committed to the source repository or produced at install time?
-3. How are hand-written additions preserved across regeneration — a partial-class-style extension
-   point, or are generated modules strictly read-only?
+**Generated modules are produced at install time**, not committed. This matches the wrapper decision
+in `SubZeroDev.Automator/08-clients.md`: committing them couples every plugin release to a generator
+version and leaves stale modules in circulation.
+
+**Generated modules are strictly read-only; hand-written additions live in a companion module** that
+imports the generated one and adds to it. Merge-preserving generators — region markers, partial
+files, three-way merges — fail in subtle ways precisely when a regeneration matters most, and the
+failure is a silently dropped customization. A separate module cannot be clobbered because the
+generator never writes to it.
+
+## Still open
+
+1. Manifest-driven generation versus `--help` inference as the primary path. _Owned outside this
+   workspace._

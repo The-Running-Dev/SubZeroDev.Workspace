@@ -141,6 +141,16 @@ Automation should not depend on the alias.
 listed as two commands with no stated difference between them. One command returns the whole
 manifest; a host that wants only the capabilities section reads that key.
 
+### Published as a signed attestation
+
+The manifest is also attached to the image as a signed OCI referrer, in canonical JSON, so a host can
+read and verify what a plugin needs **without executing it**. Running an untrusted container to ask
+what it wants is backwards; installation and capability review happen against the attestation, and
+the container starts only once the host has decided to allow it.
+
+Conformance checks that the attested manifest and the `manifest` command agree. A plugin whose
+runtime answer differs from what it attested is rejected. See `adr/ADR-004`.
+
 ### The bare-container requirement
 
 **`manifest` must succeed with no configuration file, no secrets, no network, and no mounted
@@ -453,9 +463,19 @@ field names, request errors, and nested causes — as a backstop, not as permiss
 
 ## Trust and distribution
 
-Trust levels and their enforcement are specified in `SubZeroDev.Automator/10-security-model.md`.
-Only first-party and development-local are establishable today; signed third-party trust is blocked
-on a signing ADR.
+Four trust levels, all establishable — see `adr/ADR-004` for the mechanism and
+`SubZeroDev.Automator/10-security-model.md` for enforcement:
+
+| Level              | Established by                                                                    |
+| ------------------ | --------------------------------------------------------------------------------- |
+| First-party        | Keyless signature from the organization's pinned release-workflow identity        |
+| Signed third-party | Signature matching an identity or key in the operator's allowlist                 |
+| Untrusted          | Unsigned, or signed by an identity nobody allowed                                 |
+| Development-local  | An image or path the operator named; verification skipped and recorded as skipped |
+
+Signatures are Sigstore cosign, over the image digest and the canonical-JSON manifest. Signing
+operates on canonical JSON, never the authored YAML — otherwise a formatter run invalidates a
+signature.
 
 Distribution formats — OCI image, NuGet, npm, PyPI, PowerShell Gallery, archive, remote registration
 — are separate from execution runtime. A plugin distributed as an npm package may still be executed
@@ -480,10 +500,20 @@ asserts:
 The suite is what makes "use this plugin as a template" verifiable rather than aspirational, and it
 is the deliverable that turns this document from prose into a contract.
 
-## Open questions
+## Decisions on previously open points
 
-1. Does every plugin need a CLI, or may a plugin be remote-API-only?
-2. How are runtime-specific options represented without leaking host detail into the manifest?
-3. What signing mechanism is planned? Blocks two of the four trust levels.
-4. May one manifest declare multiple runtimes for the same command, and if so how does the host
-   choose deterministically?
+**Does every plugin need a CLI?** Yes, for any plugin with a container or process runtime — the CLI
+_is_ the normative surface. A remote-API-only plugin is exempt but must serve an equivalent manifest
+endpoint and the same envelope and status semantics. Exempting CLIs more broadly would create a
+second contract.
+
+**Runtime-specific options.** A `runtimes[].options` object, schema-validated per runtime type and
+never read by plugin code. The plugin should not know which host is running it; the host needs
+somewhere to put its own settings.
+
+**Signing.** Sigstore cosign, keyless by default. See `adr/ADR-004`.
+
+**Multiple runtimes per command.** Allowed. Selection is deterministic: an explicitly requested
+runtime wins; otherwise policy; otherwise the first runtime with enforcement level `enforced` in
+**manifest order**. Manifest order is the tie-break, so the author controls it and the result never
+depends on map iteration.

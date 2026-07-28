@@ -128,9 +128,17 @@ recoverable but noisy. Drain is the graceful path and should be the documented d
 
 A restore drill belongs in the release checklist. An untested backup is a hypothesis.
 
-## Open questions
+## Decisions on previously open points
 
-1. What is the default log cap, and is it per execution or per workflow?
-2. Does quarantining a plugin version cancel executions already running on it, or only prevent new
-   ones?
-3. Is event replay available in Phase One, or deferred until the event history is proven stable?
+**Log caps.** 100 MB per execution and 1 GB per workflow run. The per-execution cap is the one that
+matters, because runaway output originates in a single plugin; the workflow cap catches a long chain
+of individually well-behaved steps.
+
+**Quarantine does not cancel running executions.** It prevents new ones. An administrator who wants
+in-flight work stopped cancels it explicitly, which is one command. Killing executions as a side
+effect of a policy change produces partial states nobody asked for, and quarantine's purpose is to
+stop the spread rather than to undo what already started.
+
+**Event replay is deferred.** Replaying against a schema that is still moving produces events
+consumers cannot interpret, and replay is most dangerous exactly when the system is least stable.
+It arrives once the event history has been stable across a release boundary.

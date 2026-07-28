@@ -85,9 +85,19 @@ Registry credentials by environment variable, declared in the manifest. Build se
 builder's secret mount rather than build arguments — **a build argument is recorded in image
 history and is readable from the published image**, which is a frequent and quiet credential leak.
 
-## Open questions
+## Decisions on previously open points
 
-1. Which builder — BuildKit rootless, Buildah, or Kaniko? This decides whether socket access is
-   needed for `build` at all, and it is the most consequential question here.
-2. Is `scan` this plugin's job, or a separate security plugin with its own update cadence?
-3. Does `push` refuse to move an existing tag, or require a flag to do so?
+**`scan` moves to a separate security plugin.** Vulnerability databases update daily; this plugin's
+release cadence is nowhere near that. Coupling them means either a stale database or a release every
+time a feed updates. A separate plugin also lets scanning apply to artifacts this plugin never
+built.
+
+**`push` refuses to move an existing tag**, requiring `--allow-tag-move` to do so. Consistent with the
+release plugin's refuse-rather-than-overwrite rule: silently moving a tag is how a pinned build stops
+being reproducible, and the failure appears at someone else's next pull.
+
+## Still open
+
+1. Which builder — rootless BuildKit, Buildah, or Kaniko. This decides whether Docker socket access is
+   ever granted at all, which makes it the most consequential question in the tooling set. _Owned
+   outside this workspace._

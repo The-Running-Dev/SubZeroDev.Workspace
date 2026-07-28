@@ -86,7 +86,16 @@ redacted and only their source shown.
 
 This is small and pays for itself the first time a setting is overridden somewhere nobody expects.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is there a default OTLP collector in the self-hosted deployment, or is exporting opt-in?
-2. What is the sampling strategy for traces under load?
+**Exporting is opt-in.** A self-hosted installation logs to console and file by default and needs no
+collector to start. Requiring one would make an observability stack a prerequisite for running a
+homelab tool, which is a disproportionate ask; setting an OTLP endpoint turns it on.
+
+**Sampling is split by workload, because the two have opposite characteristics.** Plugin executions
+are low-volume, long-running, and are the main thing anyone traces — they are **always sampled**.
+HTTP and background-job traces are high-volume and individually uninteresting, so they are
+ratio-sampled at 10%, with errors and traces exceeding a latency threshold always kept.
+
+Uniform sampling would be the mistake here: at any ratio low enough to control HTTP volume, the
+executions worth diagnosing would be discarded most of the time.

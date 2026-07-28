@@ -10,7 +10,9 @@ Split from `15-build-tooling-plugins.md`.
 
 ## Purpose
 
-Run restore, build, test, and package steps for a project, and report results in a normalized shape.
+Run restore, build, and test steps for a project, and report results in a normalized shape.
+
+Packaging belongs to the package plugin; see Decisions below.
 
 ## The scope trap
 
@@ -30,13 +32,12 @@ branch on "tests failed" without knowing whether it ran `dotnet test` or `vitest
 
 ## Commands
 
-| Command   | Idempotency  | Notes                                                   |
-| --------- | ------------ | ------------------------------------------------------- |
-| `detect`  | `idempotent` | Identify project type and available steps; read-only    |
-| `restore` | `idempotent` | Dependency resolution                                   |
-| `build`   | `idempotent` | Compile                                                 |
-| `test`    | `idempotent` | Run tests; a failing test is exit `3`, not a crash      |
-| `package` | `idempotent` | Produce distributables; hands off to the package plugin |
+| Command   | Idempotency  | Notes                                                |
+| --------- | ------------ | ---------------------------------------------------- |
+| `detect`  | `idempotent` | Identify project type and available steps; read-only |
+| `restore` | `idempotent` | Dependency resolution                                |
+| `build`   | `idempotent` | Compile                                              |
+| `test`    | `idempotent` | Run tests; a failing test is exit `3`, not a crash   |
 
 ## Adapters
 
@@ -95,9 +96,19 @@ Reports must exclude durations from the determinism comparison, or every run dif
 | `test-report.json`       | Normalized results, as above                |
 | `dependency-report.json` | Resolved dependency tree with versions      |
 
-## Open questions
+## Decisions on previously open points
 
-1. Is `package` this plugin's job at all, or purely the package plugin's? Both currently claim it.
-2. Does the plugin manage toolchain installation, or require the toolchain to be present in the
-   image? Requiring it keeps the plugin thin but multiplies images.
-3. How much configuration is too much before this has become a build system?
+**`package` belongs to the package plugin, not this one.** Two plugins claiming the same command is
+exactly the boundary erosion this document warns about, and packaging is where registry semantics
+live. The `package` command is **removed** from the table above; this plugin's `build` produces
+compiled output and the package plugin turns it into a distributable.
+
+**The toolchain must be present in the image.** One image per ecosystem, rather than a plugin that
+installs SDKs at run time. Installing toolchains means network access during builds, non-deterministic
+versions, and a plugin that is quietly a package manager. The cost is more images, which is the cheaper
+problem.
+
+**How much configuration is too much — a usable rule:** if a setting duplicates something the
+ecosystem's native tooling already expresses, it does not belong here. A `.csproj` property, an npm
+script, or a `pyproject.toml` field is the right place; a project-level script the plugin invokes is
+the escape hatch. The moment this plugin needs its own build matrix, it has become a build system.

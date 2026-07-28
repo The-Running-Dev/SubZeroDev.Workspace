@@ -127,9 +127,14 @@ signing.
 - Date-based versions such as `YYYY.MM.DD` are not used for packages: they are not valid semantic
   versions, so a consumer cannot express a range dependency.
 
-## Open questions
+## Decisions on previously open points
 
-1. Does the architecture repository publish a documentation site, and if so which repository owns the
-   pipeline?
-2. Are plugin repositories generated from a template, and does that template come from the contract
-   repository or from the GitHub plugin?
+**The architecture repository publishes its own documentation site and owns that pipeline.**
+Specifications are read most by people who are not currently building, so they are worth publishing;
+and keeping the pipeline with the content is what stops the published site drifting from the source.
+
+**The plugin template lives in the contract repository**, not in the GitHub plugin. What a template
+scaffolds is contract conformance — manifest, envelope, exit codes, conformance wiring — not
+GitHub-shaped structure. Scaffolding from the GitHub plugin is how a Jira plugin ends up with a
+`ProjectProvider` it never needed, which is precisely the inheritance problem ADR-003 exists to
+prevent.

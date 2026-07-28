@@ -84,8 +84,16 @@ Registry tokens by environment variable, one per registry, scoped to publish onl
 supports scoping. A token that can publish is a token that can ship code under the project's name,
 and it should not be reused for reads.
 
-## Open questions
+## Decisions on previously open points
 
-1. Is provenance or signing produced here, or by the release plugin?
-2. Does `publish` support a staged or pre-release channel per registry?
-3. Should the plugin refuse to publish a version whose git tag does not exist?
+**Signing and provenance happen here, at pack time.** The bytes that are signed must be the bytes that
+are published, and this is the only plugin that holds them before publication. The release plugin
+attaches artifacts that arrive already signed; it never signs.
+
+**Pre-release channels are supported where the registry has them**, expressed as one `--channel`
+option mapped per provider — npm dist-tags, NuGet prerelease versions, PowerShell Gallery prerelease.
+Where a registry has no concept of one, the option is rejected rather than silently ignored.
+
+**`publish` refuses a version with no corresponding git tag**, with `--allow-untagged` for local
+testing. An untagged publish cannot be traced back to a commit, which makes it unreproducible at
+exactly the moment someone needs to reproduce it.
