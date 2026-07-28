@@ -229,6 +229,18 @@ Not owned by any single phase.
 | X8      | Manifest-driven generation in ContainerPSGenerator               | M    | **Owned outside this workspace.** Replaces `--help` inference with declared input schemas           |
 | ~~X9~~  | ~~Update `18` and `19` to the decisions taken~~                  | —    | **Done.** `18` now owns the phase vocabulary; `19` separates open from resolved                     |
 | ~~X10~~ | ~~Update `16-repository-layout-and-packaging.md`~~               | —    | **Done.** Move-don't-copy is now a rule, with the two incidents that motivated it                   |
+| ~~X11~~ | ~~Per-repository `README.md`, `AGENTS.md`, and `CLAUDE.md`~~     | —    | **Done.** Every destination repository now carries its own instructions                             |
+| X12     | Retire the numeric filename prefixes when each repository splits | S    | They number one document set, not fifteen — see below                                               |
+
+**X12 detail.** The `NN-` prefixes order a single ecosystem-wide document set, and that set no longer
+exists. Six files are numbered `15`, and `07`, `08`, `10`, `11`, and `17` each appear in two
+repositories. Inside `SubZeroDev.Plugins.Build`, a lone `15-build-plugin.md` implies fourteen missing
+predecessors.
+
+Not done now, because renaming thirty files would break every cross-document reference in the same
+change. It belongs to each repository's split commit, where the reference rewrite is local: drop the
+prefix, keep the name. `README.md` in each repository already carries the ordering the prefixes were
+doing.
 
 ---
 
