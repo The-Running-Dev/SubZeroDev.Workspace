@@ -148,9 +148,9 @@ Rules:
 
 Done:
 
-- `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md` records
+- `SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-002-phase-one-boundaries.md` records
   all Phase One boundary decisions. Plugin ADRs live beside ADR-0001 under
-  `setup-llm/docs/decisions/`; nothing is written to the pre-rename `setup/` path.
+  `SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/`, renumbered from `001`.
 - Specification 1.1 removes the contradictory and open acceptance criteria: the
   primary goal and the binding Phase One scope are stated separately, the
   configuration-file token option is gone, the packages and releases capability

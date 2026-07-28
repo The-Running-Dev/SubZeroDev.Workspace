@@ -3,6 +3,24 @@
 **Status:** Accepted
 **Date:** 2026-07-28
 
+## Amendment (2026-07-28)
+
+Several decisions below turned out to be generic rather than GitHub-specific and were **promoted to
+the plugin contract** by `SubZeroDev.PluginContract/adr/ADR-003`. They are left in place here as the
+record of what was decided and why; the contract is now authoritative for them.
+
+Promoted: the exit-code table, secrets from the environment only, serialization and atomic
+replacement, schema-version compatibility, `null` over optional, configuration precedence, and
+logging levels.
+
+Still owned here: repository scope and filters, identity on GitHub's numeric ID, capability-flag
+mapping, commit count via the `Link` header, the request budget, summary selection, and portfolio
+overrides.
+
+The argument-parsing decision is now split: the contract requires strict per-command option
+validation, while the choice of `node:util` `parseArgs` to achieve it stays an implementation detail
+of this plugin.
+
 ## Context
 
 Version 1.0 of the specification left several boundaries open and, in a few

@@ -1,15 +1,33 @@
 # Plugin Contract
 
-| Field            | Value                                                                   |
-| ---------------- | ----------------------------------------------------------------------- |
-| Contract version | 1.0.0-draft                                                             |
-| Status           | Draft — blocking items resolved, open questions remain                  |
-| Destination repo | Its own repository, versioned and tagged independently                  |
-| Supersedes       | `setup-llm/docs/specifications/subzerodev-automator-plugin-contract.md` |
+| Field            | Value                                                     |
+| ---------------- | --------------------------------------------------------- |
+| Contract version | 1.0.0-draft                                               |
+| Status           | Draft — blocking items resolved, open questions remain    |
+| Destination repo | Its own repository, versioned and tagged independently    |
+| Supersedes       | The earlier `setup-llm/docs/` contract draft, now deleted |
 
 This contract lives in its own repository so that a Node plugin, a Python plugin, and the .NET
 Automator can all consume it without any of them depending on the others. It is versioned and tagged
 independently, which is what lets a plugin pin a contract version.
+
+## Precedence
+
+**This contract outranks every plugin specification.** Where a plugin document and this one disagree,
+this one is correct and the plugin document has drifted.
+
+The practical rule for authors: a plugin specification should contain only what is true of _that
+plugin_ and false of another. Anything true of plugins generally — how secrets arrive, what stdout
+carries, which exit code means what, how artifacts are declared, what determinism requires — belongs
+here and is **referenced, not restated**.
+
+Restating is how the two documents diverge. The GitHub plugin's specification originally carried its
+own exit-code table, its own secret-handling rules, and its own serialization rules; each was a
+generic decision written in a plugin-specific place, and one of them had already drifted into a
+direct contradiction before anyone noticed.
+
+When a new decision arises, the first question is which document owns it. If a second plugin would
+face the same question, the answer is this one.
 
 ## Definition
 
@@ -394,6 +412,44 @@ Timestamps and per-run identifiers belong in the envelope, which is expected to 
 artifacts, which are not.
 
 This is what lets a host detect real change by comparing hashes rather than re-reading content.
+
+Where a plugin's output is inherently non-reproducible — a compiled binary, a container image — the
+determinism requirement applies to its **reports** rather than to the output itself, and the plugin
+states which artifacts are exempt and why.
+
+## Serialization rules
+
+Generic, and therefore here rather than in each plugin:
+
+- UTF-8, LF line endings, one trailing newline.
+- Stable property and collection ordering, so identical input produces byte-identical output. Sort
+  explicitly; never rely on hash or insertion order.
+- **Absent values serialize as `null` rather than being omitted.** A present `null` is deterministic,
+  spares consumers from distinguishing "missing" from "unknown", and avoids the friction between
+  optional properties and strict compiler settings.
+- Where a plugin emits more than one format, all formats represent the same normalized data.
+- Each document is replaced by a single atomic rename onto its live path. Directory replacement is
+  not used: it is not atomic on Windows and fails when the destination exists.
+- Numbers that are identifiers are strings. A 64-bit provider ID does not survive a round trip
+  through a JSON number in every language.
+
+## Configuration
+
+- Resolution order: CLI option, environment variable, configuration file, built-in default. Secrets
+  are excluded from this chain entirely and come from the environment only.
+- Paths inside a configuration file resolve **relative to that file**, not to the working directory,
+  so a configuration behaves identically wherever the plugin is invoked from.
+- Configuration carries its own version and is schema-validated at startup, failing with exit `2`
+  rather than proceeding on a partially understood file.
+
+## Logging
+
+Structured, to stderr, never to stdout. Levels are `error`, `warn`, `info`, `debug`, `trace`.
+
+`info` is the level most often abused: if it fires per item rather than per operation, it is `debug`.
+
+No log record at any level may contain a secret. Redaction covers authorization headers, known secret
+field names, request errors, and nested causes — as a backstop, not as permission to log freely.
 
 ## Trust and distribution
 

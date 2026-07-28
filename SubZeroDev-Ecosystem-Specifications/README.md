@@ -71,6 +71,12 @@ business logic. Plugins never depend on Automator internals.
 The plugin contract sits outside this stack: it is depended on by Automator and by every plugin, and
 depends on nothing, which is why it gets its own repository rather than living inside Platform.
 
+### Precedence
+
+**The contract outranks every plugin specification.** A plugin document contains only what is true of
+that plugin and false of another; anything generic lives in the contract and is referenced, never
+restated. See `SubZeroDev.PluginContract/adr/ADR-003`.
+
 ## Current stance
 
 A plugin may be implemented as a Docker image, a .NET application, a Node or Python application, a
@@ -98,6 +104,11 @@ The four blocking defects found in review are fixed: the exit-code table is cano
 in the contract, the manifest schema now enforces the prose it encodes, unknown capability keys are
 refused rather than ignored, and capability enforcement is bound to the runtime host that can
 actually provide it.
+
+Every specification now lives in exactly one place. The two GitHub plugin specifications are merged,
+the superseded contract draft is deleted, and all ADRs sit with the repository they belong to,
+renumbered from `001` per repository. Nothing about the ecosystem remains under `setup-llm/docs/`,
+which now holds only workstation-toolkit documentation.
 
 Remaining open questions are listed per document and consolidated in
 `SubZeroDev.Ecosystem/19-open-questions.md`.

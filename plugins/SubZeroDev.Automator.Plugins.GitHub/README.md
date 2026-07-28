@@ -124,8 +124,9 @@ failure.
 
 ## Documents
 
-- [Specification](../../setup-llm/docs/specifications/subzerodev-automator-plugins-github.md) — what Phase One is
+- [Specification](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/12-github-plugin.md) — what Phase One is
+- [Plugin contract](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.PluginContract/04-plugin-contract.md) — the generic design this conforms to
 - [Implementation plan](IMPLEMENTATION_PLAN.md) — the order it is built in
 - [Plan review](IMPLEMENTATION_PLAN_REVIEW.md) — why it reads the way it does
-- [ADR-0001](../../setup-llm/docs/decisions/0001-subzerodev-automator-github-plugin-hosting.md) — hosting and versioning
-- [ADR-0002](../../setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md) — Phase One boundaries
+- [ADR-001](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-001-hosting-and-versioning.md) — hosting and versioning
+- [ADR-002](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-002-phase-one-boundaries.md) — Phase One boundaries

@@ -1,238 +1,211 @@
-# SubZeroDev.GitHub Plugin
+# SubZeroDev GitHub Plugin
+
+| Field     | Value                                  |
+| --------- | -------------------------------------- |
+| Version   | 2.0                                    |
+| Status    | Phase One — implementation started     |
+| Plugin ID | `subzerodev.github`                    |
+| CLI       | `subzerodev-github`, alias `sz-github` |
+| Contract  | `SubZeroDev.PluginContract` 1.0        |
+| Decisions | `adr/ADR-001`, `adr/ADR-002`           |
+
+Merged from the two specifications that previously described this plugin: version 1.1 under
+`setup-llm/docs/` and the ecosystem draft. Both are retired.
+
+**This document contains only what is specific to GitHub.** Everything generic — exit codes, secret
+handling, output channels, serialization, determinism, configuration precedence, logging, the
+manifest, Docker requirements — lives in the plugin contract and is referenced here, never restated.
+Where this document and the contract disagree, the contract is correct.
 
 ## Purpose
 
-Collect GitHub repository and activity metadata for the authenticated user and transform it into a stable provider-independent project model.
+Collect GitHub repository and activity metadata for the authenticated user and transform it into a
+stable, provider-independent project model.
 
-The plugin must run manually before Automator integration.
+The plugin is the single source of truth for portfolio data: downstream systems consume its
+normalized output rather than querying GitHub directly. It runs manually today and becomes an
+Automator plugin without rewriting any business logic.
+
+## Scope
+
+The long-term goal is every repository belonging to, or contributed to by, the authenticated user.
+
+**Phase One delivers the first half only: repositories owned by the authenticated user.** Contributed
+repositories, organization repositories, and forks-of-others need a different discovery strategy and a
+much larger API budget, and are deferred until the owned path is stable.
+
+Defaults:
+
+| Class                 | Phase One default          |
+| --------------------- | -------------------------- |
+| Public and private    | Included                   |
+| Archived              | Included, flagged          |
+| Disabled and template | Included, flagged          |
+| Forks                 | **Excluded**, configurable |
+| Organization          | Deferred                   |
+| Contributed           | Deferred                   |
+
+An earlier draft excluded forks from the summary while still collecting them. Collecting costs API
+budget whether or not the result is displayed, so exclusion means not collecting; a configuration flag
+turns collection on.
+
+## Identity
+
+A repository is keyed on **GitHub's immutable numeric ID**, namespaced by provider. `owner/name` is
+mutable display metadata and is never a key — not for the cache, not for portfolio overrides, not for
+tie-breaking.
+
+Keyed on the slug, a rename or transfer is indistinguishable from a deletion plus an addition, so the
+cache would discard history and re-fetch on every rename, and every hand-written portfolio override
+would silently detach.
 
 ## Technology
 
-- Node.js
-- TypeScript
-- Octokit
-- Zod or equivalent schema validation
-- structured logging
-- Vitest
-- Docker image
-- JSON and YAML outputs
+Node.js 24+, TypeScript, Octokit, Zod, Pino, Vitest, Docker. JSON and YAML output.
 
-## CLI
+## Commands
 
-```text
-subzerodev-github sync
-subzerodev-github list
-subzerodev-github stats
-subzerodev-github export
-subzerodev-github validate
-subzerodev-github manifest
-```
+| Command    | Purpose                                              |
+| ---------- | ---------------------------------------------------- |
+| `sync`     | Download or incrementally update repository metadata |
+| `list`     | Display repositories from cache                      |
+| `stats`    | Display aggregate statistics                         |
+| `export`   | Write the canonical output set from a valid cache    |
+| `validate` | Validate configuration, credentials, and cache       |
+| `manifest` | Print the plugin manifest — required by the contract |
 
-`subzerodev-github` is canonical; `sz-github` is a convenience alias for interactive use. The
-introspection command is `manifest`, per the plugin contract — not `describe`.
+Exposed to Automator: `sync`, `export`, `validate`, `stats`. `list` stays CLI-only unless a remote
+use appears.
 
 ## Authentication
 
-Phase One reads the token from the `GITHUB_TOKEN` environment variable. The configuration file may
-name a _different variable to read from_; it may never carry a token value, and the configuration
-schema must be incapable of representing one.
+Reads the token from `GITHUB_TOKEN`. The configuration file may name a _different variable to read
+from_; it may never carry a token value. See the contract for why the schema must be incapable of
+representing one.
 
-The original wording — "configuration reference" — was ambiguous between naming a variable and
-storing a token. It means the former. A schema that cannot hold a token is a stronger guarantee than
-a rule against logging one, because it also rules out the token reaching the cache, the exported
-documents, an error message, or a crash dump.
-
-GitHub CLI token reuse (`gh auth token`) is **opt-in and recorded in the run report**, never a
-silent fallback. It inherits whatever scopes the user's `gh` session holds, which is usually far
-broader than the read access this plugin needs, so it widens the plugin's access beyond what the
-manifest declared.
+GitHub CLI token reuse (`gh auth token`) is **opt-in and recorded in the run report**, never a silent
+fallback. It inherits whatever scopes the user's `gh` session holds — usually far broader than the
+read access this plugin needs — so it widens access beyond what the manifest declared.
 
 Future: GitHub App, OAuth.
 
-The token must never appear in output, logs, artifacts, the cache, or error messages.
+## Collection profiles
 
-## Repository scope
+Statistics vary enormously in cost. Profiles make that an explicit choice rather than an
+implementer's constant.
 
-Configurable:
+| Profile    | Contents                                                      | Approximate cost per repository |
+| ---------- | ------------------------------------------------------------- | ------------------------------- |
+| `basic`    | Repository endpoint data only                                 | 0 additional requests           |
+| `standard` | Basic plus languages, latest release, branch count, tag count | ~4                              |
+| `detailed` | Standard plus contributors, PR and issue counts, commit count | ~10, plus Search API            |
 
-- owned repositories
-- organization repositories
-- contributed repositories
-- public/private
-- forks
-- archived
-- disabled
-- templates
+Default is `standard`. Against the 5000/hour primary limit, a 200-repository account costs roughly
+800 requests on `standard` and 2000 on `detailed`.
 
-Recommended default Phase One:
+Budget guards, regardless of profile: default concurrency 4; warn at 50% of the primary limit
+consumed; stop cleanly at 90% and report partial success. Search API usage stays at or below 20 per
+minute — a separate bucket from the primary limit.
 
-- repositories owned by authenticated user
-- include public and private
-- include archived
-- exclude forks by default, configurable
-- contributed repositories deferred unless reliable ownership/contribution rules are defined
+A `304 Not Modified` does not consume primary quota, which is what makes an unchanged resync
+approach zero consumption rather than merely fewer requests.
 
-An earlier draft said forks were excluded from the portfolio summary but retained in raw collection.
-That is a different and more expensive behavior — collecting a repository costs API budget whether or
-not it reaches the summary — and it contradicts ADR-0002. Excluding by default is the decision; a
-configuration flag turns collection on for anyone who wants forks in the raw set.
+## Repository metadata
 
-## Collected repository metadata
-
-- provider
-- provider repository ID
-- node ID
-- owner
-- name
-- full name
-- description
-- visibility
-- private
-- fork
-- archived
-- disabled
-- template
-- created
-- updated
-- pushed
-- default branch
-- homepage
-- documentation URL, inferred or custom
-- clone URL
-- SSH URL
-- web URL
-- topics
-- license
-- primary language
-- language distribution
-- size
-- stars
-- forks
-- watchers
-- open issues
-- discussions enabled
-- wiki enabled
-- projects enabled
-- pages enabled
-- latest release
-- tags
-- branch count
-- contributor summary
-- pull-request summary
-- issue summary
+Provider, provider repository ID, node ID, owner, name, full name, description, visibility, private,
+fork, archived, disabled, template, created/updated/pushed timestamps, default branch, homepage,
+documentation URL (inferred or configured), clone/SSH/web URLs, topics, license, primary language,
+language distribution, size, stars, forks, watchers, open issue count, capability flags, latest
+release, tags, branch count, contributor summary, pull-request summary, issue summary.
 
 ### Capability flags are only what GitHub exposes
 
 The REST repository object provides `has_issues`, `has_projects`, `has_wiki`, `has_pages`,
-`has_downloads`, and `has_discussions`. There is **no `has_packages` and no `has_releases`**, so
-neither is collected, and neither may be synthesized by probing an endpoint and inferring a flag
-from the response. An earlier draft listed both; they were removed rather than faked.
+`has_downloads`, and `has_discussions`.
 
-### Counting semantics
+There is **no `has_packages` and no `has_releases`**. Neither is collected, and neither may be
+synthesized by probing an endpoint and inferring a flag. An earlier draft listed both; they were
+removed rather than faked.
 
-Several statistics are easy to collect incorrectly in ways that yield a plausible wrong number
-rather than an error:
+## Statistics and counting semantics
+
+Commit count, release count, tag count, branch count, contributors, open and closed pull requests,
+open and closed issues, latest release, latest tag.
+
+Several of these are easy to collect incorrectly in ways that produce a plausible wrong number rather
+than an error:
 
 - **`open_issues_count` includes pull requests.** It is not the open-issue count.
-- **Closed issue and pull-request counts need the Search API**, which uses a rate-limit bucket
-  separate from the primary one and is eventually consistent — so two syncs of unchanged data can
-  legitimately disagree, and that must not be recorded as a change.
+- **Closed issue and pull-request counts need the Search API**, which uses a separate rate-limit
+  bucket and is eventually consistent — two syncs of unchanged data can legitimately disagree, and
+  that must not be recorded as a change.
 - **Contributor lists are capped by GitHub** and exclude anonymous contributors, so contributor data
-  carries a truncation flag.
+  carries a truncation flag rather than presenting a partial list as complete.
 - **Commit count** comes from requesting a single-item commit page and reading the last page number
-  from the `Link` header, at one request per repository. Null when the header is absent, as for an
+  from the `Link` header — one request per repository. Null when the header is absent, as for an
   empty repository.
 - **`/stats/*` answers `202` with no body** while GitHub computes the result, requiring a bounded
-  retry and a give-up path to null.
+  retry with backoff and a give-up path to null.
 - **An uncollectable statistic is null with a diagnostic, never zero.** A repository with no commits
   and one whose commit count could not be read are different facts.
 
-## Cost controls
+## Language statistics
 
-Some statistics require expensive API calls.
+Name and byte count per language. Byte counts are the source of truth; percentages are derived.
 
-The plugin should use collection profiles:
+The rounding rule is documented and applied identically on every run, and rounded percentages total
+100 within the chosen precision — a remainder distributed by an undefined rule is a source of output
+churn between otherwise identical syncs. Languages are ordered deterministically, not by GitHub's
+response order.
 
-### Basic
+## Releases, branches, contributors
 
-Repository endpoint data only.
-
-### Standard
-
-Basic plus languages, latest release, branch count, tag count.
-
-### Detailed
-
-Standard plus contributors, PR counts, issue counts, commit/activity statistics.
+- **Releases**: version, published date, draft and prerelease flags, assets, notes URL.
+- **Branches**: name, default flag, protected flag, last commit. The protected flag is **nullable** —
+  branch protection is not readable under every token scope and plan, and an unreadable flag is not
+  the same as an unprotected branch.
+- **Contributors**: user, contribution count, profile URL, account type, and the truncation flag for
+  the containing list.
 
 ## Normalized project model
 
-The public output must not mirror Octokit response shapes.
-
-Example:
-
-Identity is the immutable provider repository ID, namespaced by provider. `slug` is mutable display
-metadata and is never a key — not for the cache, not for portfolio overrides, not for tie-breaking.
-`status` is derived, not collected: `archived` when GitHub reports the repository archived,
-otherwise `active`. Any user-facing status override belongs in portfolio overrides.
+Octokit response shapes must not appear in output. `status` is derived, not collected: `archived`
+when GitHub reports the repository archived, otherwise `active`.
 
 ```json
 {
   "schemaVersion": "1.0.0",
   "provider": "github",
-  "providerId": "123",
+  "providerId": "123456789",
   "slug": "the-running-dev/project",
   "name": "Project",
-  "description": "...",
+  "description": "…",
   "visibility": "public",
   "status": "active",
-  "source": {
-    "url": "...",
-    "defaultBranch": "main"
-  },
-  "timestamps": {
-    "createdAt": "...",
-    "updatedAt": "...",
-    "pushedAt": "..."
-  },
-  "technology": {
-    "primaryLanguage": "TypeScript",
-    "languages": []
-  },
+  "source": { "url": "…", "defaultBranch": "main" },
+  "timestamps": { "createdAt": "…", "updatedAt": "…", "pushedAt": "…" },
+  "technology": { "primaryLanguage": "TypeScript", "languages": [] },
   "statistics": {},
   "releases": {},
   "portfolio": {}
 }
 ```
 
+Future providers — GitLab, Azure DevOps, Bitbucket, Gitea, Forgejo — populate this same model. Each
+must supply an equivalently stable immutable identifier.
+
 ## Portfolio overrides
 
-Allow a local overrides file **keyed by the immutable provider repository ID**, not by slug.
+User-authored metadata that does not exist in GitHub, in a local overrides file **keyed by the
+immutable provider repository ID**. The file may carry the slug alongside as a human-readable
+comment; the ID is what matches.
 
-`owner/name` is mutable: renaming or transferring a repository would silently detach every
-hand-written override from it, which is the same identity failure that makes cache reconciliation
-impossible. The file may carry the slug alongside the ID as a human-readable comment, but the ID is
-what matches.
+Fields: featured, hidden, display name, summary, category, status, display order, custom
+technologies, demo URL, docs URL, screenshots, business relevance, personal contribution, start and
+end dates, notes.
 
-Fields:
-
-- featured
-- hidden
-- display name
-- summary
-- category
-- status
-- display order
-- custom technologies
-- demo URL
-- docs URL
-- screenshots
-- business relevance
-- personal contribution
-- start/end dates
-- notes
-
-GitHub data remains source metadata; portfolio overrides remain user-owned metadata.
+Provider data and user-authored data stay separable, so a resync can never overwrite a hand-written
+value and the two are never confused in output.
 
 ## Output
 
@@ -240,55 +213,91 @@ GitHub data remains source metadata; portfolio overrides remain user-owned metad
 output/
   projects.json
   projects.yaml
-  summary.json
   statistics.json
+  summary.json
+  projects.schema.json
   sync-report.json
-  raw/, optional
+  raw/            optional, off by default
 ```
 
-## Caching
+`raw/` retains unmodified API responses for diagnosing provider drift. It is excluded from
+determinism comparison and off by default, because it contains far more data than the normalized
+model and no filtering.
 
-- ETag support
-- last synchronization timestamp
-- per-repository cache
-- API version metadata
-- retry-after handling
-- partial failure tracking
+### Summary determinism
 
-## Determinism
+"Largest" and "most active" are opinions until defined, and an undefined selection changes the
+summary between runs over unchanged data. Every selection breaks ties by ascending repository
+identity:
 
-Given identical API data and overrides, output ordering and serialization must be deterministic.
+| Selection   | Definition               |
+| ----------- | ------------------------ |
+| Largest     | Greatest repository size |
+| Most active | Latest `pushedAt`        |
+| Newest      | Latest `createdAt`       |
+| Oldest      | Earliest `createdAt`     |
+
+An empty project set yields null for each rather than an omitted key.
+
+The summary also carries total, public, private, and archived counts, languages, and star, fork, and
+release totals.
+
+## Cache
+
+Keyed on repository identity, so a rename updates an entry rather than orphaning it.
+
+Tracks ETags per resource, last successful synchronization time, GitHub API version, retry-after
+state, and per-repository partial-failure diagnostics. Conditional requests reuse unchanged data.
+
+Phase One atomically replaces current state; historical snapshots are future scope. Interrupted or
+partial synchronization preserves the last valid cache — see the contract for the atomic-replacement
+rule this relies on.
 
 ## Partial success
 
-One repository failure should not necessarily invalidate all results.
+One repository failing does not invalidate the rest. The run exits `4`, retains prior valid cached
+data for what failed, writes what succeeded, and records diagnostics naming the affected
+repositories in `sync-report.json` and the result envelope.
 
-The final report distinguishes:
+## Configuration
 
-- succeeded
-- partially succeeded
-- failed
+`github.config.json`, versioned and schema-validated. Covers the token environment-variable name,
+repository filters, collection profile, cache and output directories, export formats, and rate-limit
+budget.
 
-## Plugin manifest command mapping
+Organization settings are absent, not merely unused: a setting that is read but not honored is worse
+than a missing one.
 
-Commands exposed to Automator later:
+## Phase One acceptance
 
-- sync
-- export
-- validate
-- stats
+- Authenticates from the environment and refuses to start without a token
+- Discovers every owned repository in scope exactly once
+- Collects `basic` and `standard` profiles within budget
+- Normalizes into the project model with no Octokit type escaping the provider
+- Writes the canonical output set, deterministically and byte-stably on repeat
+- Handles rate limiting and partial failure without corrupting the cache
+- Runs natively under Node and through Docker
+- Passes the contract conformance suite
+- Ships tests and documentation taking a new user from token setup to validated export
 
-`list` may remain CLI-only unless useful remotely.
+## Non-goals
 
-## Phase One acceptance criteria
+Web UI, database, scheduling, background services, automation runtime, workflow engine, MCP, REST
+API. These belong to the Automator or to future phases.
 
-- authenticates with token
-- discovers configured repository scope
-- collects Basic and Standard profiles
-- normalizes data
-- writes JSON and YAML
-- supports deterministic output
-- handles rate limiting
-- runs natively with Node
-- runs through Docker
-- includes tests and documentation
+## Future
+
+- **Commands**: `analyze`, `portfolio`, `activity`, `releases`, `languages`, `roadmap`, `graph`,
+  `export markdown`, `export sqlite`
+- **Statistics**: traffic, clones, views, downloads
+- **Scope**: organization and contributed repositories
+- **Consumers**: portfolio site, resume generator, documentation, dashboards, AI analysis, project
+  search, MCP server, REST API
+
+## Open questions
+
+1. Should commit activity be grouped by week, month, or year? Phase One collects no activity series.
+2. Should AI-generated summaries be stored per project or generated on demand?
+3. Should screenshots, logos, and badges be managed here or remain external?
+
+None blocks Phase One: portfolio overrides give all three somewhere to land without a schema change.

@@ -1,15 +1,19 @@
 # SubZeroDev.Automator.Plugins.GitHub — Next Work
 
 This is the working checklist for implementing
-[SubZeroDev.Automator.Plugins.GitHub](setup-llm/docs/specifications/subzerodev-automator-plugins-github.md).
+[SubZeroDev.Automator.Plugins.GitHub](SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/12-github-plugin.md).
 
 Two companion documents own the detail, and this checklist defers to both:
 
 - [`plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md`](plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md)
   is authoritative for sequencing, architectural boundaries, validation strategy,
   and the pull-request breakdown. Milestone numbers here match it exactly.
-- The ADRs under `setup-llm/docs/decisions/` are authoritative for decisions. When
-  this file and a decision disagree, the ADR wins and this file is wrong.
+- The [plugin contract](SubZeroDev-Ecosystem-Specifications/SubZeroDev.PluginContract/04-plugin-contract.md)
+  is authoritative for anything generic — exit codes, secrets, output channels,
+  serialization, determinism. The ADRs under
+  `SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/` own the
+  GitHub-specific decisions. When this file disagrees with either, this file is
+  wrong.
 
 The [peer review](plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN_REVIEW.md)
 records why several of the entries below exist.
@@ -46,7 +50,7 @@ are being recorded in ADR-0002:
 Remaining work:
 
 - [x] Record every decision above in
-      `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md`.
+      `SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-002-phase-one-boundaries.md`.
 - [x] Update the specification to 1.1: reconcile the primary goal with the Phase
       One discovery scope, remove the configuration-file token option, drop the
       packages and releases capability flags, bind the counting and summary
