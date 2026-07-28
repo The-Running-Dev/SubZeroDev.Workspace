@@ -56,7 +56,7 @@ failed is not evidence.
 chosen because they are the ones genuinely hard to retrofit. Everything else waits for a second
 consumer.
 
-**Repository plugin.** Provisioning and governing repositories, built here because it is the first
+**Project Setup plugin.** Provisioning and governing repositories, built here because it is the first
 consumer that forces the shared GitHub client out of the GitHub plugin — which is the extraction
 guard being satisfied rather than bypassed. It is kept out of Phase 1 because it needs the Octokit
 patterns that Phase 1 establishes.

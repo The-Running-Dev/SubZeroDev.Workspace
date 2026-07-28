@@ -4,15 +4,15 @@
 
 Decided, not proposed:
 
-| Repository                  | Contents                                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `SubZeroDev.Platform`       | The reusable application framework. Exists.                                                                               |
-| `SubZeroDev.Automator`      | The orchestration product.                                                                                                |
-| `SubZeroDev.PluginContract` | The contract, manifest schema, envelope schema, and conformance suite.                                                    |
-| `SubZeroDev.MCP`            | MCP strategy, tool projection, security and consent.                                                                      |
-| `SubZeroDev.WorkItems`      | The shared work-item model and reconciliation. A library, not a plugin.                                                   |
-| One per substantial plugin  | GitHub, Backlog, Repository, Requirements Compiler, Documentation, ContainerPSGenerator, Build, Docker, Package, Release. |
-| Architecture                | Cross-cutting specifications and ADRs that belong to no single product.                                                   |
+| Repository                  | Contents                                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `SubZeroDev.Platform`       | The reusable application framework. Exists.                                                                                  |
+| `SubZeroDev.Automator`      | The orchestration product.                                                                                                   |
+| `SubZeroDev.PluginContract` | The contract, manifest schema, envelope schema, and conformance suite.                                                       |
+| `SubZeroDev.MCP`            | MCP strategy, tool projection, security and consent.                                                                         |
+| `SubZeroDev.WorkItems`      | The shared work-item model and reconciliation. A library, not a plugin.                                                      |
+| One per substantial plugin  | GitHub, Backlog, Project Setup, Requirements Compiler, Documentation, ContainerPSGenerator, Build, Docker, Package, Release. |
+| Architecture                | Cross-cutting specifications and ADRs that belong to no single product.                                                      |
 
 `SubZeroDev.MCP` is separate from the Automator because the projection serves both hosts — a plugin's
 own `mcp` command and the Automator's brokered endpoint. Inside the Automator it would become the

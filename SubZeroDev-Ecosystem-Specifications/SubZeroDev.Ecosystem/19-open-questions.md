@@ -42,15 +42,15 @@ Two questions are recorded there with recommendations already attached — multi
 Neither blocks the build plan.
 
 **The shared-client recommendation has changed.** "Leave it unshared" was defensible with two
-candidate consumers. There are now four — the GitHub plugin, the Repository plugin, the Release
-plugin, and Backlog — which is the extraction guard's condition met several times over.
+candidate consumers. There are now four — the GitHub plugin, the Project Setup plugin, the
+Release plugin, and Backlog — which is the extraction guard's condition met several times over.
 
 The revised position: **share it, within a language.** The three Node consumers take a common
 package; Backlog keeps its own Python path, because a library cannot cross that boundary. That the
 answer differs by language is not a compromise — it is the reason the contract is a process boundary
 rather than a library interface, demonstrated on a real component. Tracked as W2.6.
 
-### Repository plugin — `SubZeroDev.Plugins.Repository/`
+### Project Setup plugin — `SubZeroDev.Plugins.ProjectSetup/`
 
 10. Does provisioning cover GitLab, Gitea, and Forgejo behind the provider boundary the Release
     plugin and WorkItems both anticipate, or is it GitHub-only until a second forge is wanted? The

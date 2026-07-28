@@ -25,7 +25,7 @@ so they can be copied out; this directory is a staging area, not their permanent
 | `SubZeroDev.Plugins.Docker/`               | Docker plugin repository         | Image build, push, scan                                                                                                                    |
 | `SubZeroDev.Plugins.Package/`              | Package plugin repository        | NuGet, npm, PowerShell Gallery, archives                                                                                                   |
 | `SubZeroDev.Plugins.Release/`              | Release plugin repository        | Notes, tagging, forge releases                                                                                                             |
-| `SubZeroDev.Plugins.Repository/`           | Repository plugin repository     | Provisioning a repository from a directory, and holding it to a stated configuration                                                       |
+| `SubZeroDev.Plugins.ProjectSetup/`         | Project Setup plugin repository  | Provisioning a repository from a directory, and holding it to a stated configuration                                                       |
 
 Documents that spanned two products were split rather than assigned to one: events and notifications
 (Platform) from execution events and artifacts (Automator); observability (Platform) from operations

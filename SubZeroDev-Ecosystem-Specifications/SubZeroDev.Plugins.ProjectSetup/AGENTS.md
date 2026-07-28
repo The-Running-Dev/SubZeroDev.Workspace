@@ -1,4 +1,4 @@
-# Working on the Repository plugin
+# Working on the Project Setup plugin
 
 Provisions a GitHub repository from a directory and holds it to a stated configuration.
 

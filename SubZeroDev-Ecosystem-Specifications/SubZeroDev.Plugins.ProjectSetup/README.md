@@ -1,18 +1,18 @@
-# SubZeroDev Repository Plugin
+# SubZeroDev Project Setup Plugin
 
 Creates a GitHub repository from a directory, and holds it to a stated configuration afterwards.
 
-| Field     | Value                                    |
-| --------- | ---------------------------------------- |
-| Plugin ID | `subzerodev.repository`                  |
-| CLI       | `subzerodev-repository`, alias `sz-repo` |
-| Status    | Specified, not implemented               |
+| Field     | Value                                        |
+| --------- | -------------------------------------------- |
+| Plugin ID | `subzerodev.project-setup`                   |
+| CLI       | `subzerodev-project-setup`, alias `sz-setup` |
+| Status    | Specified, not implemented                   |
 
 ## Contents
 
-| Document                  | Covers                                                      |
-| ------------------------- | ----------------------------------------------------------- |
-| `25-repository-plugin.md` | Purpose, commands, inference, settings, and what it governs |
+| Document                     | Covers                                                      |
+| ---------------------------- | ----------------------------------------------------------- |
+| `25-project-setup-plugin.md` | Purpose, commands, inference, settings, and what it governs |
 
 ## What it does
 
@@ -24,8 +24,8 @@ from the job names in `.github/workflows/`. Anything it cannot infer comes from 
 Then it shows you the diff and waits.
 
 ```bash
-sz-repo plan  --path ./SubZeroDev.MCP     # read-only; prints the diff and a plan token
-sz-repo apply --plan-id 7f3c9a12b8e04d65  # takes the token and nothing else
+sz-setup plan  --path ./SubZeroDev.MCP     # read-only; prints the diff and a plan token
+sz-setup apply --plan-id 7f3c9a12b8e04d65  # takes the token and nothing else
 ```
 
 Nothing reaches GitHub without a human seeing the specific change first. Creating a repository is

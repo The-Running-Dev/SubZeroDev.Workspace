@@ -105,7 +105,7 @@ It tests the contract, not the copy.
 | W2.4 | Minimal Platform: Abstractions, Core, Hosting                                  | L    | —          |
 | W2.5 | Minimal Platform: Persistence, Observability, Testing                          | L    | W2.4       |
 | W2.6 | Extract the shared GitHub client from the GitHub plugin                        | M    | W1.5       |
-| W2.7 | Repository plugin: plan/apply, inference, rulesets                             | M    | W2.6       |
+| W2.7 | Project Setup plugin: plan/apply, inference, rulesets                          | M    | W2.6       |
 
 **W2.2 matters more than it looks.** The secret-leaking and failing fixtures are how you prove the
 suite detects problems rather than merely passing everything you point it at. A conformance suite
@@ -113,7 +113,7 @@ that has never failed is not evidence.
 
 **W2.6 is the extraction guard being satisfied, not bypassed.** The rule is that a capability becomes
 a shared component when a _second_ consumer needs it. The GitHub client now has four candidates — the
-GitHub plugin, the Repository plugin, the Release plugin, and the Backlog plugin — so the condition is
+GitHub plugin, the Project Setup plugin, the Release plugin, and Backlog — so the condition is
 met several times over. The language boundary limits what sharing can mean: the three Node consumers
 share a package, and Backlog keeps its own Python path. That the answer differs by language is itself
 the argument for the contract being a process boundary rather than a library.

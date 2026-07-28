@@ -1,12 +1,12 @@
-# Repository Plugin
+# Project Setup Plugin
 
-| Field       | Value                                     |
-| ----------- | ----------------------------------------- |
-| Plugin ID   | `subzerodev.repository`                   |
-| CLI         | `subzerodev-repository`, alias `sz-repo`  |
-| Status      | Specified                                 |
-| Destination | Its own repository                        |
-| Language    | Node, sharing the GitHub client with `12` |
+| Field       | Value                                        |
+| ----------- | -------------------------------------------- |
+| Plugin ID   | `subzerodev.project-setup`                   |
+| CLI         | `subzerodev-project-setup`, alias `sz-setup` |
+| Status      | Specified                                    |
+| Destination | Its own repository                           |
+| Language    | Node, sharing the GitHub client with `12`    |
 
 ## Purpose
 
@@ -88,6 +88,12 @@ The plugin's value is in what you do not have to write down. From a directory:
 | License                | The SPDX identifier implied by a `LICENSE` file                                       |
 | Required status checks | **Job names parsed from `.github/workflows/`**                                        |
 | Default branch         | `main`, or the checked-out branch if the directory is a clone                         |
+
+**Stack detection is not this plugin's to own.** Inferring topics from `package.json` or `*.csproj`
+is the same detection the build plugin needs for adapter selection, and
+`SubZeroDev.Ecosystem/15-pipeline-composition.md` already decided that a second implementation of it
+would drift on what counts as a Node project. This plugin consumes that detection once the build
+plugin exists, and carries a minimal version until then — a known debt, not a rediscovery.
 
 **Required checks are inferred from workflows that exist**, never assumed. A required check whose
 name no workflow produces blocks every pull request permanently and presents as a GitHub outage
