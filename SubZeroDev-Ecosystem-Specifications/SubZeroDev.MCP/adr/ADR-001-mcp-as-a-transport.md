@@ -85,7 +85,7 @@ or it does not exist.
 - The contract gains an optional `mcp` command and the plan-apply pattern. Conformance gains checks
   for both.
 - The Automator's MCP server becomes a consumer of the projection layer rather than bespoke code.
-- `todo-to-github` becomes a conforming plugin rather than a standalone server: it gains a manifest,
+- The capability becomes the conforming **Backlog** plugin rather than a standalone server: it gains a manifest,
   a container, exit codes, and the envelope, and it loses its own auth model.
 - Its `plan`/`apply`/`validate` tools become plugin commands, projected. The MCP-specific work
   shrinks to the projection, which is shared.

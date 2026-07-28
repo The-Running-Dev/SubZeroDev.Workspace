@@ -87,21 +87,30 @@ that has never failed is not evidence.
 
 ---
 
-## W3 — Second plugin
+## W3 — Backlog plugin, MCP projection, and WorkItems
 
-Where the contract discovers what it assumed. Requirements Compiler is the more valuable capability;
-the documentation plugin is the cheaper test because the image already exists.
+Where the contract discovers what it assumed. The plugin is the means; the list of contract
+corrections is the deliverable.
 
-| ID   | Work                                                             | Size | Depends on |
-| ---- | ---------------------------------------------------------------- | ---- | ---------- |
-| W3.1 | Choose the second plugin — see Decisions below                   | S    | —          |
-| W3.2 | Implement it against the contract, passing conformance           | L    | W2.1, W3.1 |
-| W3.3 | Record every contract change it forced, and cut contract `1.1.0` | S    | W3.2       |
+| ID    | Work                                                                           | Size | Depends on |
+| ----- | ------------------------------------------------------------------------------ | ---- | ---------- |
+| W3.1  | Port `parse_todo.py` and `sync_lib.py` unchanged; 115 tests must pass unedited | S    | —          |
+| W3.2  | Extract `SubZeroDev.WorkItems`: model, stable IDs, markers, reconciliation     | M    | W3.1       |
+| W3.3  | GitHub tracker provider behind the library's write interface                   | M    | W3.2       |
+| W3.4  | Plan store: opaque token, TTL, single use, state fingerprint                   | S    | W3.2       |
+| W3.5  | Plugin CLI: `validate`, `plan`, `apply`, `manifest`                            | M    | W3.3, W3.4 |
+| W3.6  | Round trip against a fake tracker returning floats for number fields           | M    | W3.5       |
+| W3.7  | `SubZeroDev.MCP` projection library, Python implementation                     | M    | W0.2       |
+| W3.8  | `mcp` command projecting the manifest                                          | S    | W3.5, W3.7 |
+| W3.9  | Live verification against a throwaway repository                               | S    | W3.6, W3.8 |
+| W3.10 | Conformance, signing, publish                                                  | S    | W3.9, W2.1 |
+| W3.11 | **Record every contract change it forced; cut contract `1.1.0`**               | S    | W3.10      |
 
-**W3.3 is the actual deliverable of this phase.** The plugin is the means; the list of things the
-contract got wrong is the output.
+**W3.6 is not optional.** Three of the four known bugs were invisible to unit tests and appeared only
+under a replayed round trip. The fake must return number fields as floats — that single quirk is what
+broke convergence and what the unit tests missed.
 
----
+**W3.11 is the actual output of this phase.**
 
 ## W4 — Automator MVP
 

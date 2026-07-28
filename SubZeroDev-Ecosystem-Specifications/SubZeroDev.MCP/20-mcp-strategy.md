@@ -79,7 +79,7 @@ already requires. MCP is that rule extended to AI clients.
   AI client.
 - The Automator's MCP server stops being bespoke and becomes a consumer of this layer.
 - Plugins written in any language need a projection implementation for that language. The first is
-  Python, for the todo-to-github plugin; the second will tell us whether the projection is really
+  Python, for the Backlog plugin; the second will tell us whether the projection is really
   language-neutral or merely looked it.
 
 ## Open questions

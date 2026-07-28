@@ -1,15 +1,15 @@
-# todo-to-github Plugin
+# Backlog Plugin
 
-| Field     | Value                                        |
-| --------- | -------------------------------------------- |
-| Plugin ID | `subzerodev.todo-to-github`                  |
-| CLI       | `subzerodev-todo-to-github`, alias `sz-todo` |
-| Contract  | `SubZeroDev.PluginContract` 1.0              |
-| Language  | Python 3.11+                                 |
-| Status    | Specified; ports an existing working skill   |
-| Source    | `reference/todo-to-github.skill`             |
+| Field     | Value                                      |
+| --------- | ------------------------------------------ |
+| Plugin ID | `subzerodev.backlog`                       |
+| CLI       | `subzerodev-backlog`, alias `sz-backlog`   |
+| Contract  | `SubZeroDev.PluginContract` 1.0            |
+| Language  | Python 3.11+                               |
+| Status    | Specified; ports an existing working skill |
+| Source    | `reference/todo-to-github.skill`           |
 
-Merged from `todo-to-github-mcp-SPEC.md` and its build plan, both retired. This document describes
+Merged from the retired `todo-to-github-mcp-SPEC.md` and its build plan. This document describes
 the capability as a **conforming plugin**; the MCP surface it gains is projected, and specified in
 `SubZeroDev.MCP/21-mcp-tool-projection.md`.
 
@@ -180,8 +180,8 @@ The skill discovers this halfway through creating issues; the plugin must not.
 
 Projected as MCP resources and shipped in the container:
 
-- `subzerodev://todo-to-github/format` — the input format specification
-- `subzerodev://todo-to-github/example` — a complete worked example
+- `subzerodev://backlog/format` — the input format specification
+- `subzerodev://backlog/example` — a complete worked example
 
 A calling model needs the format to convert a user's file. Serving it as a resource beats duplicating
 it into every tool description, where it would be both long and prone to drift.

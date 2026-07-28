@@ -1,9 +1,9 @@
-# todo-to-github — Build Plan
+# Backlog Plugin — Build Plan
 
-Companion to `23-todo-to-github-plugin.md`. Merged from the retired
+Companion to `23-backlog-plugin.md`. Merged from the retired
 `todo-to-github-mcp-TODO.md`, reordered so the plugin exists before the MCP surface is added to it.
 
-Deliberately not written in the todo-to-github format — these are engineering tasks, and forcing
+Deliberately not written in the backlog document format — these are engineering tasks, and forcing
 "As a…" onto them would add noise.
 
 ## What changed from the original plan
@@ -113,10 +113,10 @@ Only now, and it should be small — the tools are projected, not written.
 
 - [ ] `mcp` command serving `validate`, `plan`, and `apply` over stdio.
 - [ ] Tool schemas projected from the manifest's `inputSchema`, not hand-written.
-- [ ] Namespaced tool names: `subzerodev_todo_to_github_plan`.
+- [ ] Namespaced tool names: `subzerodev_backlog_plan`.
 - [ ] Tool descriptions carrying read-versus-write, the plan-token requirement, and the free-form
       content-loss warning.
-- [ ] Resources: `subzerodev://todo-to-github/format` and `.../example`.
+- [ ] Resources: `subzerodev://backlog/format` and `.../example`.
 - [ ] Exit `4` projects as a **successful** tool result with populated errors, not a tool error.
 - [ ] Artifacts referenced, never inlined.
 - [ ] Contract tests via an in-process MCP client.

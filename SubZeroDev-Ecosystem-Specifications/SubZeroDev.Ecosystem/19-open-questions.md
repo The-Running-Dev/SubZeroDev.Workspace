@@ -23,7 +23,7 @@ rests on an assumption that could change, the document states what would change 
 | Repository layout                                             | Platform, Automator, contract, and one repository per substantial plugin                                          |
 | Are specifications copied between repositories?               | **No.** One home, referenced by tag                                                                               |
 | Build order                                                   | GitHub → Documentation plugin → Automator MVP                                                                     |
-| Which plugin is second?                                       | todo-to-github — Python, writes externally, needs MCP. Supersedes the Documentation choice                        |
+| Which plugin is second?                                       | Backlog — Python, writes externally, needs MCP. Supersedes the Documentation choice                               |
 | Is local execution the initial product?                       | Yes; Docker host only, local process host deferred to Phase 6                                                     |
 | Is the local process host in the MVP?                         | No — it cannot enforce declared capabilities                                                                      |
 | Manifest serialization                                        | YAML authoring, canonical JSON for validation and signing                                                         |
@@ -95,3 +95,6 @@ rests on an assumption that could change, the document states what would change 
 | How is approval enforced for writes?                          | Plan-apply, promoted to the contract. Structural, not documented                                                  |
 | Is the `mcp` command required?                                | Optional. Without it a plugin is still reachable through the Automator                                            |
 | Does exit `4` project as an MCP error?                        | No — a successful result with populated errors                                                                    |
+| Name for the todo-sync plugin                                 | `Backlog` — a domain noun, provider-neutral, like every other plugin                                              |
+| Does Requirements keep its own publishing?                    | Yes, sharing `SubZeroDev.WorkItems` rather than duplicating convergence                                           |
+| Requirements Compiler language                                | Python, as a consequence of sharing a library with the Backlog plugin                                             |

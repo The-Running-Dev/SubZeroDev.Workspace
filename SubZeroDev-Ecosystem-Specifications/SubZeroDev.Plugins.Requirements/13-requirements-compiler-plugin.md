@@ -104,6 +104,20 @@ Small projects may use only Feature → Task.
 
 ## Work item model
 
+**Supplied by `SubZeroDev.WorkItems`, not defined here.** The model, stable-ID generation, markers and
+content hashing, reconciliation, and the tracker write path are shared with the Backlog plugin, which
+produces the same hierarchy by parsing rather than by reasoning.
+
+Two implementations of convergence would be two sets of convergence bugs, and the Backlog plugin
+already carries fixes for four of them.
+
+**This binds the Requirements Compiler to Python**, the Backlog plugin's language. That is the price
+of a shared library rather than composing through the document format, and it is recorded in
+`SubZeroDev.WorkItems/24-work-items-library.md`.
+
+What stays here: the AI provider abstraction, prompts, the classification of explicit versus derived
+versus assumption, and validation of the compiled result.
+
 Fields:
 
 - stable generated ID
@@ -134,7 +148,7 @@ This is necessary for reconciliation with existing GitHub issues.
 
 ## Reconciliation
 
-Before publishing:
+Implemented by `SubZeroDev.WorkItems`. Before publishing:
 
 - fetch existing generated issues
 - match by stable ID
@@ -145,6 +159,14 @@ Before publishing:
 - produce dry-run diff
 
 ## GitHub publishing
+
+Uses the shared library's tracker provider. GitHub first; GitLab, Gitea, and Forgejo slot in behind
+the same interface.
+
+The compiler should also be able to **emit the backlog document format** rather than publishing
+directly. That keeps the composition path open — compile, review the document by hand, then let the
+Backlog plugin publish it — which is the workflow this document already describes as compile,
+approve, publish.
 
 Potential commands:
 

@@ -8,13 +8,13 @@ Automator's fifteen-item milestone, Platform's package scope, and this roadmap's
 
 ## Decisions this reflects
 
-| Decision           | Choice                                                                     |
-| ------------------ | -------------------------------------------------------------------------- |
-| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred    |
-| Build order        | GitHub plugin → todo-to-github plugin → Automator MVP                      |
-| Second plugin      | todo-to-github — Python, writes externally, and needs a direct MCP surface |
-| Local process host | Out of the MVP                                                             |
-| Contract           | Its own repository, tagged independently                                   |
+| Decision           | Choice                                                                  |
+| ------------------ | ----------------------------------------------------------------------- |
+| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred |
+| Build order        | GitHub plugin → Backlog plugin → Automator MVP                          |
+| Second plugin      | Backlog — Python, writes externally, and needs a direct MCP surface     |
+| Local process host | Out of the MVP                                                          |
+| Contract           | Its own repository, tagged independently                                |
 
 ## Phase 0 — Contract stabilization
 
@@ -54,15 +54,15 @@ failed is not evidence.
 chosen because they are the ones genuinely hard to retrofit. Everything else waits for a second
 consumer.
 
-## Phase 3 — todo-to-github plugin
+## Phase 3 — Backlog plugin
 
 The second plugin, and the point of it is not the plugin.
 
 **This supersedes the earlier choice of the Documentation plugin.** Documentation was picked as the
-cheapest contract test, since its image already exists. todo-to-github is a better one for the same
+cheapest contract test, since its image already exists. The Backlog plugin is a better one for the same
 cost, and the difference is what it exercises:
 
-|                 | Documentation             | todo-to-github                                      |
+|                 | Documentation             | Backlog                                             |
 | --------------- | ------------------------- | --------------------------------------------------- |
 | Language        | Node, as the first plugin | **Python** — a real test of language neutrality     |
 | Direction       | Builds a site             | **Writes to a system other people see**             |
@@ -80,8 +80,16 @@ straightforward once the contract has been proven twice.
 **The deliverable is still the list of things the contract got wrong**, and a contract `1.1.0` cut
 from it. The working plugin is the means.
 
-The MCP projection layer lands here too, because this is the first plugin that needs it — see
-`SubZeroDev.MCP/`.
+Two shared pieces land here because this is the first plugin that needs them:
+
+- **`SubZeroDev.MCP`** — the manifest-to-tool projection, used by this plugin's direct server and
+  later by the Automator's brokered one.
+- **`SubZeroDev.WorkItems`** — the work-item model, stable IDs, reconciliation, and tracker
+  providers, extracted as the Requirements Compiler will consume the same code in Phase 7.
+
+Extracting `WorkItems` now rather than later is the one place the second-consumer rule is applied
+early, and deliberately: the second consumer is already specified, and the alternative is writing
+convergence twice.
 
 ## Phase 4 — Automator MVP
 
@@ -131,7 +139,7 @@ control process, enterprise SSO, automatic destructive reconciliation.
 ## Critical path
 
 ```text
-Phase 0 → GitHub to conformance → todo-to-github plugin → contract 1.1 → Automator MVP
+Phase 0 → GitHub to conformance → Backlog plugin → contract 1.1 → Automator MVP
 ```
 
 The two steps that most reduce risk are the **first runnable slice** in Phase 1 and the

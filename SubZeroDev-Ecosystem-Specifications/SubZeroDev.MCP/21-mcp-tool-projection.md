@@ -39,7 +39,7 @@ Every projected description must state:
 - any failure mode that is silent rather than loud
 
 The last one matters more than it looks. Where a command can produce a plausible-looking result from
-malformed input — the todo-to-github plugin's free-form parse that yields empty epics is the worked
+malformed input — the Backlog plugin's free-form parse that yields empty epics is the worked
 example — the description must say so, because the model has no other way to learn it and the user
 will not see a warning they were not shown.
 
