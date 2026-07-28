@@ -45,17 +45,19 @@ are being recorded in ADR-0002:
 
 Remaining work:
 
-- [ ] Record every decision above in
+- [x] Record every decision above in
       `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md`.
-- [ ] Update the specification: reconcile the primary goal with the Phase One
-      discovery scope, remove the configuration-file token option, and drop the
-      packages and releases capability flags.
+- [x] Update the specification to 1.1: reconcile the primary goal with the Phase
+      One discovery scope, remove the configuration-file token option, drop the
+      packages and releases capability flags, bind the counting and summary
+      semantics, and close the questions the ADR answered.
 - [ ] Add a root `.gitattributes` so `npm run format:check` agrees across
       Windows and Linux.
 - [ ] Make the installed-entry-point test portable on Windows without weakening
       Linux symlink coverage.
 - [ ] Add `windows-latest` to the `validate` job matrix.
-- [ ] Define the CLI exit codes, leaving `1` reserved for uncaught exceptions.
+- [x] Define the CLI exit codes, leaving `1` reserved for uncaught exceptions.
+      They are wired through the commands in Milestone 7.
 
 Exit criteria:
 

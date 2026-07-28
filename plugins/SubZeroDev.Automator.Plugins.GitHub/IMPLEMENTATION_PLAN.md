@@ -23,45 +23,56 @@ yet.
 
 ## Review Findings to Resolve First
 
-1. **Repository scope conflicts in the specification.** The primary goal says
+Findings 1 through 7 and 9 through 11 are resolved in specification 1.1 and
+ADR-0002. They are kept here as the record of what was wrong, not as open work.
+Finding 8 remains open and is sequenced in Milestone 0.
+
+1. ~~**Repository scope conflicts in the specification.**~~ The primary goal said
    owned and contributed repositories, while the Phase One discovery section
-   limits work to repositories owned by the authenticated user.
-2. **Authentication policy is incomplete.** The specification permits a token
-   in a configuration file, but storage, redaction, precedence, and safe example
-   files are not defined.
-3. **The API-call budget is undefined.** Exact commit, issue, pull-request,
+   limited work to repositories owned by the authenticated user. The
+   specification now states the destination and the binding Phase One scope
+   separately.
+2. ~~**Authentication policy is incomplete.**~~ The specification permitted a
+   token in a configuration file without defining storage, redaction, precedence,
+   or safe example files. The token now comes from the environment only, and the
+   configuration schema cannot represent one.
+3. ~~**The API-call budget is undefined.**~~ Exact commit, issue, pull-request,
    contributor, tag, branch, and release counts can require many paginated
-   requests per repository.
-4. **Output shape remains open.** Consolidated versus per-project output affects
-   schemas, serializers, cache keys, and atomic writes.
-5. **Portfolio metadata remains open.** Adding it after publishing the first
-   schema would create avoidable schema churn.
-6. **Summary semantics are incomplete.** “Most active repository” needs an
-   exact formula and deterministic tie-breaker.
-7. **GitHub capability mapping needs validation.** GitHub exposes some
+   requests per repository. A numeric budget is recorded below.
+4. ~~**Output shape remains open.**~~ Consolidated versus per-project output
+   affects schemas, serializers, cache keys, and atomic writes. Consolidated
+   only.
+5. ~~**Portfolio metadata remains open.**~~ Adding it after publishing the first
+   schema would create avoidable schema churn. It ships as an optional `custom`
+   object.
+6. ~~**Summary semantics are incomplete.**~~ “Most active repository” needed an
+   exact formula and deterministic tie-breaker. Every selection is now defined
+   and tie-broken by ascending repository identity.
+7. ~~**GitHub capability mapping needs validation.**~~ GitHub exposes some
    capabilities directly, but neither a packages nor a releases capability is a
    repository property, and neither must be invented. The REST repository object
    provides `has_issues`, `has_projects`, `has_wiki`, `has_pages`,
-   `has_downloads`, and `has_discussions`; the specification asks for two flags
-   that do not exist.
+   `has_downloads`, and `has_discussions`; the specification asked for two flags
+   that do not exist. Both are dropped.
 8. **Cross-platform validation is not clean.** Prettier reports line-ending
    changes on the current Windows checkout, and the symlink entry-point test
    requires Windows Developer Mode or elevated symlink permission. Continuous
    integration also runs only on `ubuntu-latest`, so no Windows claim is
    currently enforceable.
-9. **Duplicate specification and decision documents.** The merge that brought
+9. ~~**Duplicate specification and decision documents.**~~ The merge that brought
    `main` into this branch resurrected `setup/docs/`, which the repository rename
    had replaced with `setup-llm/docs/`. Two byte-identical copies of the
    specification and ADR-0001 were tracked at once, so any specification update
    would have silently drifted. Resolved by deleting the `setup/` copies;
    `setup-llm/docs/` is canonical.
-10. **Repository identity is unspecified.** Rename, transfer, and deletion
+10. ~~**Repository identity is unspecified.**~~ Rename, transfer, and deletion
     reconciliation are required, but no immutable identifier was chosen. Keyed on
     `owner/name`, a rename is indistinguishable from a deletion plus an addition.
-11. **This plan and `TODO-next.md` disagreed.** The checklist left decisions open
-    that this plan had closed, closed the output-layout decision differently, and
-    numbered its milestones one step out of alignment. This plan is authoritative
-    for sequencing; the ADR is authoritative for decisions.
+    Identity is now GitHub's immutable numeric ID, namespaced by provider.
+11. ~~**This plan and `TODO-next.md` disagreed.**~~ The checklist left decisions
+    open that this plan had closed, closed the output-layout decision
+    differently, and numbered its milestones one step out of alignment. This plan
+    is authoritative for sequencing; the ADR is authoritative for decisions.
 
 ## Phase One Decisions
 
@@ -135,26 +146,18 @@ Rules:
 
 ## Milestone 0 — Close Decisions and Stabilize the Scaffold
 
-Deliverables:
+Done:
 
-- Add `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md`
-  containing all Phase One boundary decisions. Plugin ADRs live beside the
-  existing ADR-0001 under `setup-llm/docs/decisions/`; nothing is written to the
-  pre-rename `setup/` path.
-- Update the specification so Phase One has no contradictory or open acceptance
-  criteria. In particular, reconcile the primary goal ("owned and contributed")
-  with the Phase One discovery scope ("owned only"), remove the configuration-file
-  token option, and drop the packages and releases capability flags.
-- Realign `TODO-next.md` with this plan's milestone numbering and decisions.
-- Configure repository line-ending behavior through a root `.gitattributes`, which
-  does not yet exist, so `npm run format:check` behaves consistently on Windows
-  and Linux.
-- Make the installed-entry-point test portable on Windows, using a junction,
-  hard link, permission-aware skip, or platform-specific assertion without
-  weakening Linux symlink coverage.
-- Add `windows-latest` to the `validate` job matrix, so the Windows claim below
-  is enforced rather than asserted.
-- Define CLI exit codes:
+- `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md` records
+  all Phase One boundary decisions. Plugin ADRs live beside ADR-0001 under
+  `setup-llm/docs/decisions/`; nothing is written to the pre-rename `setup/` path.
+- Specification 1.1 removes the contradictory and open acceptance criteria: the
+  primary goal and the binding Phase One scope are stated separately, the
+  configuration-file token option is gone, the packages and releases capability
+  flags are dropped, counting and summary semantics are bound, and the questions
+  the ADR answered have moved out of Open Questions.
+- `TODO-next.md` is realigned with this plan's milestone numbering and decisions.
+- CLI exit codes are defined:
   - `0`: success
   - `2`: usage or validation error
   - `3`: operational failure
@@ -163,7 +166,19 @@ Deliverables:
   - `6`: rate-limited before completion
 
   `1` is deliberately unused: Node.js returns it for an uncaught exception, so
-  reserving it keeps a crash distinguishable from a handled failure.
+  reserving it keeps a crash distinguishable from a handled failure. The codes
+  are wired through the commands in Milestone 7.
+
+Remaining:
+
+- Configure repository line-ending behavior through a root `.gitattributes`, which
+  does not yet exist, so `npm run format:check` behaves consistently on Windows
+  and Linux.
+- Make the installed-entry-point test portable on Windows, using a junction,
+  hard link, permission-aware skip, or platform-specific assertion without
+  weakening Linux symlink coverage.
+- Add `windows-latest` to the `validate` job matrix, so the Windows claim below
+  is enforced rather than asserted.
 
 Verification:
 
