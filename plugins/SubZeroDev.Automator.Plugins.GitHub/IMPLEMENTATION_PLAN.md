@@ -565,7 +565,8 @@ Implement:
   discovering them during it. `package.json` currently sets `private: true`,
   which makes `npm publish` refuse outright, and declares neither `license` nor
   `repository`, so a published package would be unlicensed and carry no
-  provenance link. All three are correct for a scaffold and wrong for a release.
+  provenance link. No `LICENSE` file exists in the repository either. All of it
+  is correct for a scaffold and wrong for a release.
 - Decide whether `npm audit --audit-level=high` blocks a release. It runs in CI
   today but is absent from `npm run check`, so a new advisory in a transitive
   dependency can red the branch for reasons unrelated to any pull request.
