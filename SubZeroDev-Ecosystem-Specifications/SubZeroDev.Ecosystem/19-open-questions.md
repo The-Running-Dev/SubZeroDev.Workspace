@@ -5,9 +5,14 @@ and nobody reopens them by accident.
 
 ## Open
 
-Fifteen questions, numbered 0-14. Fourteen are non-blocking; the naming one has a deadline rather
-than a blocker. Each is stated in full in the document that owns it; this is
-the index, so that no question exists only in a document nobody happens to open.
+Fifteen questions, numbered 0-14. **Two are answered** — 11 and 13, struck through below with their
+reasoning kept. Of the thirteen that remain, twelve are non-blocking; question 0, plugin naming, has
+a deadline rather than a blocker.
+
+Each is stated in full in the document that owns it; this is the index, so that no question exists
+only in a document nobody happens to open. Every entry is a numbered list item, so the count can be
+derived rather than asserted — it has been wrong twice, both times because a question was described
+in prose instead of numbered.
 
 The count is stated because this register once claimed one open item while ten had accumulated: each
 had been opened or closed in its own document and nobody reconciled. If you change a question
@@ -53,13 +58,13 @@ anywhere, change it here in the same commit.
 
 ### Backlog plugin — `SubZeroDev.Plugins.Backlog/`
 
-One question remains, and it is counted above as part of the fourteen only if it is numbered — so it
-is numbered here rather than described, which is how the previous count drifted:
+14. Multi-repo targeting: one file per repository as today, or per-epic repository targeting. Assume
+    single-repo unless decided; it is a larger change than it appears.
 
-- Multi-repo targeting: one file per repository as today, or per-epic repository targeting. Assume
-  single-repo unless decided; it is a larger change than it appears. **This is question 14.**
+A numbered list item, not prose. The count above is derived by counting these, and describing a
+question instead of numbering it is how the total drifted twice.
 
-The client-sharing question that used to sit beside it is answered and struck through in
+The client-sharing question that used to sit beside this one is answered and struck through in
 `23-backlog-plugin.md`; see Resolved below.
 
 **The shared-client recommendation has changed.** "Leave it unshared" was defensible with two
@@ -76,15 +81,18 @@ rather than a library interface, demonstrated on a real component. Tracked as W2
 10. **When is `setup-llm/scripts/setup-project.ps1` retired, and does anything migrate?** The plugin
     supersedes it. It works and runs where there is no container. Recommended: deprecate on the
     plugin's first release, delete once the plugin has set up one real project end to end.
-11. Does provisioning cover GitLab, Gitea, and Forgejo behind the provider boundary the Release
-    plugin and WorkItems both anticipate, or is it GitHub-only until a second forge is wanted? The
-    narrower reading is recommended.
+11. ~~Does provisioning cover GitLab, Gitea, and Forgejo, or is it GitHub-only?~~ **Answered:
+    GitHub only, behind a provider interface.** No second implementation until asked. The interface
+    is shaped now because the Release plugin and WorkItems both already anticipate the same
+    boundary, and a boundary three documents expect is cheap to leave room for and expensive to
+    retrofit.
 12. Should a ruleset be a named, reusable policy shared across repositories rather than restated in
     each settings file? Fifteen repositories sharing one policy is the immediate case, and restating
     it fifteen times is exactly the drift this project keeps fixing.
-13. Are the generated `AGENTS.md` and `CLAUDE.md` templated per repository kind, or generated from
-    one source that would let the shared conventions block be checked rather than hand-copied? The
-    second is the more useful answer and the larger piece of work. Related to X13.
+13. ~~Are the generated `AGENTS.md` and `CLAUDE.md` templated per repository kind, or generated from
+    one source?~~ **Answered: one source for the shared conventions block, templated around it.**
+    That hybrid is what makes X13 mechanical rather than a hash comparison run by hand. Templating
+    whole files would produce fifteen independent templates and reproduce the drift with more steps.
 
 **Keeping this list correct is the point.** An earlier version of this section claimed a single open
 question while ten had accumulated in documents written after it — which is the exact failure the

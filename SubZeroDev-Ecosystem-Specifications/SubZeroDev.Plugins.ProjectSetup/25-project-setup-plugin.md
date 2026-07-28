@@ -92,7 +92,11 @@ approval cannot merge anything, and a default that deadlocks the common case get
 rather than tuned.
 
 Rulesets, not classic branch protection — they are what GitHub reports as `GH013 Repository rule
-violations`, they compose, and they are where the platform is going.
+violations`, they compose, and they are where the platform is going. The default is
+`POST /repos/{owner}/{repo}/rulesets` with `target: branch`, `enforcement: active`, and
+`conditions.ref_name.include: ["~DEFAULT_BRANCH"]`, carrying three rules — `deletion`,
+`non_fast_forward`, and `pull_request` with `required_approving_review_count: 0` — plus
+`required_status_checks` only when contexts were actually observed.
 
 ## It supersedes `setup-project.ps1`
 
@@ -262,7 +266,28 @@ repository, which owns the consolidated register:
 - when `setup-project.ps1` is retired, and whether anything migrates
 - whether the remote half covers forges other than GitHub
 - whether a ruleset becomes a named, reusable policy rather than being restated per repository
-- how the generated `AGENTS.md` and `CLAUDE.md` are produced
+- ~~how the generated `AGENTS.md` and `CLAUDE.md` are produced~~ — **answered**, see below
 
 They are indexed rather than duplicated here. A question stated in two places is a question that gets
 answered in one of them.
+
+Two were blocking implementation and are now answered.
+
+**The instruction files are generated from one source, not templated per repository kind.** The
+shared conventions block has a single source file; the plugin emits it and can verify an existing
+copy against it. The repository-specific body around it is templated.
+
+The hybrid is not a compromise — it is the only shape that makes X13 possible. Fifteen repositories
+carry that block today because it was hand-copied, and the only reason it can be checked at all is a
+hash comparison run by hand. One source makes the check mechanical. Templating the whole file would
+produce fifteen independent templates and reproduce the problem with more steps.
+
+The canonical copy states that it _is_ canonical while the repeats name the Architecture repository,
+so generation must know which it is emitting. That one-line difference is deliberate and is recorded
+in the Architecture repository's `AGENTS.md`.
+
+**Forge coverage is GitHub only, behind a provider interface.** No second implementation until
+someone asks for one. The interface is worth shaping now rather than later because two other
+documents already anticipate the same boundary — the Release plugin for forge releases, and
+WorkItems for GitLab, Gitea, and Forgejo — and a boundary three documents expect costs little to
+leave room for and a lot to retrofit.
