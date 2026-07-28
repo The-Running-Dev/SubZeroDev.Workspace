@@ -13,6 +13,27 @@ contradicts both itself and the GitHub plugin work already committed to this bra
 None of that is structural. It is all fixable before implementation, which is the point of
 reviewing now.
 
+## Status: closed
+
+**This is a point-in-time record of the review, not a live list.** It describes the specifications as
+they stood at `6560d98`, and it is kept because the reasoning behind several current decisions only
+makes sense against what came before.
+
+Every finding below is resolved. Every item under _Critical changes_, _Recommended ADRs_, and
+_Decisions needed_ has been actioned or decided:
+
+| Section              | Outcome                                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Findings C1–C16      | All resolved in the documents that own them                                                                                                                                                      |
+| Critical changes 1–7 | All applied                                                                                                                                                                                      |
+| Recommended ADRs     | Contract precedence (`PluginContract/ADR-003`), signing and trust (`ADR-004`), root naming (`Ecosystem/ADR-002`); the remainder folded into the documents rather than raised as separate records |
+| Revised phase plan   | Superseded by `SubZeroDev.Ecosystem/18-roadmap.md`, which now owns phase numbering                                                                                                               |
+| Decisions needed     | All decided; see `19-open-questions.md`                                                                                                                                                          |
+
+Sentences below written in the present tense — "there isn't one", "nothing describes how" — were true
+at review time and are no longer. `19-open-questions.md` is the current state; this document is the
+history.
+
 ---
 
 ## What is right

@@ -28,7 +28,7 @@ rests on an assumption that could change, the document states what would change 
 | Is the local process host in the MVP?                         | No — it cannot enforce declared capabilities                                                                      |
 | Manifest serialization                                        | YAML authoring, canonical JSON for validation and signing                                                         |
 | Is JSON Schema the canonical input/output definition?         | Yes — schemas are normative, generated types are not                                                              |
-| Are multiple runtime implementations allowed in one manifest? | Yes; deterministic selection is still open                                                                        |
+| Are multiple runtime implementations allowed in one manifest? | Yes; resolved by explicit request, then policy, then manifest order                                               |
 | Version compatibility policy                                  | Same major accepted, higher major refused; unknown capability and secret keys refused                             |
 | Exit codes                                                    | One table, in the contract only                                                                                   |
 | Execution states                                              | Six, not thirteen                                                                                                 |
