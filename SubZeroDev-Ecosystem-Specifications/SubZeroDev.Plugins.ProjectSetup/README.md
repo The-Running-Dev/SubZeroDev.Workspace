@@ -1,6 +1,10 @@
 # SubZeroDev Project Setup Plugin
 
-Creates a GitHub repository from a directory, and holds it to a stated configuration afterwards.
+Takes a project from nothing to a working repository: the directory and its files, the agent and
+contributor instructions, the git history, the remote, and the rules protecting it.
+
+Successor to `setup-llm/scripts/setup-project.ps1`, which does the local half and stops short of the
+remote.
 
 | Field     | Value                                        |
 | --------- | -------------------------------------------- |
@@ -43,15 +47,25 @@ the grant, that turns the capability system into paperwork.
 They do share the GitHub client — Octokit construction, the request wrapper, rate limits, retries,
 redaction. Sharing the transport is not the same as sharing the blast radius.
 
+## Two halves, one gate
+
+Local scaffolding is reversible — a directory you did not want is a directory you delete — so
+`scaffold` needs no approval. The remote is not: a name is permanent once anyone links it, and a
+ruleset that fails to apply fails silently. So `plan` and `apply` gate that half and only that half.
+Putting a ceremony around the reversible part is how the gate that matters stops being read.
+
 ## What it does not do
 
 Not deletion, not archival, not collaborators, teams, secrets, or transfers — each is a separate
-access-control surface. Not the local project either: `setup-llm/scripts/setup-project.ps1` already
-builds the directory, files, and first commit. This starts at the remote, which is the step the
-existing tooling stops short of.
+access-control surface. Not workstation setup either: installing tooling, MCP servers, and OS
+dependencies stays in `setup-llm`, which is a machine concern rather than a project one.
 
 ## Status
 
-Specification only. Two open questions, both recorded with recommendations: whether other forges are
-in scope, and whether rulesets become a named shared policy rather than being restated per
-repository.
+Specification only. Four open questions, each recorded with a recommendation: when the PowerShell
+script is retired, whether other forges are in scope, whether rulesets become a named shared policy,
+and how the generated instruction files are produced.
+
+**The name is provisional.** The ecosystem has no plugin naming convention — some plugins are named
+for a provider, some for a domain object, some for an activity — and settling that is free only until
+the first package publishes. Question 0 in the register.

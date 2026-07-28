@@ -243,6 +243,7 @@ Not owned by any single phase.
 | ~~X10~~ | ~~Update `16-repository-layout-and-packaging.md`~~               | —    | **Done.** Move-don't-copy is now a rule, with the two incidents that motivated it                   |
 | ~~X11~~ | ~~Per-repository `README.md`, `AGENTS.md`, and `CLAUDE.md`~~     | —    | **Done.** Every destination repository now carries its own instructions                             |
 | X12     | Retire the numeric filename prefixes when each repository splits | S    | They number one document set, not fifteen — see below                                               |
+| X14     | Settle a plugin naming convention and rename accordingly         | S    | **Before first publish.** No rule connects the current names; free now, expensive after publish     |
 | X13     | Check each repeated conventions block against the canonical copy | S    | A repeated block that nothing compares is a copy that drifts. Suggested in review of PR #13         |
 
 **X12 detail.** The `NN-` prefixes order a single ecosystem-wide document set, and that set no longer

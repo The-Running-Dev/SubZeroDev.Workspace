@@ -66,7 +66,11 @@ Already stated in the plugin contract and repeated here as the general form:
 
 ## Consequences
 
-- Names are settled, so packages can publish without a rename hanging over them.
+- The _root_ and the _forms_ are settled, so packages can publish without a rename hanging over the
+  namespace. **Individual plugin names are not** — this ADR fixes `subzerodev.<name>` as the shape and
+  says nothing about how `<name>` is chosen, and in practice the plugins mix provider names, domain
+  objects, activities, and compounds. That gap is question 0 in `19-open-questions.md`, and the
+  reservation argument below applies to it with the same force.
 - Prefix reservation becomes a prerequisite of the first release rather than an afterthought.
 - `SubZeroDev.Platform` keeps a category word as a product name. Accepted: the cost is occasional
   conversational ambiguity, against the cost of a rename after publication.

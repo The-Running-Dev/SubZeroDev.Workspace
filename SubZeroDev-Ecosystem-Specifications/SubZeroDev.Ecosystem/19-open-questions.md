@@ -5,12 +5,27 @@ and nobody reopens them by accident.
 
 ## Open
 
-Eleven questions, none of them blocking. Each is stated in full in the document that owns it; this is
+Twelve questions. Eleven are non-blocking; the naming one has a deadline rather than a blocker. Each is stated in full in the document that owns it; this is
 the index, so that no question exists only in a document nobody happens to open.
 
 The count is stated because this register once claimed one open item while ten had accumulated: each
 had been opened or closed in its own document and nobody reconciled. If you change a question
 anywhere, change it here in the same commit.
+
+### Settle before first publish
+
+0. **Plugin names have no convention, and every one of them is provisional.** `GitHub` and `Docker`
+   name a provider; `Backlog`, `Package`, and `Release` name a domain object; `Build` names an
+   activity; `ProjectSetup` and `ContainerPSGenerator` are compounds. Each was reasonable alone and
+   no rule connects them.
+
+   This is numbered zero because it is the only open question with a deadline. ADR-002 already argues
+   that a package identifier is effectively permanent once consumers depend on it — a rename after
+   publication means deprecating, republishing, and breaking everyone who did not follow. Nothing has
+   published, so settling it costs nothing today and will not be free again.
+
+   In scope: the whole set, not one plugin. The repository owner has said other plugins may be
+   renamed, so no current name should be treated as fixed.
 
 ### Owned outside this workspace
 

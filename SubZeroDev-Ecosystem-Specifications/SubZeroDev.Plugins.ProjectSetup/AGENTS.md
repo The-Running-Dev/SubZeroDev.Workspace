@@ -1,8 +1,20 @@
 # Working on the Project Setup plugin
 
-Provisions a GitHub repository from a directory and holds it to a stated configuration.
+Takes a project from nothing to a working repository — local files, instructions, git, remote, rules.
+Successor to `setup-llm/scripts/setup-project.ps1`, whose behaviour is the specification for the local
+half; do not invent a second one.
 
-## This plugin's whole job is a write nobody can take back
+**This plugin's name is provisional**, and so are the other plugins'. The ecosystem has no naming
+convention and the owner may rename several. Do not build anything that hardcodes the name where a
+rename would be expensive.
+
+## Gate the half that cannot be undone, and only that half
+
+Local scaffolding is reversible. Generating a directory, a `.gitignore`, a README, and instruction
+files needs no plan token — `scaffold` just does it. Putting an approval ceremony there trains people
+to click through, which is how the gate that matters stops being read.
+
+## The remote half is a write nobody can take back
 
 A repository name is effectively permanent once anyone clones, forks, or links it. A ruleset that
 does not apply fails **silently** — the branch looks protected and is not, and nobody discovers it
@@ -61,9 +73,11 @@ Not deletion, not archival, not transfers, not collaborators or teams, not secre
 is a separate access-control surface, and grouping them here would widen the capability grant far past
 provisioning.
 
-Not the local project either. `setup-llm/scripts/setup-project.ps1` builds the directory, the files,
-and the first commit; this plugin starts at the remote. Compose the two, do not absorb one into the
-other.
+Not workstation setup. Installing tooling, MCP servers, and OS dependencies stays in `setup-llm` —
+that is a machine concern, and it is the half of that toolkit this plugin does not supersede.
+
+Stack detection is not yours either. It is the build plugin's `detect`, per the decision in
+`15-pipeline-composition.md`; carry a minimal version until that exists, then consume it.
 
 ## Before you finish
 
