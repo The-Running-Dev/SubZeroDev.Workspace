@@ -3,6 +3,22 @@
 Derived from the specifications and `REVIEW.md`, ordered by dependency. Sizes are rough: **S** under
 a day, **M** a few days, **L** a week or more.
 
+## Mapping to roadmap phases
+
+`SubZeroDev.Ecosystem/18-roadmap.md` owns phase numbering for the ecosystem. This document numbers
+work packages, and they are not free to drift:
+
+| Work package | Roadmap phase                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| W0           | Phase 0 — contract stabilization                                                                      |
+| W1           | Phase 1 — GitHub plugin to conformance                                                                |
+| W2           | Phase 2 — conformance suite and minimal Platform                                                      |
+| W3           | Phase 3 — Backlog plugin, with MCP projection and WorkItems                                           |
+| W4           | Phase 4 — Automator MVP                                                                               |
+| W5           | Phase 5 — Automator interfaces and the Documentation plugin                                           |
+| W6           | Platform packages beyond the minimal set; the roadmap folds these into Phases 5–8 as consumers appear |
+| W7           | Phases 6–8 — multi-runtime, agents, AI, commercial                                                    |
+
 Build order follows the decision taken: **GitHub plugin → second plugin → Automator MVP.** A
 contract validated by one implementation is a contract fitted to that implementation, and the
 orchestrator has nothing to orchestrate until two things exist.
@@ -70,7 +86,7 @@ Already done on the current branch: scaffold, cross-platform CI, line-ending pol
 
 ---
 
-## W2 — Conformance suite
+## W2 — Conformance suite and minimal Platform
 
 The suite is what makes "use the GitHub plugin as a template" verifiable rather than aspirational.
 It tests the contract, not the copy.
@@ -80,10 +96,17 @@ It tests the contract, not the copy.
 | W2.1 | Conformance runner: takes an image or a local command, runs the nine checks in `04` | M    | W0.2, W0.3 |
 | W2.2 | Fixture plugins: echo, failing, timeout, artifact-producing, secret-leaking         | M    | W2.1       |
 | W2.3 | Wire conformance into plugin CI as a required check                                 | S    | W2.1       |
+| W2.4 | Minimal Platform: Abstractions, Core, Hosting                                       | L    | —          |
+| W2.5 | Minimal Platform: Persistence, Observability, Testing                               | L    | W2.4       |
 
 **W2.2 matters more than it looks.** The secret-leaking and failing fixtures are how you prove the
 suite detects problems rather than merely passing everything you point it at. A conformance suite
 that has never failed is not evidence.
+
+**W2.4 and W2.5 run in parallel with the conformance track**, per roadmap Phase 2. These six packages
+are the ones genuinely hard to retrofit — hosting shape, transaction boundaries, observability
+wiring, and test infrastructure all cost far more to introduce later than to start with. Everything
+else waits for a second consumer.
 
 ---
 
@@ -139,15 +162,19 @@ internal transitions that may not need persisting. Six suffice: `Queued`, `Runni
 
 ---
 
-## W5 — Automator interfaces
+## W5 — Automator interfaces and the Documentation plugin
 
-| ID   | Work                                             | Size | Depends on |
-| ---- | ------------------------------------------------ | ---- | ---------- |
-| W5.1 | REST API over the execution model                | M    | W4.5       |
-| W5.2 | PowerShell client module                         | M    | W5.1       |
-| W5.3 | Sequential workflows                             | L    | W4.5       |
-| W5.4 | Cron scheduling, with an explicit overlap policy | M    | W5.3       |
-| W5.5 | Notifications                                    | M    | W5.3       |
+| ID   | Work                                                                     | Size | Depends on |
+| ---- | ------------------------------------------------------------------------ | ---- | ---------- |
+| W5.1 | REST API over the execution model                                        | M    | W4.5       |
+| W5.2 | PowerShell client module                                                 | M    | W5.1       |
+| W5.3 | Sequential workflows                                                     | L    | W4.5       |
+| W5.4 | Cron scheduling, with an explicit overlap policy                         | M    | W5.3       |
+| W5.5 | Notifications                                                            | M    | W5.3       |
+| W5.6 | Documentation plugin: wrap the existing Docusaurus image in the contract | M    | W2.1       |
+
+**W5.6** is cheap by design: the image already exists, so the work is wrapping it in the contract
+rather than building a capability. It gives the workflow engine a second real plugin to compose.
 
 **W5.4 detail.** The overlap policy — what happens when a schedule fires while the previous run is
 still going — is currently undefined. Skip, queue, or run concurrently are all defensible; silence
@@ -155,23 +182,21 @@ is not.
 
 ---
 
-## W6 — Platform extraction
+## W6 — Platform packages beyond the minimal set
 
-Platform is extracted from a working Automator rather than designed against no consumer. The
-repository exists; this is when it gets filled.
+The minimal Platform — Abstractions, Core, Hosting, Persistence, Observability, Testing — is built in
+W2, alongside the conformance suite. This phase is the remainder.
 
-| ID   | Work                                                                | Size | Depends on |
-| ---- | ------------------------------------------------------------------- | ---- | ---------- |
-| W6.1 | Identify what Automator built that generalizes                      | S    | W5.5       |
-| W6.2 | Extract hosting, configuration, persistence, observability, testing | L    | W6.1       |
-| W6.3 | Prove reuse by building the second consumer on it                   | L    | W6.2       |
+| ID   | Work                                                                     | Size | Depends on |
+| ---- | ------------------------------------------------------------------------ | ---- | ---------- |
+| W6.1 | Identify what Automator built that a second consumer would also want     | S    | W5.5       |
+| W6.2 | Promote configuration, events, notifications, storage, and jobs packages | L    | W6.1       |
+| W6.3 | Prove reuse by building the second consumer on them                      | L    | W6.2       |
 
-**Sequencing note.** The specification in `02` lists 24 packages compared to ABP. Frameworks earn
-their abstractions from the second and third consumer; designed from zero consumers they encode
-guesses. Extraction is mechanical; premature abstraction is not. This ordering was recommended in
-review and is not yet an accepted decision — see Decisions.
-
----
+**The guard, restated because it is the whole risk.** A candidate becomes a package when a _second_
+consumer needs it, not when the first one does. Until then it lives inside Automator, where it is
+cheap to change. Without that guard the minimal six becomes the original twenty-four by increments,
+one reasonable-looking addition at a time.
 
 ## W7 — Later phases
 

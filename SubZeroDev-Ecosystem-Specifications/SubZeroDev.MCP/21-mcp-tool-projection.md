@@ -87,6 +87,9 @@ A 40 MB `projects.json` returned inline is a broken interaction, not a large one
 An MCP tool error is read by a model that must decide what to do next, not by a human reading a
 terminal. The contract's exit codes do not project directly — a model cannot act on `4`.
 
+**The codes' meanings are defined in the contract and not restated here.** The table below is the
+projection: what each outcome becomes on the MCP side.
+
 | Exit         | Tool result                                                                                |
 | ------------ | ------------------------------------------------------------------------------------------ |
 | `0`          | Success                                                                                    |

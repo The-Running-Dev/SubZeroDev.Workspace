@@ -199,7 +199,9 @@ it into every tool description, where it would be both long and prone to drift.
 
 1. **Multi-repo targeting** — one file per repository as today, or per-epic repository targeting.
    Assume single-repo unless decided; it is a much larger change than it appears.
-2. Does this plugin share a GitHub provider library with the GitHub plugin? They point in opposite
-   directions — one reads portfolio metadata, one writes issues — but both need auth, rate limiting,
-   and retry. Recommendation: **no shared library yet.** Two plugins, one provider each; extract only
-   if a third appears, on the same reasoning as Platform extraction.
+2. Does this plugin share a **GitHub provider** library with the GitHub plugin? Note this is a
+   different question from `SubZeroDev.WorkItems`, which it does share and which owns the tracker
+   write path. What is unshared is the lower-level GitHub client — auth, rate limiting, retry — where
+   the two plugins point in opposite directions, one reading portfolio metadata and one writing
+   issues. Recommendation: **leave it unshared.** Extract only if a third consumer appears, on the
+   same second-consumer reasoning the Platform decision uses.

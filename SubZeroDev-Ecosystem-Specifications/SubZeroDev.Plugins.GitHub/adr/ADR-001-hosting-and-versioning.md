@@ -1,4 +1,4 @@
-# ADR-0001: Host SubZeroDev.Automator.Plugins.GitHub as a CLI-First Plugin
+# ADR-001: Host the GitHub Plugin as a CLI-First Plugin
 
 **Status:** Accepted
 **Date:** 2026-07-27

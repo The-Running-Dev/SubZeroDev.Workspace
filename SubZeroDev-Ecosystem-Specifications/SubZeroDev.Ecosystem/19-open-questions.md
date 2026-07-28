@@ -5,12 +5,43 @@ and nobody reopens them by accident.
 
 ## Open
 
-**One item, and it is owned outside this workspace:** the Docker plugin's builder — rootless
-BuildKit, Buildah, or Kaniko — and whether ContainerPSGenerator becomes manifest-driven before or
-after its inference path.
+Ten questions, none of them blocking. Each is stated in full in the document that owns it; this is
+the index, so that no question exists only in a document nobody happens to open.
 
-Everything else is decided and recorded below, or in the document that owns it. Where a decision
-rests on an assumption that could change, the document states what would change it.
+### Owned outside this workspace
+
+1. The Docker plugin's builder — rootless BuildKit, Buildah, or Kaniko. Decides whether Docker socket
+   access is ever granted at all.
+2. Whether ContainerPSGenerator becomes manifest-driven before or after its inference path.
+
+### MCP — `SubZeroDev.MCP/`
+
+3. Does the projection layer ship as one package per language, or a specification with independent
+   implementations? The second is what language-neutrality would predict; the first is less work now.
+4. Should the Automator's brokered server treat direct-mode plugins as upstreams, rather than
+   invoking their CLI? It would work and adds a hop for no obvious gain.
+5. Does the projection cover MCP prompts, or only tools and resources?
+6. Should `outputSchema` become required in the manifest once projection exists? A projected tool is
+   more useful with one.
+7. Does direct mode support authentication at all, or is it strictly single-user local?
+8. Where does the tool-exposure allowlist live for direct mode — plugin configuration, or a flag?
+
+### WorkItems — `SubZeroDev.WorkItems/`
+
+9. Does the library expose tracker providers, or only the model and reconciliation? Sharing the write
+   path is most of the value and most of the coupling.
+10. Should the Requirements Compiler publish directly, or always emit a document and compose? Both
+    are supported; the question is which is the documented default.
+
+### Backlog plugin — `SubZeroDev.Plugins.Backlog/`
+
+Two questions are recorded there with recommendations already attached — multi-repo targeting
+(assume single-repo) and whether the low-level GitHub client is shared with the GitHub plugin (leave
+it unshared). Neither blocks the build plan.
+
+**Keeping this list correct is the point.** An earlier version of this section claimed a single open
+question while ten had accumulated in documents written after it — which is the exact failure the
+register exists to prevent, and it was found by a consistency sweep rather than by anyone noticing.
 
 ## Resolved
 

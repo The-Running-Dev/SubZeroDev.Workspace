@@ -30,6 +30,24 @@ _Decisions needed_ has been actioned or decided:
 | Revised phase plan   | Superseded by `SubZeroDev.Ecosystem/18-roadmap.md`, which now owns phase numbering                                                                                                               |
 | Decisions needed     | All decided; see `19-open-questions.md`                                                                                                                                                          |
 
+### Second pass — consistency sweep
+
+A later sweep, after the MCP, WorkItems, and Backlog documents were added and the GitHub plugin was
+decoupled from the Automator, found six inconsistencies. All are fixed:
+
+| #   | Finding                                                                                                                                                                          | Resolution                                                           |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1   | `WORK-BREAKDOWN.md` still described Platform extraction as an unaccepted recommendation, and had no Platform work at all, while the roadmap places a minimal Platform in Phase 2 | Rewritten to match: six packages in W2, the remainder in W6          |
+| 2   | `19-open-questions.md` claimed one open question while ten had accumulated in documents written after it                                                                         | Register reconciled and indexed by owning document                   |
+| 3   | The README decisions table named Documentation as the second plugin, and listed Platform twice                                                                                   | Rebuilt from the decisions actually taken                            |
+| 4   | The Backlog plugin concluded "no shared library" while `SubZeroDev.WorkItems` exists and owns its tracker write path                                                             | Narrowed to the low-level GitHub client, which genuinely is unshared |
+| 5   | Two GitHub plugin ADR titles carried the superseded `SubZeroDev.Automator.Plugins.GitHub` name                                                                                   | Titles corrected; bodies left as the historical record               |
+| 6   | The MCP projection restated exit-code meanings the contract declares canonical                                                                                                   | Reframed as a projection that defers to the contract for meanings    |
+
+Findings 1 and 2 are the same failure in two places: a decision was taken and one document was not
+brought along. That is what the precedence rule in `PluginContract/adr/ADR-003` and this register
+exist to catch, and in both cases a sweep caught them rather than a reader.
+
 Sentences below written in the present tense — "there isn't one", "nothing describes how" — were true
 at review time and are no longer. `19-open-questions.md` is the current state; this document is the
 history.
