@@ -24,10 +24,20 @@ concurrency:
 
 jobs:
   validate:
-    name: Validate plugin
-    runs-on: ubuntu-latest
+    name: Validate plugin (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Windows is where line endings and the entry-point symlink actually
+      # differ, so a Windows failure must be visible rather than cancelling the
+      # Linux run that would have explained it.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     defaults:
       run:
+        # bash on the Windows runner too, so the smoke tests below are one
+        # script rather than one per platform.
+        shell: bash
         working-directory: plugins/SubZeroDev.Automator.Plugins.GitHub
     steps:
       - name: Check out repository
