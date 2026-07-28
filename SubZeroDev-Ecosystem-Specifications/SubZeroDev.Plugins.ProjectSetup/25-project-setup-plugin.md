@@ -157,7 +157,7 @@ The value is in what you do not have to write down.
 | Language and starters  | Detected stack — `package.json`, `pyproject.toml`, `*.csproj`, `Dockerfile`, `*.psm1` |
 | Topics                 | The same detection                                                                    |
 | License                | The SPDX identifier implied by a `LICENSE` file                                       |
-| Required status checks | **Job names parsed from `.github/workflows/`**                                        |
+| Required status checks | **Observed check contexts, verified** — see below                                     |
 | Default branch         | `main`, or the checked-out branch if the directory is a clone                         |
 
 Two are never inferred silently, because a wrong guess is unsafe rather than merely noisy.
@@ -166,9 +166,32 @@ Two are never inferred silently, because a wrong guess is unsafe rather than mer
 owner's other repositories, states the reason in the rendering, marks a proposed public repository
 unmissably, and lets the apply gate be the confirmation.
 
-**Required status checks.** Only ever a check that a workflow in the directory actually produces. A
-required check nothing produces blocks every pull request permanently and presents as a GitHub outage
-rather than a configuration error.
+**Required status checks.** A required check that nothing produces blocks every pull request
+permanently and presents as a GitHub outage rather than a configuration error. So a check is proposed
+only when its production can be **proven**, and parsing job names does not prove it.
+
+Two things defeat a job-name parser, and this repository contains both:
+
+- **A matrix produces one context per combination**, named from the job's `name:` with the expression
+  expanded. `subzerodev-github-plugin.yml` declares `name: Validate plugin (${{ matrix.os }})` over
+  `[ubuntu-latest, windows-latest]`, so the contexts are `Validate plugin (ubuntu-latest)` and
+  `Validate plugin (windows-latest)`. The job key `validate` is never a context at all.
+- **A path filter suppresses the run entirely.** That same workflow only triggers on changes under
+  `plugins/SubZeroDev.Plugins.GitHub/**`. A pull request touching only documentation produces no
+  context, so requiring one would block it forever.
+
+The algorithm is therefore observation, not parsing:
+
+1. Read the check contexts GitHub actually reported on recent commits to the default branch.
+2. Propose only contexts seen there, and name in the rendering how many runs each was observed in.
+3. Omit any candidate whose production cannot be shown, and say in the rendering that it was omitted
+   and why — silently dropping it is how someone concludes protection is on when it is not.
+4. Where a workflow is path-filtered, the correct answer is usually not a required check at all.
+   Flag it rather than guessing.
+
+On a repository with no history there is nothing to observe, so the honest output is **no required
+checks**, stated as such. A protection rule added later against real contexts is cheap; a repository
+nobody can merge into is not.
 
 ## Settings
 
@@ -179,12 +202,12 @@ Two forms, because they serve different moments:
 - **`.settings.json`** — for anything nested: ruleset shape, per-branch rules, check lists, the
   file-generation manifest.
 
-Both optional, and they may coexist. Resolution follows the contract's configuration precedence — CLI
-option, environment variable, settings file, inferred value, built-in default — with JSON taking
-precedence over text where both define a key, because JSON is the form that can express the nested
-settings and is therefore the more likely to be authoritative.
+Both optional, and they may coexist. Resolution follows the configuration precedence in the plugin
+contract, which owns that rule; this document does not restate the order.
 
-Paths inside a settings file resolve relative to that file, per the contract.
+What is specific to this plugin, and therefore stated here: **JSON takes precedence over text** where
+both define a key, because JSON is the form that can express the nested settings and is the more
+likely to be authoritative. Inferred values sit below both, above the built-in defaults.
 
 ## Naming
 
@@ -227,19 +250,19 @@ plugin does not supersede.
 - Generated `AGENTS.md` and `CLAUDE.md` match the shape this ecosystem's repositories already carry,
   including the shared conventions block
 - A partial application exits `4`, names which actions succeeded, and consumes the plan
-- No token appears in output, logs, errors, or the plan file
+- No **credential** appears in output, logs, errors, or the plan file. The opaque `planId` is
+  different and must be emitted — it travels in the contract's top-level `plan` block, and without it
+  a standalone caller cannot invoke `apply` at all
 
 ## Open questions
 
-1. **When is `setup-project.ps1` retired, and does anything migrate?** It works and runs where there
-   is no container. Recommended: deprecate on this plugin's first release, delete once the plugin has
-   set up one real project end to end.
-2. Does the remote half cover GitLab, Gitea, and Forgejo behind the provider boundary the Release
-   plugin and WorkItems both anticipate, or is it GitHub-only until a second forge is wanted? The
-   narrower reading is recommended.
-3. Should a ruleset be a named, reusable policy shared across repositories rather than restated in
-   each settings file? Fifteen repositories sharing one policy is the immediate case, and restating it
-   fifteen times is the drift this project keeps fixing.
-4. Are the generated `AGENTS.md` and `CLAUDE.md` templated per repository kind, or generated from one
-   source that would let the shared conventions block be checked rather than hand-copied? The second
-   is the more useful answer and the larger piece of work. Related to X13.
+Four, stated in full with their recommendations in `19-open-questions.md` in the Architecture
+repository, which owns the consolidated register:
+
+- when `setup-project.ps1` is retired, and whether anything migrates
+- whether the remote half covers forges other than GitHub
+- whether a ruleset becomes a named, reusable policy rather than being restated per repository
+- how the generated `AGENTS.md` and `CLAUDE.md` are produced
+
+They are indexed rather than duplicated here. A question stated in two places is a question that gets
+answered in one of them.

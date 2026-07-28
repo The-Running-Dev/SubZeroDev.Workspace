@@ -5,8 +5,14 @@ phase vocabulary, the repository layout, the ecosystem testing model, and the op
 register.
 
 **It is also where the cross-repository authoring conventions are canonical.** Every other
-SubZeroDev specification repository repeats the conventions block below verbatim so it can stand
-alone. If the block changes here, it changes everywhere in the same commit.
+SubZeroDev specification repository repeats the conventions block below so it can stand alone. If the
+block changes here, it changes everywhere in the same commit.
+
+**One line differs on purpose.** This copy says "This is the canonical copy"; the repeats name this
+repository instead. Everything from the first bullet onward is byte-identical and is what a
+consistency check should compare — comparing the introductions would require the canonical copy to
+lie about being canonical. A checker that diffs whole sections will flag this; it is the intended
+difference, and X13 should encode it rather than remove it.
 
 ## What belongs here
 

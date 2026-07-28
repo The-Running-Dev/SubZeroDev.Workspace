@@ -8,13 +8,13 @@ Automator's fifteen-item milestone, Platform's package scope, and this roadmap's
 
 ## Decisions this reflects
 
-| Decision           | Choice                                                                  |
-| ------------------ | ----------------------------------------------------------------------- |
-| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred |
-| Build order        | GitHub plugin → Backlog plugin → Automator MVP                          |
-| Second plugin      | Backlog — Python, writes externally, and needs a direct MCP surface     |
-| Local process host | Out of the MVP                                                          |
-| Contract           | Its own repository, tagged independently                                |
+| Decision           | Choice                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred                                                                     |
+| Build order        | GitHub plugin → Backlog plugin → Automator MVP. Project Setup is Phase 2 tooling and does not sit in this sequence                          |
+| Second plugin      | Backlog — Python, writes externally, and needs a direct MCP surface. "Second" means second to validate the contract, not second to be built |
+| Local process host | Out of the MVP                                                                                                                              |
+| Contract           | Its own repository, tagged independently                                                                                                    |
 
 ## Phase 0 — Contract stabilization
 
@@ -57,9 +57,16 @@ chosen because they are the ones genuinely hard to retrofit. Everything else wai
 consumer.
 
 **Project Setup plugin.** Provisioning and governing repositories, built here because it is the first
-consumer that forces the shared GitHub client out of the GitHub plugin — which is the extraction
-guard being satisfied rather than bypassed. It is kept out of Phase 1 because it needs the Octokit
-patterns that Phase 1 establishes.
+consumer that forces the shared GitHub client out of the GitHub plugin — the extraction guard being
+satisfied rather than bypassed. It is kept out of Phase 1 because it needs the Octokit patterns Phase
+1 establishes.
+
+**It does not displace Backlog as the second plugin**, and the two orderings are not in conflict once
+the terms are separated. The build order above is about **validating the contract**: Backlog is
+second because it is Python, writes externally, and needs MCP — the three things the GitHub plugin
+never exercises. Project Setup exercises none of them; it is Node, and it reuses the transport the
+GitHub plugin already established. It is tooling that happens to land in Phase 2 because that is when
+its dependency exists, not a contender for the second-implementation slot.
 
 Note the ordering it cannot escape: it provisions repositories, and one of them is its own. The first
 repositories are created by hand; the plugin exists for everything after, and for reconciling the

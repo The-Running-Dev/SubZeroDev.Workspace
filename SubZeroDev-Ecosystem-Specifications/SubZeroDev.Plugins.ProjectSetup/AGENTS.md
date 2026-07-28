@@ -63,9 +63,11 @@ Two are not safe:
 - **Visibility.** A wrong guess is a disclosure or an obstruction. Propose a value, state the reason
   in the rendering, mark a proposed public repository unmissably, and let the apply gate be the
   confirmation.
-- **Required status checks.** Only ever name a check that a workflow in the directory actually
-  produces. A required check nothing produces blocks every pull request permanently and looks like a
-  GitHub outage rather than a configuration error.
+- **Required status checks.** Propose a check only when its production can be _proven_, by reading
+  the contexts GitHub actually reported on recent default-branch commits. Parsing job names does not
+  prove it: a matrix produces one context per combination named from the expanded `name:`, so the job
+  key is never a context, and a path filter can suppress the run entirely. Both are true of this
+  ecosystem's own workflow. With no history to observe, the honest output is no required checks.
 
 ## Boundaries
 
@@ -76,8 +78,9 @@ provisioning.
 Not workstation setup. Installing tooling, MCP servers, and OS dependencies stays in `setup-llm` —
 that is a machine concern, and it is the half of that toolkit this plugin does not supersede.
 
-Stack detection is not yours either. It is the build plugin's `detect`, per the decision in
-`15-pipeline-composition.md`; carry a minimal version until that exists, then consume it.
+Stack detection is not yours either. It is the build plugin's `detect`, per the decision recorded in
+`15-pipeline-composition.md` in the **`SubZeroDev.Ecosystem`** repository; carry a minimal version
+until that exists, then consume it.
 
 ## Before you finish
 
@@ -85,8 +88,9 @@ Stack detection is not yours either. It is the build plugin's `detect`, per the 
 - The manifest declares no capability the commands do not exercise.
 - No required check is named that no workflow produces.
 - A repository already matching its settings plans zero actions.
-- No token in output, logs, errors, or the plan file — the plan file especially, since it persists on
-  disk between two invocations.
+- No **credential** in output, logs, errors, or the plan file — the plan file especially, since it
+  persists on disk between two invocations. The opaque `planId` is the opposite: it must be emitted,
+  in the contract's top-level `plan` block, or `apply` cannot be invoked at all.
 
 ## What the plugin contract already decides
 

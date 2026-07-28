@@ -199,9 +199,18 @@ it into every tool description, where it would be both long and prone to drift.
 
 1. **Multi-repo targeting** — one file per repository as today, or per-epic repository targeting.
    Assume single-repo unless decided; it is a much larger change than it appears.
-2. Does this plugin share a **GitHub provider** library with the GitHub plugin? Note this is a
-   different question from `SubZeroDev.WorkItems`, which it does share and which owns the tracker
-   write path. What is unshared is the lower-level GitHub client — auth, rate limiting, retry — where
-   the two plugins point in opposite directions, one reading portfolio metadata and one writing
-   issues. Recommendation: **leave it unshared.** Extract only if a third consumer appears, on the
-   same second-consumer reasoning the Platform decision uses.
+2. ~~Does this plugin share a **GitHub provider** library with the GitHub plugin?~~ **Answered: no,
+   not with this plugin.**
+
+   This was always a different question from `SubZeroDev.WorkItems`, which this plugin does share and
+   which owns the tracker write path. What was in question is the lower-level GitHub client — auth,
+   rate limiting, retry — where the two plugins point in opposite directions, one reading portfolio
+   metadata and one writing issues.
+
+   The original recommendation was to leave it unshared and extract only if a third consumer
+   appeared. **A third and fourth appeared**: the Project Setup and Release plugins. The extraction
+   guard's condition is met, and the client is now shared among the _Node_ consumers.
+
+   This plugin is not one of them. It is Python, and a library cannot cross that boundary, so it
+   keeps its own client — which is the answer this question was really asking for. Tracked as W2.6;
+   the reasoning is in `19-open-questions.md` in the Architecture repository.

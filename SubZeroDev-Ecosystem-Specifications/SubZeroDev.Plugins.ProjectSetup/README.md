@@ -32,7 +32,8 @@ sz-setup plan  --path ./SubZeroDev.MCP     # read-only; prints the diff and a pl
 sz-setup apply --plan-id 7f3c9a12b8e04d65  # takes the token and nothing else
 ```
 
-Nothing reaches GitHub without a human seeing the specific change first. Creating a repository is
+The `plan` command prints the opaque plan ID; `apply` takes it and nothing else. Nothing reaches
+GitHub without a human seeing the specific change first. Creating a repository is
 effectively permanent once anyone clones, forks, or links it, and a ruleset that fails to apply fails
 silently — so the approval is structural rather than a documented convention.
 

@@ -118,6 +118,12 @@ met several times over. The language boundary limits what sharing can mean: the 
 share a package, and Backlog keeps its own Python path. That the answer differs by language is itself
 the argument for the contract being a process boundary rather than a library.
 
+**W2.7 is not the second plugin.** It lands in Phase 2 because W2.6 is where its dependency appears,
+not because it displaces Backlog. The build order — GitHub → Backlog → Automator — is about which
+implementation validates the contract, and Backlog holds that slot because it is Python, writes
+externally, and needs MCP. Project Setup is Node and reuses the transport the GitHub plugin
+established, so it tests nothing new about the contract.
+
 **W2.7 cannot provision its own repository.** The first repositories are created by hand; the plugin
 exists for the ones after, and for reconciling drift in all of them.
 
