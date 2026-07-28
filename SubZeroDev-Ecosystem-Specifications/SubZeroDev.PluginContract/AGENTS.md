@@ -72,10 +72,15 @@ it sat in the repository for several commits.
 
 `17-conformance.md` is authoritative for the check list; `04`'s list is a summary that follows it.
 
-Three envelope rules cannot be expressed in JSON Schema — the 256 KiB cap on `data`, `finishedAt`
-ordering, and `errors` being non-empty on a failed or partial status. They live in the suite as C3b
-or they live nowhere. When you add a rule the schema cannot enforce, put it in the suite in the same
-commit, or it is decoration.
+Two envelope rules cannot be expressed in JSON Schema — the 256 KiB cap on `data` and `finishedAt`
+ordering. They live in the suite as C3b or they live nowhere. When you add a rule the schema cannot
+enforce, put it in the suite in the same commit, or it is decoration.
+
+**Be sure it really cannot be expressed before delegating it.** A third rule — non-empty `errors` on
+a failed or partial status — was sent to the suite on the assumption that a constraint conditioned on
+a sibling field was inexpressible. It was not: the schema already branches on `status`, and the same
+branch carries `minItems`. A rule pushed to the suite unnecessarily is a rule that every
+schema-validating host silently skips.
 
 **The suite needs fixtures that make it fail.** `leaky`, `noisy`, `nondeterministic`, and `traversal`
 exist to prove the checks detect what they claim. A suite that passes everything it is pointed at is

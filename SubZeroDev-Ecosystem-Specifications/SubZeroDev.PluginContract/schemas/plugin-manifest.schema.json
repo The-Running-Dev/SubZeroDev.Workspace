@@ -68,8 +68,8 @@
     "relativePath": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$",
-      "description": "Relative path confined to its directory. Rejects absolute paths and any .. traversal segment."
+      "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|[/\\\\])\\.\\.([/\\\\]|$)).+$",
+      "description": "Relative path confined to its directory. Both separators are refused as a leading character and as traversal, because the contract supports Windows plugins: this rejects /etc/passwd, \\\\server\\share, C:\\secret, ../etc, and a\\..\\b alike."
     },
 
     "command": {

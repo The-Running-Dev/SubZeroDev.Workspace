@@ -21,10 +21,11 @@ Automator's fifteen-item milestone, Platform's package scope, and this roadmap's
 Blocking. Small.
 
 - Create the contract repository and tag `v1.0.0`
-- Publish the manifest and result-envelope schemas at version-pathed URLs
+- Publish the manifest and result-envelope schemas at version-pathed URLs. Both are written and
+  validated; what remains is publishing them
 - Manifest canonicalization: YAML authoring, restricted profile, canonical JSON for validation
 - Schema test suite, including the negative corpus
-- Resolve naming, ADR numbering, and remaining specification contradictions
+- Resolve remaining specification contradictions. Naming and ADR numbering are settled
 - **Reserve the `SubZeroDev.*` identifiers** on NuGet, npm, the container registry, and PowerShell
   Gallery. Free, and it has to happen before the first publish rather than after the first
   collision — see `adr/ADR-002`
@@ -46,7 +47,8 @@ mocks that encode the same assumptions as the code.
 
 Two tracks that do not block each other.
 
-**Conformance suite:** the runner, the nine checks, and the fixture plugins — including the leaky,
+**Conformance suite:** the runner, the checks specified in the contract's `17-conformance.md`, and
+the fixture plugins — including the leaky,
 noisy, nondeterministic, and traversing fixtures that must _fail_, because a suite that has never
 failed is not evidence.
 
@@ -85,7 +87,9 @@ Two shared pieces land here because this is the first plugin that needs them:
 - **`SubZeroDev.MCP`** — the manifest-to-tool projection, used by this plugin's direct server and
   later by the Automator's brokered one.
 - **`SubZeroDev.WorkItems`** — the work-item model, stable IDs, reconciliation, and tracker
-  providers, extracted as the Requirements Compiler will consume the same code in Phase 7.
+  providers, extracted because the Requirements Compiler consumes the same code in Phase 7.
+  Providers are in scope: convergence _is_ the write path, and reconciliation that cannot execute its
+  own actions hands each consumer the half where all four known bugs lived.
 
 Extracting `WorkItems` now rather than later is the one place the second-consumer rule is applied
 early, and deliberately: the second consumer is already specified, and the alternative is writing
@@ -122,7 +126,9 @@ PostgreSQL, and object storage.
 
 ## Phase 7 — AI and project workflow
 
-Requirements Compiler, GitHub project publishing, MCP, approval steps, and AI provider policy.
+Requirements Compiler, GitHub project publishing, approval steps, and AI provider policy. MCP is not
+new here — the projection ships in Phase 3 and the Automator's brokered endpoint in Phase 5; this
+phase consumes both.
 
 ## Phase 8 — Commercial platform
 

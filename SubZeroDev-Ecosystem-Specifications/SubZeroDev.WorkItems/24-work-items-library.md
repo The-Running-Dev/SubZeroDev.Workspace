@@ -104,8 +104,19 @@ sharing: the expensive test is written once.
 
 ## Open questions
 
-1. Does the library expose tracker providers, or only the model and reconciliation, leaving each
-   plugin its own write path? Sharing the write path is most of the value; it is also most of the
-   coupling.
+1. ~~Does the library expose tracker providers, or only the model and reconciliation?~~ **Resolved:
+   the library owns them**, as What the library owns already states. The question is struck because
+   the document answered it in one section and asked it in another, and three downstream documents —
+   the roadmap's Phase 3, work package W3.3, and this repository's `AGENTS.md` — had each read a
+   different half.
+
+   The deciding argument is that **convergence _is_ the write path.** Reconciliation that cannot
+   execute its own actions hands each plugin the half where all four known bugs lived. The coupling
+   is real and accepted: a provider change now affects both consumers, and the library's release
+   cadence becomes a shared constraint.
+
+   What stays out is the **approval gate**, not the write. The library supplies the plan and can
+   execute it; only the calling plugin issues and checks the token that authorizes execution.
+
 2. Should the Requirements Compiler publish directly, or always emit a document and compose? Both are
    supported by this design; the question is which is documented as the default.

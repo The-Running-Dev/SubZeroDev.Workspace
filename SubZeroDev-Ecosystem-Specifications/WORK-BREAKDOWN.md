@@ -36,7 +36,7 @@ exist as a tagged artifact before anything can pin it.
 | W0.2     | Publish `plugin-manifest.schema.json` at a versioned path and tag `v1.0.0`              | S    | W0.1       |
 | ~~W0.3~~ | ~~Add `result-envelope.schema.json`~~ — **done**, authored and validated in place       | —    | —          |
 | W0.4     | Manifest canonicalization: YAML → canonical JSON, with a restricted YAML profile        | M    | W0.2       |
-| W0.5     | Schema test suite: the reference manifest validates, and each negative case is rejected | S    | W0.2       |
+| W0.5     | Schema test suite for both schemas: every positive case accepts, every negative rejects | S    | W0.2       |
 
 **W0.4 detail.** YAML is the authoring format and JSON is what gets validated and eventually signed.
 The restricted profile matters because manifests will eventually be loaded from untrusted third
@@ -50,10 +50,9 @@ positive and twenty-seven negative cases. Every negative case rejects and every 
 accepts, under ajv strict mode. Those checks should become committed tests rather than one-offs, and
 W0.5 is that work.
 
-**Three envelope rules are not expressible in JSON Schema** and belong to the conformance suite
-instead: the 256 KiB cap on `data`, `finishedAt` being at or after `startedAt`, and a `failed` or
-`partial` status carrying at least one entry in `errors`. They are listed in the contract's
-conformance section so they are not lost between the schema and the suite.
+**Two envelope rules are not expressible in JSON Schema** and belong to the conformance suite
+instead: the 256 KiB cap on `data`, and `finishedAt` being at or after `startedAt`. They are listed
+in the contract's conformance section so they are not lost between the schema and the suite.
 
 ---
 
@@ -84,12 +83,12 @@ contract.
 against mocks that encode the same assumptions as the code. It is deliberately placed before the
 expensive statistics and cache work.
 
-**W1.7 supersedes the fixed request budget** in ADR-0002. Collection profiles make API cost an
+**W1.7 supersedes the fixed request budget** in the GitHub plugin's ADR-002. Collection profiles make API cost an
 explicit user choice rather than an implementer's constant, which is the better design and came from
 the ChatGPT draft.
 
-Already done on the current branch: scaffold, cross-platform CI, line-ending policy, specification
-1.1, and ADR-0002.
+Already merged to `main`: scaffold, cross-platform CI, line-ending policy, specification 1.1,
+and the GitHub plugin's ADR-002.
 
 ---
 
@@ -207,8 +206,9 @@ one reasonable-looking addition at a time.
 
 ## W7 — Later phases
 
-Multi-runtime hosts, remote agents, DAG workflows, PostgreSQL and object storage, MCP, approvals,
-and the commercial layer. Specified in the roadmap; not broken down until W4 exists, because the
+Multi-runtime hosts, remote agents, DAG workflows, PostgreSQL and object storage, the Automator's
+brokered MCP endpoint, approval steps, and the commercial layer. The MCP **projection** is not here —
+it ships in W3 with the first plugin that needs it. Specified in the roadmap; not broken down until W4 exists, because the
 breakdown would be guesswork.
 
 ---
@@ -220,8 +220,8 @@ Not owned by any single phase.
 | ID      | Work                                                             | Size | Notes                                                                                               |
 | ------- | ---------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------- |
 | ~~X1~~  | ~~Split `07`, `11`, `17` by destination repository~~             | —    | **Done.** Also split `08` and the five build-tooling plugins                                        |
-| X2      | Renumber ADRs per repository once split                          | S    | Two sequences currently exist with different zero-padding                                           |
-| X3      | Retire the superseded contract draft under `setup-llm/`          | S    | Superseded by `04`; ADR-0003 there needs marking                                                    |
+| ~~X2~~  | ~~Renumber ADRs per repository once split~~                      | —    | **Done.** Filenames, titles, and status format now agree; each ADR records its former number        |
+| ~~X3~~  | ~~Retire the superseded contract draft under `setup-llm/`~~      | —    | **Done.** Nothing about the ecosystem remains there; it holds workstation-toolkit docs only         |
 | ~~X4~~  | ~~Signing ADR: mechanism, trust root, verification, revocation~~ | —    | **Done.** `PluginContract/adr/ADR-004`; all four trust levels now establishable                     |
 | ~~X5~~  | ~~Orphan-execution handling~~                                    | —    | **Designed** in `07-execution-events-and-artifacts.md`: lease, heartbeat, terminal `Orphaned` state |
 | ~~X6~~  | ~~Artifact identity on deterministic re-run~~                    | —    | **Decided**: content-addressed blob, per-execution record                                           |
@@ -231,6 +231,7 @@ Not owned by any single phase.
 | ~~X10~~ | ~~Update `16-repository-layout-and-packaging.md`~~               | —    | **Done.** Move-don't-copy is now a rule, with the two incidents that motivated it                   |
 | ~~X11~~ | ~~Per-repository `README.md`, `AGENTS.md`, and `CLAUDE.md`~~     | —    | **Done.** Every destination repository now carries its own instructions                             |
 | X12     | Retire the numeric filename prefixes when each repository splits | S    | They number one document set, not fifteen — see below                                               |
+| X13     | Check each repeated conventions block against the canonical copy | S    | A repeated block that nothing compares is a copy that drifts. Suggested in review of PR #13         |
 
 **X12 detail.** The `NN-` prefixes order a single ecosystem-wide document set, and that set no longer
 exists. Six files are numbered `15`, and `07`, `08`, `10`, `11`, and `17` each appear in two
@@ -246,11 +247,19 @@ doing.
 
 ## Decisions still needed
 
-One, and it is owned outside this workspace: the Docker plugin's builder, and ContainerPSGenerator's
-generation path.
+**Two are owned outside this workspace** and block their own plugins rather than the critical path:
+the Docker plugin's builder (X7) and ContainerPSGenerator's generation path (X8).
 
-Everything else is decided. `SubZeroDev.Ecosystem/19-open-questions.md` records the full set, and
-each document states what would change a decision that rests on an assumption.
+**Nine remain open inside it**, none blocking Phase 1: six on MCP — how the projection layer ships,
+whether the Automator brokers direct plugins as upstreams, whether prompts are projected, whether
+`outputSchema` becomes required, whether direct mode authenticates, and where the exposure allowlist
+lives; one on WorkItems — whether the Requirements Compiler publishes directly or composes; and two
+on the Backlog plugin — multi-repository targeting, and whether it shares a GitHub provider library
+with the GitHub plugin.
+
+`SubZeroDev.Ecosystem/19-open-questions.md` is the consolidated register and must agree with the sum
+of the per-document lists. It once claimed one open item while ten had accumulated, which is why the
+count is stated here rather than described.
 
 ## Critical path
 
@@ -261,6 +270,6 @@ W0.1 → W0.2 → W1.1 → W1.2 → W1.5 → W1.6 → W1.9 → W1.12 → W1.14 �
 W2.1 must land before W1.14, and can be built in parallel with W1.5 onward. Everything in W5 and W6
 sits off the critical path until W4.5 completes.
 
-The two steps that most reduce risk are **W1.6**, the first run against a real account, and **W3.3**,
+The two steps that most reduce risk are **W1.6**, the first run against a real account, and **W3.11**,
 the list of things the second plugin proved the contract got wrong. Both are cheap; both prevent
 expensive rework.

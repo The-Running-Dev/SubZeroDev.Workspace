@@ -43,8 +43,16 @@ is recorded there, or it has no home.
 
 ## Invariants
 
-- **The dependency direction is one-way.** Platform → Automator → plugins. Platform never depends on
-  Automator or on a plugin. A document that implies otherwise is wrong, whichever document it is.
+- **The dependency direction is one-way: plugins → Automator → Platform.** Each layer depends on the
+  one beneath it and never the reverse. Platform never depends on Automator or on a plugin, and a
+  document that implies otherwise is wrong, whichever document it is.
+
+  Note the arrow. `01-ecosystem-architecture.md` and the READMEs draw the stack top-down as
+  `Platform → Automator → plugins`, which is **layering**, not dependency — the arrow points from the
+  thing depended on toward the thing that depends on it. Label whichever one you mean; the two point
+  opposite ways and reversing them turns the invariant into an instruction to add the forbidden
+  reference.
+
 - **The plugin contract sits outside that stack.** It is depended on by the Automator and by every
   plugin, and depends on nothing.
 - **The Platform extraction guard.** A capability becomes a Platform package when a _second_ consumer

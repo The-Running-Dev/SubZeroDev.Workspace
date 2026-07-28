@@ -28,34 +28,42 @@ two items are the same item and what changed.
 is not a key; a title changes. Reconciliation keyed on anything mutable turns a rename into a delete
 plus an add, which is how a sync destroys history.
 
+**Tracker providers, with GitHub first.** GitLab, Gitea, and Forgejo are the same shape and slot in
+behind the same interface.
+
+Providers are in scope because **convergence _is_ the write path.** Reconciliation that cannot
+execute its own actions hands each consumer the half where all four known bugs lived. The coupling
+that buys is real and accepted: a provider change affects both consumers, and this library's release
+cadence becomes a shared constraint.
+
 ## What does not belong here
 
-**Anything that writes.** Publishing, issue creation, API calls. A library that reconciles and also
-publishes has no seam a caller can approve at, and both consumers need the plan-apply gate — which
-lives in the calling plugin, where the token can be issued and checked.
+**The approval gate.** The library supplies the plan and can execute it; only the calling plugin
+issues and checks the token that authorizes execution. That separation is what keeps a seam for a
+human — a library that decided who may apply would remove it.
 
-**Tracker-specific knowledge**, unless the open question below settles the other way.
+**Parsing** — the Backlog plugin's markdown parser stays there. **AI** — prompts, provider
+abstraction, and classification stay in the Requirements Compiler. **Plugin concerns** — manifest,
+envelope, exit codes, CLI, MCP — are contract-level, and a library has none of them.
 
-## The open question that shapes this repository
+## The open question that remains
 
-**Does the library expose tracker providers, or only the model and reconciliation, leaving each
-plugin to talk to its own tracker?**
+**Whether the Requirements Compiler publishes directly, or always emits a document and composes with
+the Backlog plugin.** It is recorded here because it changes what this library must support, but it
+is the Requirements Compiler's to answer.
 
-This is the boundary decision for the repository and it is unresolved. Until it is answered, prefer
-the narrower reading — model and reconciliation only. A library that starts narrow and grows is
-ordinary; one that starts broad and has to be split has already been depended on.
+The tracker-provider question is **closed** — see the Open questions section of
+`24-work-items-library.md`. It was open in one section of that document while another section
+answered it, and three downstream documents had each read a different half.
 
-The second open question — whether the Requirements Compiler publishes directly or always emits a
-document and composes — is recorded here because it affects what this library must support, but it is
-the Requirements Compiler's to answer.
-
-When either is answered, record it here **and** reconcile `19-open-questions.md` in the Architecture
-repository in the same commit.
+When the remaining question is answered, record it here **and** reconcile `19-open-questions.md` in
+the Architecture repository in the same commit.
 
 ## Before you finish
 
-- Check that nothing you added performs a write.
 - Check that no reconciliation path keys on a mutable field.
+- Check that nothing you added decides **who may apply** a plan. Executing one is this library's job;
+  authorizing one is not.
 
 ## Conventions
 

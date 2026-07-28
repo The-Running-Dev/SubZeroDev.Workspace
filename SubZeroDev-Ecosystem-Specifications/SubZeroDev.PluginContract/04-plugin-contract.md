@@ -338,9 +338,14 @@ ordering and comparison free of timezone handling.
 plugin-shaped and invisible to a generic host, which defeats the point of a structural gate — a host
 must be able to see that an approval is pending without knowing what the plugin does.
 
-Three envelope rules are not expressible in JSON Schema and belong to the conformance suite instead:
-the 256 KiB cap on `data`, `finishedAt` being at or after `startedAt`, and a `failed` or `partial`
-status carrying at least one entry in `errors`.
+Two envelope rules are not expressible in JSON Schema and belong to the conformance suite instead:
+the 256 KiB cap on `data`, and `finishedAt` being at or after `startedAt`.
+
+A third — a `failed` or `partial` status carrying at least one entry in `errors` — was written off as
+inexpressible and is not. The schema already branches on `status` to constrain `exitCode`, so the same
+conditional carries `minItems: 1` on `errors`. It is enforced in the schema, which matters because a
+host validating against the schema alone would otherwise accept a failure that says nothing about
+why.
 
 ### `data` is bounded
 
@@ -560,9 +565,8 @@ and is authoritative for the check list; this is the summary of what it asserts:
 2. `--help` and `--version` exit 0; an unknown command exits 2.
 3. In JSON mode, stdout parses as exactly one JSON document — the check that catches a stray log
    line — and that document validates against the result-envelope schema.
-4. The envelope satisfies the three rules the schema cannot express: `data` is at most 256 KiB
-   serialized, `finishedAt` is at or after `startedAt`, and a `failed` or `partial` status carries at
-   least one entry in `errors`.
+4. The envelope satisfies the two rules the schema cannot express: `data` is at most 256 KiB
+   serialized, and `finishedAt` is at or after `startedAt`.
 5. Every declared artifact appears where declared and validates against its schema, and every
    `artifacts[]` entry in the envelope matches the file on disk in size and digest.
 6. Declared exit codes are produced for their conditions, and the envelope's `exitCode` equals the

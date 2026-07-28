@@ -23,17 +23,23 @@ The cost, taken knowingly: it binds both consumers to Python.
 
 ## Scope
 
-**In:** the work-item model, immutable provider-issued identity, states, and the reconciliation that
-decides whether two items are the same item and what changed.
+**In:** the work-item model, immutable provider-issued identity, states, markers and content hashing,
+the reconciliation that decides whether two items are the same item and what changed, plan rendering,
+and the tracker providers that execute a plan — GitHub first, with GitLab, Gitea, and Forgejo the
+same shape behind the same interface.
 
-**Out:** anything that writes. Publishing and issue creation stay in the calling plugin, where the
-plan-apply approval gate can issue and check a token. A library that reconciles _and_ publishes
-leaves the caller no seam to approve at.
+Providers are in scope because convergence _is_ the write path. Reconciliation that cannot execute
+its own actions hands each consumer the half where all four known bugs lived. The coupling is real
+and accepted.
+
+**Out:** the approval gate. The library supplies the plan and can execute it; only the calling plugin
+issues and checks the token that authorizes execution — which is what keeps a seam for a human. Also
+out: parsing, AI, and every plugin-level concern (manifest, envelope, exit codes, CLI, MCP).
 
 ## Open questions
 
-Whether the library exposes tracker providers or only the model and reconciliation is unresolved, and
-it is the boundary decision for this repository. Until it is settled, the narrow reading applies.
+One: whether the Requirements Compiler publishes directly or always emits a document and composes
+with the Backlog plugin. The tracker-provider scope question is closed.
 
 ## Status
 
