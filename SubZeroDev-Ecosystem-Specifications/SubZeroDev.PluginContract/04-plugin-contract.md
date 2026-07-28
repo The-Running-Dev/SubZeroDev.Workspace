@@ -398,6 +398,46 @@ Rules:
 - Commands creating external resources should support an idempotency key where the provider allows
   one.
 
+## The plan-apply pattern
+
+Where a command writes to a system outside the plugin's own storage, the write is gated by a token
+from a prior read-only call.
+
+1. A read-only command computes what would change and returns an opaque `planId` — random, not a
+   hash of the content — plus a rendering a human can review.
+2. The write command takes **only** the `planId`. No target, no content, nothing that would let it
+   act without a plan.
+3. A plan is single-use, TTL-bounded, and carries a fingerprint of the state it was computed
+   against.
+4. The write refuses a plan that is unknown, expired, already used, or whose target has changed since
+   the plan was taken.
+
+The fingerprint check is the one most often skipped and the one that matters: between plan and apply,
+someone may have changed the target by hand. Applying a stale diff over their change is worse than
+refusing.
+
+**Why this is in the contract rather than in each plugin.** Three plugins already need it, expressed
+three different ways — the release plugin's dry-run default, the package plugin's refuse-on-mismatch,
+and the Requirements Compiler's compile-approve-publish. It is one pattern, and a second plugin faces
+the same question, which is the test ADR-003 sets.
+
+It also stops being optional under MCP. A prose instruction to stop and wait for approval works when
+documentation is loaded alongside; a different client's model never reads it. The gate must be
+structural or it does not exist — and an instruction injected into the plugin's input cannot
+fabricate a plan token.
+
+`--dry-run` remains required for side-effecting commands. Plan-apply is the stronger form, for
+writes where seeing the diff first is not merely polite.
+
+## Optional MCP surface
+
+A plugin may implement an `mcp` command, serving its own commands over the Model Context Protocol so
+an AI client can reach it directly. The tool surface is **projected from the manifest**, never
+hand-written.
+
+It is optional: a plugin without it is fully conforming and remains reachable through the Automator's
+brokered MCP server, which projects the same manifest. Specified in `SubZeroDev.MCP/`.
+
 ## Cancellation
 
 Hosts propagate cancellation by signal, container stop, or an agent request. Plugins should clean up

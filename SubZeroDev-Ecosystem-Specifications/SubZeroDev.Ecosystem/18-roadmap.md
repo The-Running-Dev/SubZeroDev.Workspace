@@ -8,13 +8,13 @@ Automator's fifteen-item milestone, Platform's package scope, and this roadmap's
 
 ## Decisions this reflects
 
-| Decision           | Choice                                                                      |
-| ------------------ | --------------------------------------------------------------------------- |
-| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred     |
-| Build order        | GitHub plugin → Documentation plugin → Automator MVP                        |
-| Second plugin      | Documentation — cheapest real contract test, since the image already exists |
-| Local process host | Out of the MVP                                                              |
-| Contract           | Its own repository, tagged independently                                    |
+| Decision           | Choice                                                                     |
+| ------------------ | -------------------------------------------------------------------------- |
+| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred    |
+| Build order        | GitHub plugin → todo-to-github plugin → Automator MVP                      |
+| Second plugin      | todo-to-github — Python, writes externally, and needs a direct MCP surface |
+| Local process host | Out of the MVP                                                             |
+| Contract           | Its own repository, tagged independently                                   |
 
 ## Phase 0 — Contract stabilization
 
@@ -54,16 +54,34 @@ failed is not evidence.
 chosen because they are the ones genuinely hard to retrofit. Everything else waits for a second
 consumer.
 
-## Phase 3 — Documentation plugin
+## Phase 3 — todo-to-github plugin
 
 The second plugin, and the point of it is not the plugin.
 
-The Docusaurus image already exists, so the work is wrapping an existing capability in the contract
-rather than building a new one — which is exactly what makes it a good test. A contract validated by
-one implementation is a contract fitted to that implementation.
+**This supersedes the earlier choice of the Documentation plugin.** Documentation was picked as the
+cheapest contract test, since its image already exists. todo-to-github is a better one for the same
+cost, and the difference is what it exercises:
 
-**The deliverable is the list of things the contract got wrong**, and a contract `1.1.0` cut from it.
-The working plugin is the means.
+|                 | Documentation             | todo-to-github                                      |
+| --------------- | ------------------------- | --------------------------------------------------- |
+| Language        | Node, as the first plugin | **Python** — a real test of language neutrality     |
+| Direction       | Builds a site             | **Writes to a system other people see**             |
+| Idempotency     | Rebuild is cheap          | **Convergence is its whole design**                 |
+| Partial failure | Rare                      | **Expected on a large file**                        |
+| Approval        | Not needed                | **Plan-apply, structurally enforced**               |
+| MCP             | Not needed                | **First plugin needing a direct AI-client surface** |
+
+It also arrives with a working implementation and 115 passing tests, so the contract is tested
+against real code rather than against a design written to fit it.
+
+The Documentation plugin remains valuable and moves to Phase 5, where wrapping an existing image is
+straightforward once the contract has been proven twice.
+
+**The deliverable is still the list of things the contract got wrong**, and a contract `1.1.0` cut
+from it. The working plugin is the means.
+
+The MCP projection layer lands here too, because this is the first plugin that needs it — see
+`SubZeroDev.MCP/`.
 
 ## Phase 4 — Automator MVP
 
@@ -77,10 +95,17 @@ The working plugin is the means.
 No local process host, no REST, no workflows, no scheduling. This phase proves the orchestration
 model; it is not the product.
 
-## Phase 5 — Automator interfaces
+## Phase 5 — Automator interfaces and the Documentation plugin
 
 REST API, PowerShell client, sequential workflows, cron scheduling with an explicit overlap policy,
 and notifications through Platform.
+
+The Documentation plugin lands here: wrapping the existing Docusaurus image is straightforward once
+the contract has been exercised twice, and it gives the workflow engine a second real plugin to
+compose.
+
+The Automator's brokered MCP server also lands here, consuming the projection layer built in
+Phase 3 rather than reimplementing it.
 
 ## Phase 6 — Multi-runtime and remote agents
 
@@ -106,7 +131,7 @@ control process, enterprise SSO, automatic destructive reconciliation.
 ## Critical path
 
 ```text
-Phase 0 → GitHub to conformance → Documentation plugin → contract 1.1 → Automator MVP
+Phase 0 → GitHub to conformance → todo-to-github plugin → contract 1.1 → Automator MVP
 ```
 
 The two steps that most reduce risk are the **first runnable slice** in Phase 1 and the

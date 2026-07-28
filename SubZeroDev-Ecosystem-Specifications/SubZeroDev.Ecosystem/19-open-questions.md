@@ -23,7 +23,7 @@ rests on an assumption that could change, the document states what would change 
 | Repository layout                                             | Platform, Automator, contract, and one repository per substantial plugin                                          |
 | Are specifications copied between repositories?               | **No.** One home, referenced by tag                                                                               |
 | Build order                                                   | GitHub → Documentation plugin → Automator MVP                                                                     |
-| Which plugin is second?                                       | Documentation — the image exists, so it tests the contract cheaply                                                |
+| Which plugin is second?                                       | todo-to-github — Python, writes externally, needs MCP. Supersedes the Documentation choice                        |
 | Is local execution the initial product?                       | Yes; Docker host only, local process host deferred to Phase 6                                                     |
 | Is the local process host in the MVP?                         | No — it cannot enforce declared capabilities                                                                      |
 | Manifest serialization                                        | YAML authoring, canonical JSON for validation and signing                                                         |
@@ -88,3 +88,10 @@ rests on an assumption that could change, the document states what would change 
 | Community edition licensing                                   | No licence code path at all — not a check that passes                                                             |
 | Licence enforcement                                           | Offline verification; expiry degrades features, never data or running work; fails open                            |
 | Root namespace                                                | `SubZeroDev` kept; identifiers reserved before first publish                                                      |
+| Is MCP a runtime type?                                        | No — a transport. Tool surfaces are projected from the manifest                                                   |
+| Where do MCP tool schemas come from?                          | Projected from `commands[].inputSchema`, never hand-written                                                       |
+| Do MCP tools take a token parameter?                          | **No.** Worse than argv — it enters model context, client logs, and history                                       |
+| Is MCP exposure automatic on install?                         | No. Opt-in per command, default closed                                                                            |
+| How is approval enforced for writes?                          | Plan-apply, promoted to the contract. Structural, not documented                                                  |
+| Is the `mcp` command required?                                | Optional. Without it a plugin is still reachable through the Automator                                            |
+| Does exit `4` project as an MCP error?                        | No — a successful result with populated errors                                                                    |
