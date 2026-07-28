@@ -1,5 +1,5 @@
 ---
-title: LLM Workspace Toolkit
+title: SubZeroDev Workspace
 id: template-overview
 sidebar_position: 1
 description: Canonical setup and repository guide.

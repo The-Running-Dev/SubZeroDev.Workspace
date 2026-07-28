@@ -234,7 +234,7 @@ Then run the project’s build, test, and lint commands; review the complete dif
 
 - **Instructions did not load:** confirm the client was opened at the repository root and that the filename is exactly `AGENTS.md` or `CLAUDE.md`.
 - **MCP server missing:** restart the client or start a new session, then inspect `/mcp` in Codex or the MCP list in Claude Code.
-- **GitHub MCP fails:** confirm Docker Desktop or Docker Engine is running and `GITHUB_PERSONAL_ACCESS_TOKEN` is set in `setup/docker/.env`.
+- **GitHub MCP fails:** confirm Docker Desktop or Docker Engine is running and `GITHUB_PERSONAL_ACCESS_TOKEN` is set in `setup-llm/docker/.env`.
 - **GitHub access denied:** verify the token’s repository access and scopes. Read-only mode cannot add permissions the token does not possess.
 - **Filesystem MCP cannot reach the project:** confirm the project is under the configured allowed root, currently `D:\Dropbox`.
 - **Claude Desktop cannot see local MCP tools:** install an appropriate Desktop Extension; Claude Code registrations do not automatically become Desktop registrations.

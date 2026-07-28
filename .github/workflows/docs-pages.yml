@@ -6,29 +6,29 @@ on:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - 'setup/.dockerignore'
-      - 'setup/Dockerfile'
-      - 'setup/entrypoint.ps1'
+      - '.dockerignore'
+      - 'setup-llm/Dockerfile'
+      - 'setup-llm/entrypoint.ps1'
       - 'docs-template'
       - 'README.md'
-      - 'setup/README.md'
-      - 'setup/docs/**'
-      - 'setup/scripts/docs-workflow-local.ps1'
-      - 'setup/scripts/setup-docs.ps1'
+      - 'setup-llm/README.md'
+      - 'setup-llm/docs/**'
+      - 'setup-llm/scripts/docs-workflow-local.ps1'
+      - 'setup-llm/scripts/setup-docs.ps1'
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/docs-pages.yml'
-      - 'setup/.dockerignore'
-      - 'setup/Dockerfile'
-      - 'setup/entrypoint.ps1'
+      - '.dockerignore'
+      - 'setup-llm/Dockerfile'
+      - 'setup-llm/entrypoint.ps1'
       - 'docs-template'
       - 'README.md'
-      - 'setup/README.md'
-      - 'setup/docs/**'
-      - 'setup/scripts/docs-workflow-local.ps1'
-      - 'setup/scripts/setup-docs.ps1'
+      - 'setup-llm/README.md'
+      - 'setup-llm/docs/**'
+      - 'setup-llm/scripts/docs-workflow-local.ps1'
+      - 'setup-llm/scripts/setup-docs.ps1'
   workflow_dispatch:
 
 concurrency:
@@ -61,7 +61,7 @@ jobs:
 
       - name: Synchronize documentation
         shell: pwsh
-        run: ./setup/scripts/setup-docs.ps1
+        run: ./setup-llm/scripts/setup-docs.ps1
 
       - name: Install template dependencies
         working-directory: docs-template
@@ -140,7 +140,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/the-running-dev/llms
+          images: ghcr.io/the-running-dev/subzerodev-workspace
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
@@ -149,25 +149,25 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: setup/Dockerfile
+          file: setup-llm/Dockerfile
           target: runtime-prebuilt
           push: false
-          outputs: type=oci,dest=/tmp/llms-toolkit.tar
+          outputs: type=oci,dest=/tmp/subzerodev-workspace.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Upload OCI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: llms-toolkit-oci
-          path: /tmp/llms-toolkit.tar
+          name: subzerodev-workspace-oci
+          path: /tmp/subzerodev-workspace.tar
 
       - name: Publish container to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: setup/Dockerfile
+          file: setup-llm/Dockerfile
           target: runtime-prebuilt
           push: true
           tags: ${{ steps.meta.outputs.tags }}

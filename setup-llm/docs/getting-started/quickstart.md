@@ -6,14 +6,14 @@ description: Create and open a new AI-assisted project with the shortest support
 
 # Quick Start
 
-**Fast guide to setting up a new AI-assisted project using setup/scripts/setup-project.ps1**
+**Fast guide to setting up a new AI-assisted project using setup-llm/scripts/setup-project.ps1**
 
 The project generator runs on Windows, macOS, and Linux under PowerShell. The examples below use Windows paths; replace them with paths such as `~/Projects/MyApp` on macOS or Linux.
 
 ## TL;DR
 
 ```powershell
-cd D:\Projects\LLMs\setup
+cd D:\Projects\SubZeroDev.Workspace\setup-llm
 
 .\scripts\setup-project.ps1 `
   -ProjectPath 'D:\Dropbox\Projects\MyApp' `
@@ -35,7 +35,7 @@ Done! Navigate to your project and open with Claude Code or Codex.
 ### 1. Navigate to Setup Directory
 
 ```powershell
-cd D:\Projects\LLMs\setup
+cd D:\Projects\SubZeroDev.Workspace\setup-llm
 ```
 
 ### 2. Run the Setup Script
@@ -246,7 +246,7 @@ In Claude Code:
 
 | Problem | Solution |
 |---------|----------|
-| **Script not found** | Make sure you're in `D:\Projects\LLMs\setup` directory |
+| **Script not found** | Make sure you're in `D:\Projects\SubZeroDev.Workspace\setup-llm` directory |
 | **Git config error** | Run `git config --global user.name 'Your Name' && git config --global user.email 'your@email.com'` |
 | **Path already exists** | Choose a different project path or delete the existing directory |
 | **Language starter missing** | Normal for some languages. Manually create language-specific files. See [Language starters](../reference/language-starters.md). |

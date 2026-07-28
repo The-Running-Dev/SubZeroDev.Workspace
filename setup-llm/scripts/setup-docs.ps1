@@ -1,13 +1,14 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$SourcePath = (Join-Path $PWD.Path 'docs'),
-    [string]$TemplatePath = (Join-Path $PWD.Path 'docs-template'),
-    [string]$ReadmePath = (Join-Path $PWD.Path 'README.md'),
+    [string]$SourcePath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs'),
+    [string]$TemplatePath = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'docs-template'),
+    [string]$ReadmePath = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'README.md'),
     [string]$OrganizationName = 'The-Running-Dev',
-    [string]$RepositoryName = 'LLMs',
-    [string]$SiteTitle = 'LLM Workspace Toolkit',
-    [string]$SiteUrl = 'https://llms.subzerodev.com',
-    [string]$BaseUrl = '/'
+    [string]$RepositoryName = 'SubZeroDev.Workspace',
+    [string]$SiteTitle = 'SubZeroDev Workspace',
+    [string]$SiteUrl = 'https://workspace.subzerodev.com',
+    [string]$BaseUrl = '/',
+    [string]$SetupDirectoryName = 'setup-llm'
 )
 
 Set-StrictMode -Version Latest
@@ -15,7 +16,13 @@ $ErrorActionPreference = 'Stop'
 $modulePath = Join-Path $PSScriptRoot 'modules/Setup.psm1'
 Import-Module $modulePath -Force
 
-$resolvedSource = Resolve-OrCreatePath -Path $SourcePath -PathKind Directory
+# The source directory must already exist. Silently creating it here previously masked a
+# broken -SourcePath default, which synchronized an empty directory over the published docs.
+$expandedSourcePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($SourcePath)
+if (-not (Test-Path -LiteralPath $expandedSourcePath -PathType Container)) {
+    throw "Documentation Source Directory is Missing: $expandedSourcePath"
+}
+$resolvedSource = $expandedSourcePath
 $resolvedTemplate = Resolve-OrCreatePath -Path $TemplatePath -PathKind Directory
 $resolvedReadme = Resolve-OrCreatePath -Path $ReadmePath -PathKind File
 $templatePackage = Join-Path $resolvedTemplate 'package.json'
@@ -97,12 +104,13 @@ function Convert-ReadmeLinks {
         [Parameter(Mandatory)][string]$DocumentationBase
     )
 
-    $converted = $Content -replace '\]\(setup/docs/index\.md\)', "]($DocumentationBase/)"
-    $converted = $converted -replace '\]\(setup/docs/\)', "]($DocumentationBase/)"
-    $converted = $converted -replace '\]\(setup/\)', "]($repositoryUrl/tree/main/setup)"
+    $escapedSetupDirectory = [regex]::Escape($SetupDirectoryName)
+    $converted = $Content -replace "\]\($escapedSetupDirectory/docs/index\.md\)", "]($DocumentationBase/)"
+    $converted = $converted -replace "\]\($escapedSetupDirectory/docs/\)", "]($DocumentationBase/)"
+    $converted = $converted -replace "\]\($escapedSetupDirectory/\)", "]($repositoryUrl/tree/main/$SetupDirectoryName)"
     $converted = $converted -replace '\]\(docs-template/\)', "]($repositoryUrl/tree/main/docs-template)"
-    $converted = $converted -replace '\]\(setup/docs/', "]($DocumentationBase/"
-    $converted = $converted -replace '\]\(setup/', "]($repositoryUrl/blob/main/setup/"
+    $converted = $converted -replace "\]\($escapedSetupDirectory/docs/", "]($DocumentationBase/"
+    $converted = $converted -replace "\]\($escapedSetupDirectory/", "]($repositoryUrl/blob/main/$SetupDirectoryName/"
     if ($DocumentationBase -ne '.') {
         $escapedDocumentationBase = [regex]::Escape($DocumentationBase)
         $converted = $converted -replace "(\]\($escapedDocumentationBase/[^)\s]+)\.md\)", '$1/)'

@@ -6,37 +6,37 @@ description: Run the setup and documentation without installing PowerShell on th
 
 # Container Quick Start
 
-The LLM Workspace Toolkit container includes PowerShell, the setup scripts, and the statically built documentation. The only host prerequisite is Docker.
+The SubZeroDev Workspace container includes PowerShell, the setup scripts, and the statically built documentation. The only host prerequisite is Docker.
 
 ## Serve the Documentation
 
 ```bash
-docker run --rm --name llms-docs \
+docker run --rm --name subzerodev-workspace-docs \
   -p 8080:8080 \
-  ghcr.io/the-running-dev/llms:latest
+  ghcr.io/the-running-dev/subzerodev-workspace:latest
 ```
 
 Open [http://localhost:8080](http://localhost:8080). The default `docs` command runs nginx in the foreground and serves the documentation embedded at image-build time.
 
 ## Run the Setup
 
-Use the `setup` command to pass arguments to `setup/scripts/setup.ps1` inside the Linux container:
+Use the `setup` command to pass arguments to `setup-llm/scripts/setup.ps1` inside the Linux container:
 
 ```bash
 docker run --rm -it \
-  ghcr.io/the-running-dev/llms:latest \
+  ghcr.io/the-running-dev/subzerodev-workspace:latest \
   setup -Client Codex -SkipGitHub
 ```
 
 This removes the host PowerShell requirement, but setup remains container-scoped. It installs and registers tools inside that container. Persist configuration and working files with named volumes or bind mounts:
 
 ```bash
-docker volume create llms-config
+docker volume create subzerodev-workspace-config
 
 docker run --rm -it \
-  -v llms-config:/root/.config \
+  -v subzerodev-workspace-config:/root/.config \
   -v "$PWD:/workspace" \
-  ghcr.io/the-running-dev/llms:latest \
+  ghcr.io/the-running-dev/subzerodev-workspace:latest \
   setup -Client Codex -SkipGitHub
 ```
 
@@ -47,9 +47,9 @@ GitHub MCP launches another container, so it requires access to the host Docker 
 ```bash
 docker run --rm -it \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$PWD/setup/docker/.env:/opt/llms/setup/docker/.env:ro" \
-  -v llms-config:/root/.config \
-  ghcr.io/the-running-dev/llms:latest \
+  -v "$PWD/setup-llm/docker/.env:/opt/workspace/setup-llm/docker/.env:ro" \
+  -v subzerodev-workspace-config:/root/.config \
+  ghcr.io/the-running-dev/subzerodev-workspace:latest \
   setup -Client Codex
 ```
 
@@ -60,10 +60,10 @@ Mounting the Docker socket gives the container control of the host Docker daemon
 The image uses PowerShell as its Docker entry point. Start an interactive shell with:
 
 ```bash
-docker run --rm -it ghcr.io/the-running-dev/llms:latest pwsh
+docker run --rm -it ghcr.io/the-running-dev/subzerodev-workspace:latest pwsh
 ```
 
-The scripts are available under `/opt/llms/setup`, and `/workspace` is reserved for mounted projects.
+The scripts are available under `/opt/workspace/setup-llm`, and `/workspace` is reserved for mounted projects.
 
 ## Build Locally
 
@@ -71,8 +71,8 @@ Initialize the documentation submodule before building:
 
 ```bash
 git submodule update --init --recursive
-docker build -f setup/Dockerfile -t llms-toolkit .
-docker run --rm -p 8080:8080 llms-toolkit
+docker build -f setup-llm/Dockerfile -t subzerodev-workspace .
+docker run --rm -p 8080:8080 subzerodev-workspace
 ```
 
-Pull requests build the Dockerfile and upload an OCI image archive as a workflow artifact. Builds from `main` additionally publish `ghcr.io/the-running-dev/llms:latest` and an immutable commit-SHA tag to GitHub Container Registry.
+Pull requests build the Dockerfile and upload an OCI image archive as a workflow artifact. Builds from `main` additionally publish `ghcr.io/the-running-dev/subzerodev-workspace:latest` and an immutable commit-SHA tag to GitHub Container Registry.

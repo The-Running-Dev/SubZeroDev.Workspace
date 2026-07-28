@@ -79,4 +79,4 @@ if ($IncludeDatabase) {
 
 Write-Host "`nLLM workspace setup completed." -ForegroundColor Green
 Write-Host 'Restart the configured clients and verify their MCP connections.'
-Write-Host 'GitHub remains read-only and loads its token from setup/docker/.env through Docker Compose.'
+Write-Host 'GitHub remains read-only and loads its token from setup-llm/docker/.env through Docker Compose.'
