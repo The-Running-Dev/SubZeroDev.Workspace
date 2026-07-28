@@ -1,8 +1,8 @@
 {
-  "name": "@subzerodev/automator-plugin-github",
+  "name": "@subzerodev/plugin-github",
   "version": "0.1.0",
   "private": true,
-  "description": "Provider-independent GitHub repository synchronization plugin",
+  "description": "Provider-independent GitHub repository and portfolio data plugin",
   "type": "module",
   "engines": {
     "node": ">=24"

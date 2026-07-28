@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 const commandNames = ['sync', 'list', 'stats', 'export', 'validate'] as const;
 type CommandName = (typeof commandNames)[number];
 
-const help = `SubZeroDev.Automator.Plugins.GitHub
+const help = `SubZeroDev GitHub Plugin
 
 Usage:
   subzerodev-github <command> [options]

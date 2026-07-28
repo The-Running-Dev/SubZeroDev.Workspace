@@ -47,13 +47,13 @@ Container setup changes the container environment. Mount `/root/.config` and `/w
 
 ## Repository Layout
 
-| Path | Purpose |
-|------|---------|
-| [`setup-llm/`](setup-llm/) | Cross-platform workstation provisioning, MCP registration, and project scaffolding |
-| [`setup-llm/docs/`](setup-llm/docs/) | Getting-started guides, architecture, reference material, and setup specifications |
-| [`docs-template/`](docs-template/) | Pinned Docusaurus template submodule used to build the documentation site |
-| [`plugins/SubZeroDev.Automator.Plugins.GitHub/`](plugins/SubZeroDev.Automator.Plugins.GitHub/) | CLI-first GitHub integration plugin and normalized project model |
-| `SubZeroDev.Workspace.code-workspace` | VS Code workspace definition |
+| Path                                                                       | Purpose                                                                            |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [`setup-llm/`](setup-llm/)                                                 | Cross-platform workstation provisioning, MCP registration, and project scaffolding |
+| [`setup-llm/docs/`](setup-llm/docs/)                                       | Getting-started guides, architecture, reference material, and setup specifications |
+| [`docs-template/`](docs-template/)                                         | Pinned Docusaurus template submodule used to build the documentation site          |
+| [`plugins/SubZeroDev.Plugins.GitHub/`](plugins/SubZeroDev.Plugins.GitHub/) | CLI-first GitHub integration plugin and normalized project model                   |
+| `SubZeroDev.Workspace.code-workspace`                                      | VS Code workspace definition                                                       |
 
 ## Quick Start
 
@@ -70,11 +70,11 @@ The preview command shows prerequisite actions without installing them. The seco
 
 ### Supported Platforms
 
-| Platform | Prerequisite installer | Package tooling |
-|----------|------------------------|-----------------|
-| Windows | `setup-llm/scripts/setup-windows.ps1` | Winget |
-| macOS | `setup-llm/scripts/setup-macos.ps1` | Homebrew and npm |
-| Ubuntu/Debian | `setup-llm/scripts/setup-ubuntu.ps1` | apt, pipx, and npm |
+| Platform      | Prerequisite installer                | Package tooling    |
+| ------------- | ------------------------------------- | ------------------ |
+| Windows       | `setup-llm/scripts/setup-windows.ps1` | Winget             |
+| macOS         | `setup-llm/scripts/setup-macos.ps1`   | Homebrew and npm   |
+| Ubuntu/Debian | `setup-llm/scripts/setup-ubuntu.ps1`  | apt, pipx, and npm |
 
 Use `setup-llm/scripts/setup.ps1` for normal operation. It detects the OS and dispatches to the matching platform script. `setup-llm/scripts/setup-workstation.ps1` contains the shared Graphify, memory, and MCP configuration used after platform prerequisites are available.
 

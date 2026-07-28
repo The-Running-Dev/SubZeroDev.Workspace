@@ -3,6 +3,19 @@
 **Status:** Accepted
 **Date:** 2026-07-27
 
+## Amendment (2026-07-28)
+
+The names below are superseded. The plugin was originally
+`SubZeroDev.Automator.Plugins.GitHub`, packaged as `@subzerodev/automator-plugin-github`, because it
+was scaffolded before the ecosystem architecture existed.
+
+That name says the plugin is a component of the Automator, which the architecture explicitly rejects:
+plugins must not depend on Automator internals, must be independently executable, and depend on the
+plugin contract rather than on any host. The plugin is now `SubZeroDev.Plugins.GitHub`, packaged as
+`@subzerodev/plugin-github`, with the image `subzerodev-github`.
+
+The hosting and versioning decisions themselves are unchanged and still stand.
+
 ## Context
 
 SubZeroDev.Automator.Plugins.GitHub needs to run independently today and may later be consumed by

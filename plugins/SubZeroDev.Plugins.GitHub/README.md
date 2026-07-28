@@ -1,4 +1,4 @@
-# SubZeroDev.Automator.Plugins.GitHub
+# SubZeroDev GitHub Plugin
 
 CLI-first GitHub integration plugin that transforms GitHub repository data into
 provider-independent, versioned project models.
@@ -74,7 +74,7 @@ invoking Docker directly:
 docker run --rm --user "$(id -u):$(id -g)" \
   --volume "$PWD/.cache:/data/cache" \
   --volume "$PWD/output:/data/output" \
-  subzerodev-automator-plugins-github:local validate
+  subzerodev-github:local validate
 ```
 
 Docker Desktop on macOS and Windows maps ownership automatically, so no
@@ -85,13 +85,13 @@ Docker Desktop on macOS and Windows maps ownership automatically, so no
 The equivalent commands without the PowerShell wrapper are:
 
 ```bash
-docker build -t subzerodev-automator-plugins-github:local .
-docker run --rm subzerodev-automator-plugins-github:local --help
+docker build -t subzerodev-github:local .
+docker run --rm subzerodev-github:local --help
 docker run --rm \
   --env GITHUB_TOKEN \
   --volume "$PWD/.cache:/data/cache" \
   --volume "$PWD/output:/data/output" \
-  subzerodev-automator-plugins-github:local sync
+  subzerodev-github:local sync
 ```
 
 ## CLI
@@ -126,7 +126,7 @@ failure.
 
 - [Specification](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/12-github-plugin.md) — what Phase One is
 - [Plugin contract](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.PluginContract/04-plugin-contract.md) — the generic design this conforms to
-- [Implementation plan](IMPLEMENTATION_PLAN.md) — the order it is built in
-- [Plan review](IMPLEMENTATION_PLAN_REVIEW.md) — why it reads the way it does
+- [Build plan](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/BUILD-PLAN.md) — the order it is built in
+- [Plan review](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/reference/IMPLEMENTATION_PLAN_REVIEW.md) — why it reads the way it does
 - [ADR-001](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-001-hosting-and-versioning.md) — hosting and versioning
 - [ADR-002](../../SubZeroDev-Ecosystem-Specifications/SubZeroDev.Plugins.GitHub/adr/ADR-002-phase-one-boundaries.md) — Phase One boundaries
