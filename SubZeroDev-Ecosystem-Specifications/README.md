@@ -8,16 +8,26 @@ Scope: SubZeroDev.Platform, SubZeroDev.Automator, the plugin contract, and the i
 Each top-level directory holds the specifications destined for one repository. They are grouped here
 so they can be copied out; this directory is a staging area, not their permanent home.
 
-| Directory                           | Destination repository           | Contents                                                                                                              |
-| ----------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `SubZeroDev.Ecosystem/`             | Architecture repository          | Vision, logical architecture, repository layout, testing strategy, roadmap, open questions                            |
-| `SubZeroDev.Platform/`              | Platform repository (exists)     | Platform specification; tenancy, billing, and licensing                                                               |
-| `SubZeroDev.Automator/`             | Automator repository             | Automator specification, runtime hosts, workflow engine, events, clients, REST and MCP, observability, security model |
-| `SubZeroDev.PluginContract/`        | Its own repository               | The contract every plugin satisfies, plus the manifest schema and reference manifest                                  |
-| `SubZeroDev.Plugins.GitHub/`        | GitHub plugin repository         | GitHub plugin specification                                                                                           |
-| `SubZeroDev.Plugins.Requirements/`  | Requirements Compiler repository | Requirements Compiler specification                                                                                   |
-| `SubZeroDev.Plugins.Documentation/` | Documentation plugin repository  | Documentation plugin specification                                                                                    |
-| `SubZeroDev.Plugins.BuildTooling/`  | Build tooling repositories       | ContainerPSGenerator, build, Docker, package, and release plugins                                                     |
+| Directory                                  | Destination repository           | Contents                                                                                                                                   |
+| ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SubZeroDev.Ecosystem/`                    | Architecture repository          | Vision, logical architecture, pipeline composition, repository layout, testing strategy, roadmap, open questions                           |
+| `SubZeroDev.Platform/`                     | Platform repository (exists)     | Platform specification; events and notifications; observability; tenancy, billing, and licensing                                           |
+| `SubZeroDev.Automator/`                    | Automator repository             | Automator specification, runtime hosts, workflow engine, execution events and artifacts, clients, REST and MCP, security model, operations |
+| `SubZeroDev.PluginContract/`               | Its own repository               | The contract, CLI conventions, conformance suite, manifest schema, reference manifest                                                      |
+| `SubZeroDev.Plugins.GitHub/`               | GitHub plugin repository         | GitHub plugin                                                                                                                              |
+| `SubZeroDev.Plugins.Requirements/`         | Requirements Compiler repository | Requirements Compiler                                                                                                                      |
+| `SubZeroDev.Plugins.Documentation/`        | Documentation plugin repository  | Documentation plugin                                                                                                                       |
+| `SubZeroDev.Plugins.ContainerPSGenerator/` | ContainerPSGenerator repository  | PowerShell module generation                                                                                                               |
+| `SubZeroDev.Plugins.Build/`                | Build plugin repository          | Restore, build, test, normalized reports                                                                                                   |
+| `SubZeroDev.Plugins.Docker/`               | Docker plugin repository         | Image build, push, scan                                                                                                                    |
+| `SubZeroDev.Plugins.Package/`              | Package plugin repository        | NuGet, npm, PowerShell Gallery, archives                                                                                                   |
+| `SubZeroDev.Plugins.Release/`              | Release plugin repository        | Notes, tagging, forge releases                                                                                                             |
+
+Documents that spanned two products were split rather than assigned to one: events and notifications
+(Platform) from execution events and artifacts (Automator); observability (Platform) from operations
+(Automator); CLI conventions (contract) from client modules (Automator); the testing layer model
+(Ecosystem) from the conformance suite (contract); and the five build-tooling plugins into one
+directory each.
 
 `REVIEW.md` and `WORK-BREAKDOWN.md` stay here. They are working documents about the specifications,
 not part of any product's documentation.

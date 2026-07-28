@@ -176,14 +176,18 @@ breakdown would be guesswork.
 
 Not owned by any single phase.
 
-| ID  | Work                                                                              | Size | Notes                                                                                                 |
-| --- | --------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------- |
-| X1  | Split `07`, `11`, and `17` by destination repository                              | S    | They span Platform and Automator; each currently sits in its primary home with the overlap unresolved |
-| X2  | Renumber ADRs per repository once split                                           | S    | Two sequences currently exist with different zero-padding                                             |
-| X3  | Retire the superseded contract draft under `setup-llm/`                           | S    | Superseded by `04`; ADR-0003 there needs marking                                                      |
-| X4  | Signing ADR: mechanism, trust root, verification, revocation                      | M    | Blocks two of the four trust levels                                                                   |
-| X5  | Orphan-execution handling                                                         | M    | An execution whose agent vanishes currently has no defined outcome                                    |
-| X6  | Artifact identity: does a deterministic re-run create a new artifact or reuse it? | S    | Affects retention and deduplication                                                                   |
+| ID     | Work                                                                     | Size | Notes                                                                                               |
+| ------ | ------------------------------------------------------------------------ | ---- | --------------------------------------------------------------------------------------------------- |
+| ~~X1~~ | ~~Split `07`, `11`, `17` by destination repository~~                     | —    | **Done.** Also split `08` and the five build-tooling plugins                                        |
+| X2     | Renumber ADRs per repository once split                                  | S    | Two sequences currently exist with different zero-padding                                           |
+| X3     | Retire the superseded contract draft under `setup-llm/`                  | S    | Superseded by `04`; ADR-0003 there needs marking                                                    |
+| X4     | Signing ADR: mechanism, trust root, verification, revocation             | M    | Blocks two of the four trust levels                                                                 |
+| ~~X5~~ | ~~Orphan-execution handling~~                                            | —    | **Designed** in `07-execution-events-and-artifacts.md`: lease, heartbeat, terminal `Orphaned` state |
+| ~~X6~~ | ~~Artifact identity on deterministic re-run~~                            | —    | **Decided**: content-addressed blob, per-execution record                                           |
+| X7     | Choose the Docker plugin's builder — rootless or socket                  | M    | Decides whether socket access is ever granted                                                       |
+| X8     | Manifest-driven generation in ContainerPSGenerator                       | M    | Replaces `--help` inference with declared input schemas                                             |
+| X9     | Update `18-roadmap.md` and `19-open-questions.md` to the decisions taken | S    | Both predate the phase revision and the answered questions                                          |
+| X10    | Update `16-repository-layout-and-packaging.md`                           | S    | Still proposes copying specs between repos; predates the contract-repo decision                     |
 
 ---
 
