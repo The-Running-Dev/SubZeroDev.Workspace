@@ -104,10 +104,28 @@ It tests the contract, not the copy.
 | W2.3 | Wire conformance into plugin CI as a required check                            | S    | W2.1       |
 | W2.4 | Minimal Platform: Abstractions, Core, Hosting                                  | L    | —          |
 | W2.5 | Minimal Platform: Persistence, Observability, Testing                          | L    | W2.4       |
+| W2.6 | Extract the shared GitHub client from the GitHub plugin                        | M    | W1.5       |
+| W2.7 | Project Setup plugin: plan/apply, inference, rulesets                          | M    | W2.6       |
 
 **W2.2 matters more than it looks.** The secret-leaking and failing fixtures are how you prove the
 suite detects problems rather than merely passing everything you point it at. A conformance suite
 that has never failed is not evidence.
+
+**W2.6 is the extraction guard being satisfied, not bypassed.** The rule is that a capability becomes
+a shared component when a _second_ consumer needs it. The GitHub client now has four candidates — the
+GitHub plugin, the Project Setup plugin, the Release plugin, and Backlog — so the condition is
+met several times over. The language boundary limits what sharing can mean: the three Node consumers
+share a package, and Backlog keeps its own Python path. That the answer differs by language is itself
+the argument for the contract being a process boundary rather than a library.
+
+**W2.7 is not the second plugin.** It lands in Phase 2 because W2.6 is where its dependency appears,
+not because it displaces Backlog. The build order — GitHub → Backlog → Automator — is about which
+implementation validates the contract, and Backlog holds that slot because it is Python, writes
+externally, and needs MCP. Project Setup is Node and reuses the transport the GitHub plugin
+established, so it tests nothing new about the contract.
+
+**W2.7 cannot provision its own repository.** The first repositories are created by hand; the plugin
+exists for the ones after, and for reconciling drift in all of them.
 
 **W2.4 and W2.5 run in parallel with the conformance track**, per roadmap Phase 2. These six packages
 are the ones genuinely hard to retrofit — hosting shape, transaction boundaries, observability
@@ -231,6 +249,7 @@ Not owned by any single phase.
 | ~~X10~~ | ~~Update `16-repository-layout-and-packaging.md`~~               | —    | **Done.** Move-don't-copy is now a rule, with the two incidents that motivated it                   |
 | ~~X11~~ | ~~Per-repository `README.md`, `AGENTS.md`, and `CLAUDE.md`~~     | —    | **Done.** Every destination repository now carries its own instructions                             |
 | X12     | Retire the numeric filename prefixes when each repository splits | S    | They number one document set, not fifteen — see below                                               |
+| X14     | Settle a plugin naming convention and rename accordingly         | S    | **Before first publish.** No rule connects the current names; free now, expensive after publish     |
 | X13     | Check each repeated conventions block against the canonical copy | S    | A repeated block that nothing compares is a copy that drifts. Suggested in review of PR #13         |
 
 **X12 detail.** The `NN-` prefixes order a single ecosystem-wide document set, and that set no longer

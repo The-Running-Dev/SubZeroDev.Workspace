@@ -24,7 +24,7 @@ does is useful by hand.
 ## Daisy chaining
 
 ```text
-repository.inspect
+build.detect
 → build.restore
 → build.test
 → container-ps-generator.generate
@@ -36,6 +36,10 @@ repository.inspect
 ```
 
 This is a workflow, not a feature of any plugin. No plugin in that chain knows the others exist.
+
+The first step was written as `repository.inspect` when the chain was drafted, and the decision below
+resolved it to the build plugin's `detect`. The example now says so, rather than naming a plugin ID
+that was decided against — an ID in an example is the first place someone looks for the plugin.
 
 ### What makes the chain work
 
@@ -76,6 +80,16 @@ is code reuse, not composition, and it does not cross the process boundary.
 **`repository.inspect` is the build plugin's `detect`.** A separate plugin whose only job is to look
 at a repository and report what it is would duplicate the adapter detection the build plugin needs
 anyway, and the two would drift on what counts as a Node project.
+
+**This decision constrains the Project Setup plugin**, which also reads a directory to infer topics.
+That inference is incidental to provisioning rather than its purpose, so it does not make a second
+inspection plugin — but it is the same detection, and two implementations would drift on exactly the
+question this decision names. Project Setup consumes the build plugin's detection rather than
+reimplementing it, on the same reasoning that gives the Node plugins one shared GitHub client.
+
+Until the build plugin exists, Project Setup carries its own minimal detection and is the first
+consumer that will force the extraction. That is stated so it is a known debt rather than a
+rediscovery.
 
 **A build agent is a generic agent with build plugins cached** and appropriate labels. A distinct
 agent type would mean a second scheduling path, a second health model, and a second set of selection
