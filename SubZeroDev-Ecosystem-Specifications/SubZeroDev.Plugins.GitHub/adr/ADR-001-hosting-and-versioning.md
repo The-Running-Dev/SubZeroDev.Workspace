@@ -1,7 +1,8 @@
 # ADR-001: Host the GitHub Plugin as a CLI-First Plugin
 
-**Status:** Accepted
-**Date:** 2026-07-27
+## Status
+
+Accepted — 2026-07-27
 
 ## Amendment (2026-07-28)
 

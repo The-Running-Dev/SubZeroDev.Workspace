@@ -13,8 +13,11 @@ so they can be copied out; this directory is a staging area, not their permanent
 | `SubZeroDev.Ecosystem/`                    | Architecture repository          | Vision, logical architecture, pipeline composition, repository layout, testing strategy, roadmap, open questions                           |
 | `SubZeroDev.Platform/`                     | Platform repository (exists)     | Platform specification; events and notifications; observability; tenancy, billing, and licensing                                           |
 | `SubZeroDev.Automator/`                    | Automator repository             | Automator specification, runtime hosts, workflow engine, execution events and artifacts, clients, REST and MCP, security model, operations |
-| `SubZeroDev.PluginContract/`               | Its own repository               | The contract, CLI conventions, conformance suite, manifest schema, reference manifest                                                      |
+| `SubZeroDev.PluginContract/`               | Its own repository               | The contract, CLI conventions, conformance suite, manifest and envelope schemas, reference manifest                                        |
+| `SubZeroDev.MCP/`                          | Its own repository               | MCP strategy, tool projection from the manifest, security and consent                                                                      |
+| `SubZeroDev.WorkItems/`                    | Its own repository               | Shared work-item model and reconciliation library — a library, not a plugin                                                                |
 | `SubZeroDev.Plugins.GitHub/`               | GitHub plugin repository         | GitHub plugin                                                                                                                              |
+| `SubZeroDev.Plugins.Backlog/`              | Backlog plugin repository        | Backlog plugin — the second plugin                                                                                                         |
 | `SubZeroDev.Plugins.Requirements/`         | Requirements Compiler repository | Requirements Compiler                                                                                                                      |
 | `SubZeroDev.Plugins.Documentation/`        | Documentation plugin repository  | Documentation plugin                                                                                                                       |
 | `SubZeroDev.Plugins.ContainerPSGenerator/` | ContainerPSGenerator repository  | PowerShell module generation                                                                                                               |
@@ -116,5 +119,30 @@ the superseded contract draft is deleted, and all ADRs sit with the repository t
 renumbered from `001` per repository. Nothing about the ecosystem remains under `setup-llm/docs/`,
 which now holds only workstation-toolkit documentation.
 
+**No ADR is left in `Proposed`.** The five carried over from the draft are now decided and written
+out with their context, consequences, and rejected alternatives, and each records the number it
+carried in the original global sequence so the renumbering is traceable.
+
+**Every destination repository carries its own instructions.** A `README.md` saying what it is, an
+`AGENTS.md` with the invariants and the placement rules for that repository, and a `CLAUDE.md`
+pointing at `AGENTS.md` rather than repeating it. They are written to survive the split — a
+repository that arrives with a bare `12-github-plugin.md` and nothing else tells a new reader
+nothing.
+
+The split map above also gained three directories it had never listed: `SubZeroDev.MCP/`,
+`SubZeroDev.WorkItems/`, and `SubZeroDev.Plugins.Backlog/` all existed without a recorded
+destination.
+
+**Both normative schemas exist.** `plugin-manifest.schema.json` and `result-envelope.schema.json`
+live in `SubZeroDev.PluginContract/schemas/` and are validated under ajv strict mode. The contract
+states that the schemas — not any generated types — are the normative artifact, so an envelope
+specified only in prose was a gap in the contract's own terms.
+
 Remaining open questions are listed per document and consolidated in
 `SubZeroDev.Ecosystem/19-open-questions.md`.
+
+One known piece of debt is deliberately left: the `NN-` filename prefixes number a single
+ecosystem-wide document set that no longer exists. Six files are numbered `15`, and five other
+numbers appear in two repositories each. Renaming them now would break every cross-document
+reference; it belongs to each repository's split commit, and is tracked as X12 in
+`WORK-BREAKDOWN.md`.

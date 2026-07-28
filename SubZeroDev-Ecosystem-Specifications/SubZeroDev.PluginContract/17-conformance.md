@@ -65,6 +65,27 @@ Asserts stdout parses as exactly one JSON document validating against the envelo
 it will. This is the check that catches a logger left on stdout, and it is the highest-value check in
 the suite because that defect breaks every adapter simultaneously and presents as a parse error.
 
+### C3b — Envelope invariants the schema cannot express
+
+`result-envelope.schema.json` enforces the envelope's shape, including that `status` and `exitCode`
+agree and that a `failed` or `partial` status carries at least one entry in `errors`. Two rules are
+outside what JSON Schema can state, so they are asserted here or they are not asserted anywhere:
+
+| Rule                                    | Why the schema cannot say it      |
+| --------------------------------------- | --------------------------------- |
+| `data` is at most 256 KiB serialized    | No serialized-size keyword exists |
+| `finishedAt` is at or after `startedAt` | No cross-field comparison         |
+
+A third rule was listed here in the first draft — non-empty `errors` on a failure — on the assumption
+that a constraint conditioned on a sibling field could not be expressed. It can: the schema already
+branches on `status`, and the same branch carries `minItems`. It moved into the schema, where a host
+validating without this suite still gets it.
+
+Also asserts the envelope's `exitCode` equals the process exit code the runner observed, and that
+each `artifacts[]` entry matches the file on disk in both `bytes` and `sha256`. The envelope is what
+a host records; an envelope that disagrees with reality is worse than a missing one, because nothing
+downstream re-checks it.
+
 ### C4 — Declared artifacts
 
 Asserts every artifact declared `required: true` exists at its declared path after a successful run,
@@ -112,10 +133,14 @@ timestamp in an artifact fails here, which is the intent.
 ### C9 — Path confinement
 
 Attempts to have the plugin write an artifact declared with a traversing path and asserts refusal.
+Both separators are exercised — `../etc`, `..\etc`, `a/..\b`, `/etc/passwd`, `\\server\share`, and
+`C:\secret` — because the contract supports Windows plugins and a POSIX-only check passes a host that
+is not safe.
 
 This check needs a cooperating fixture, since a well-behaved plugin will not attempt it. It belongs
 here because the schema rejects such a path at validation time and this proves the runtime rejects it
-too.
+too — and the runtime has to do more than the schema can: **canonicalize the resolved path and verify
+containment**, since a pattern cannot see where a symlink points.
 
 ## Fixture plugins
 

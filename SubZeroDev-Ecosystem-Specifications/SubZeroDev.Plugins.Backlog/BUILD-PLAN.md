@@ -3,6 +3,11 @@
 Companion to `23-backlog-plugin.md`. Merged from the retired
 `todo-to-github-mcp-TODO.md`, reordered so the plugin exists before the MCP surface is added to it.
 
+This is **Phase 3** of `18-roadmap.md` in the Architecture repository, which owns phase numbering for
+the ecosystem. Milestone numbers below are local to this plugin — the original draft numbered them
+"Phase 0–8", which collided: its Phase 6 was the MCP surface while the roadmap's Phase 6 is
+multi-runtime hosts and remote agents.
+
 Deliberately not written in the backlog document format — these are engineering tasks, and forcing
 "As a…" onto them would add noise.
 
@@ -16,7 +21,7 @@ The auth phase shrinks to nothing — the contract already decided it. Environme
 per-call parameter, no OAuth seam to design. That was the original plan's first blocking decision and
 it is now answered.
 
-## Phase 0 — Verify the ground
+## Milestone 0 — Verify the ground
 
 Two things in the source specification were true when written and move quickly.
 
@@ -27,7 +32,7 @@ Two things in the source specification were true when written and move quickly.
       `addSubIssue`, issue types, `updateProjectV2ItemFieldValue`.
 - [ ] Record anything that has moved, in the repository, before proceeding.
 
-## Phase 1 — Skeleton and the ported core
+## Milestone 1 — Skeleton and the ported core
 
 - [ ] Scaffold a plugin repository per the contract's layout. Python 3.11+, `uv`, `pyproject.toml`.
 - [ ] Copy `parse_todo.py` and `sync_lib.py` **unchanged**. Adjust imports only.
@@ -41,7 +46,7 @@ Two things in the source specification were true when written and move quickly.
 **Gate:** ported suite green; `manifest` validates and runs with no config, secrets, network, or
 mounts.
 
-## Phase 2 — GitHub access layer
+## Milestone 2 — GitHub access layer
 
 - [ ] Error taxonomy mapped onto the contract's exit codes.
 - [ ] Token resolution in **one** function reading the environment. Nothing else reads it, and no
@@ -59,7 +64,23 @@ mounts.
 
 **Gate:** can read and write a real repository from a script, before any CLI or MCP exists.
 
-## Phase 3 — Plan store and the approval gate
+## Milestone 2.5 — Extract `SubZeroDev.WorkItems`
+
+The shared library the Requirements Compiler will consume. Extracted here rather than later because
+the second consumer is already specified, and the alternative is writing convergence twice.
+
+- [ ] Move the model, stable IDs, markers and content hashing, reconciliation, and plan rendering out
+      of the ported `sync_lib.py` into the library, with the GitHub tracker provider behind its write
+      interface.
+- [ ] The ported tests must still pass, against the library. **If a test needs editing, the extraction
+      changed behaviour** — that is the signal to stop, not to update the test.
+- [ ] The approval gate does **not** move. The library supplies and can execute a plan; only this
+      plugin issues and checks the token that authorizes it.
+
+**Gate:** ported suite green against the extracted library; nothing in the library decides who may
+apply a plan.
+
+## Milestone 3 — Plan store and the approval gate
 
 - [ ] Plan store keyed by an opaque random `plan_id` — not a content hash.
 - [ ] Store repository, actions, state fingerprint, timestamp. In-memory is sufficient; plans are
@@ -71,7 +92,7 @@ mounts.
 
 **Gate:** a plan cannot be applied twice, late, or against changed state.
 
-## Phase 4 — CLI commands
+## Milestone 4 — CLI commands
 
 The contract surface, before MCP.
 
@@ -87,7 +108,7 @@ The contract surface, before MCP.
 
 **Gate:** `validate → plan → apply` works from the CLI, in the container, against a real repository.
 
-## Phase 5 — Round trip against a fake API
+## Milestone 5 — Round trip against a fake API
 
 **The phase that found every serious bug last time. Do not shorten it.**
 
@@ -107,7 +128,7 @@ The contract surface, before MCP.
 
 **Gate:** every scenario passes; the second plan is always no-op.
 
-## Phase 6 — MCP surface
+## Milestone 6 — MCP surface
 
 Only now, and it should be small — the tools are projected, not written.
 
@@ -124,7 +145,7 @@ Only now, and it should be small — the tools are projected, not written.
 
 **Gate:** MCP conformance checks pass; no tool schema contains a credential parameter.
 
-## Phase 7 — Live verification
+## Milestone 7 — Live verification
 
 Nothing before this proves it works. **The fakes were written from the same documentation as the
 implementation, so they agree with any misreading of it.**
@@ -139,7 +160,7 @@ implementation, so they agree with any misreading of it.**
 
 **Gate:** a real repository converges. Until this passes, the plugin is unproven.
 
-## Phase 8 — Conformance and release
+## Milestone 8 — Conformance and release
 
 - [ ] Full contract conformance suite passes.
 - [ ] Container smoke: `manifest`, `validate`, and a fixture-backed `plan`.
@@ -158,6 +179,7 @@ implementation, so they agree with any misreading of it.**
 ## Standing constraints
 
 - Never log or echo a token, in any output, including errors.
+- Phase numbering belongs to the roadmap. Milestones here are local, and stay local.
 - No command and no projected tool takes a credential parameter.
 - Parents always created before children.
 - `apply` is never callable without a `plan_id`.

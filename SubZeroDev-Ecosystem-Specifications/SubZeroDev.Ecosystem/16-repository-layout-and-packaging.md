@@ -4,13 +4,34 @@
 
 Decided, not proposed:
 
-| Repository                  | Contents                                                                                             |
-| --------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `SubZeroDev.Platform`       | The reusable application framework. Exists.                                                          |
-| `SubZeroDev.Automator`      | The orchestration product.                                                                           |
-| `SubZeroDev.PluginContract` | The contract, manifest schema, envelope schema, and conformance suite.                               |
-| One per substantial plugin  | GitHub, Requirements Compiler, Documentation, ContainerPSGenerator, Build, Docker, Package, Release. |
-| Architecture                | Cross-cutting specifications and ADRs that belong to no single product.                              |
+| Repository                  | Contents                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `SubZeroDev.Platform`       | The reusable application framework. Exists.                                                                   |
+| `SubZeroDev.Automator`      | The orchestration product.                                                                                    |
+| `SubZeroDev.PluginContract` | The contract, manifest schema, envelope schema, and conformance suite.                                        |
+| `SubZeroDev.MCP`            | MCP strategy, tool projection, security and consent.                                                          |
+| `SubZeroDev.WorkItems`      | The shared work-item model and reconciliation. A library, not a plugin.                                       |
+| One per substantial plugin  | GitHub, Backlog, Requirements Compiler, Documentation, ContainerPSGenerator, Build, Docker, Package, Release. |
+| Architecture                | Cross-cutting specifications and ADRs that belong to no single product.                                       |
+
+`SubZeroDev.MCP` is separate from the Automator because the projection serves both hosts — a plugin's
+own `mcp` command and the Automator's brokered endpoint. Inside the Automator it would become the
+brokered host's private concern, and the direct host would grow a second projection.
+
+`SubZeroDev.WorkItems` is separate from both of its consumers for the reason any shared model is: two
+plugins expressing the same model independently would disagree, and the disagreement would surface as
+two tools each claiming to be authoritative about what a work item is.
+
+### Every repository carries its own instructions
+
+Each repository holds a `README.md` describing what it is, an `AGENTS.md` with the working
+instructions for that repository — its invariants, what belongs in it, and what belongs elsewhere —
+and a `CLAUDE.md` pointing at `AGENTS.md` rather than repeating it.
+
+The cross-repository conventions block inside each `AGENTS.md` is repeated verbatim, with the
+canonical copy in the Architecture repository. That is the one place duplication is permitted, and
+only because a repository has to stand alone once the split happens: instructions that work only
+inside the staging monorepo stop working exactly when they are needed.
 
 ### Why the contract gets its own repository
 
