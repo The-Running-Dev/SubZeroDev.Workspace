@@ -22,11 +22,13 @@ Provide standardized documentation build, preview, validation, and packaging.
 ## Commands
 
 ```text
-sz-docs build
-sz-docs serve
-sz-docs validate
-sz-docs package
+subzerodev-docs build
+subzerodev-docs serve
+subzerodev-docs validate
+subzerodev-docs package
 ```
+
+Canonical binary name; `sz-docs` is a convenience alias for interactive use.
 
 ## Inputs
 

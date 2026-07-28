@@ -1,54 +1,51 @@
 # SubZeroDev Ecosystem Specifications
 
-Status: Working architecture specification  
-Intended reviewers: Ben, Claude Opus, Codex, implementation agents  
-Scope: SubZeroDev.Platform, SubZeroDev.Automator, shared plugin architecture, initial plugins, and AI-assisted development workflow
+Status: Working architecture specification, split by destination repository
+Scope: SubZeroDev.Platform, SubZeroDev.Automator, the plugin contract, and the initial plugins
 
-## Purpose
+## How this directory is organized
 
-This document set consolidates the architectural decisions and implementation direction discussed for the SubZeroDev ecosystem.
+Each top-level directory holds the specifications destined for one repository. They are grouped here
+so they can be copied out; this directory is a staging area, not their permanent home.
 
-The system is deliberately divided into:
+| Directory                           | Destination repository           | Contents                                                                                                              |
+| ----------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `SubZeroDev.Ecosystem/`             | Architecture repository          | Vision, logical architecture, repository layout, testing strategy, roadmap, open questions                            |
+| `SubZeroDev.Platform/`              | Platform repository (exists)     | Platform specification; tenancy, billing, and licensing                                                               |
+| `SubZeroDev.Automator/`             | Automator repository             | Automator specification, runtime hosts, workflow engine, events, clients, REST and MCP, observability, security model |
+| `SubZeroDev.PluginContract/`        | Its own repository               | The contract every plugin satisfies, plus the manifest schema and reference manifest                                  |
+| `SubZeroDev.Plugins.GitHub/`        | GitHub plugin repository         | GitHub plugin specification                                                                                           |
+| `SubZeroDev.Plugins.Requirements/`  | Requirements Compiler repository | Requirements Compiler specification                                                                                   |
+| `SubZeroDev.Plugins.Documentation/` | Documentation plugin repository  | Documentation plugin specification                                                                                    |
+| `SubZeroDev.Plugins.BuildTooling/`  | Build tooling repositories       | ContainerPSGenerator, build, Docker, package, and release plugins                                                     |
 
-1. **SubZeroDev.Platform** — reusable application infrastructure comparable in purpose to ABP Framework.
-2. **SubZeroDev.Automator** — a thin orchestration product built on Platform.
-3. **Plugins** — independent capabilities that can run manually and can later be registered with Automator.
-4. **Runtime hosts** — adapters that execute plugins implemented using Docker, .NET, Node.js, Python, PowerShell, local processes, or remote APIs.
-5. **Interfaces** — CLI, PowerShell, REST, MCP, scheduler, web UI, and future agents.
+`REVIEW.md` and `WORK-BREAKDOWN.md` stay here. They are working documents about the specifications,
+not part of any product's documentation.
 
-## Recommended reading order
+### Copying rule
 
-1. `00-vision-and-boundaries.md`
-2. `01-ecosystem-architecture.md`
-3. `02-platform-specification.md`
-4. `03-automator-specification.md`
-5. `04-plugin-contract.md`
-6. `05-runtime-hosts.md`
-7. `06-workflow-engine.md`
-8. `07-events-notifications-artifacts.md`
-9. `08-powershell-and-cli.md`
-10. `09-rest-and-mcp.md`
-11. `10-security-tenancy-billing.md`
-12. `11-observability-and-operations.md`
-13. `12-github-plugin.md`
-14. `13-requirements-compiler-plugin.md`
-15. `14-documentation-plugin.md`
-16. `15-build-tooling-plugins.md`
-17. `16-repository-layout-and-packaging.md`
-18. `17-testing-strategy.md`
-19. `18-roadmap.md`
-20. `19-open-questions.md`
-21. ADRs and schemas
+**Move, do not copy.** `16-repository-layout-and-packaging.md` originally proposed that
+specifications live centrally and be "copied/versioned into product repositories". Copying documents
+between repositories is how this repository ended up tracking two byte-identical copies of the
+GitHub plugin specification and ADR-0001 under both `setup/` and `setup-llm/`, which had to be found
+and deleted. A second copy drifts the moment either is edited. Reference by tag or submodule
+instead.
+
+## Reading order
+
+For someone new to the ecosystem:
+
+1. `SubZeroDev.Ecosystem/00-vision-and-boundaries.md`
+2. `SubZeroDev.Ecosystem/01-ecosystem-architecture.md`
+3. `SubZeroDev.PluginContract/04-plugin-contract.md`
+4. `SubZeroDev.Automator/03-automator-specification.md`
+5. `SubZeroDev.Platform/02-platform-specification.md`
+6. Whichever plugin you are working on
+
+`REVIEW.md` explains why several documents read the way they now do, and `WORK-BREAKDOWN.md` says
+what to build in what order.
 
 ## Architectural rule
-
-Platform provides reusable infrastructure.
-
-Automator provides orchestration.
-
-Plugins provide business capabilities.
-
-The dependency direction is always:
 
 ```text
 SubZeroDev.Platform
@@ -58,36 +55,39 @@ SubZeroDev.Automator
 Plugins / Workflows / Products
 ```
 
-Platform must never depend on Automator or product-specific plugins.
+Platform never depends on Automator or on product-specific plugins. Automator never absorbs plugin
+business logic. Plugins never depend on Automator internals.
 
-Automator must not absorb plugin business logic.
+The plugin contract sits outside this stack: it is depended on by Automator and by every plugin, and
+depends on nothing, which is why it gets its own repository rather than living inside Platform.
 
-## Current implementation stance
+## Current stance
 
-These specifications intentionally allow a plugin to be implemented using more than one runtime:
+A plugin may be implemented as a Docker image, a .NET application, a Node or Python application, a
+PowerShell module, a native executable, or a remote HTTP service.
 
-- Docker/OCI image
-- .NET application or assembly
-- Node.js application
-- Python application
-- PowerShell module or script
-- Native executable
-- Remote HTTP service
+Docker is the preferred distribution and execution option, and the only runtime that can actually
+enforce the declared capability model — but it is not the definition of a plugin.
 
-Docker is a first-class and preferred distribution/execution option, but it is not the definition of a plugin.
+## Decisions taken
 
-## Review expectation
+Recorded here so the documents are read in light of them:
 
-Claude Opus should review:
+| Decision          | Choice                                                         |
+| ----------------- | -------------------------------------------------------------- |
+| Contract home     | Its own repository, versioned and tagged independently         |
+| Platform          | Repository exists; specifications split out for manual copying |
+| Build order       | GitHub plugin → second plugin → Automator MVP                  |
+| CLI naming        | `subzerodev-<name>` canonical, `sz-<name>` alias               |
+| Repository layout | Platform, Automator, and one repository per substantial plugin |
+| GitHub plugin     | Moves to its own repository soon; preparation only for now     |
 
-- architectural boundaries
-- package boundaries
-- contracts
-- security assumptions
-- versioning
-- execution semantics
-- failure behavior
-- phase ordering
-- overengineering risks
+## Status of this set
 
-Any unresolved decision should be converted into an ADR before implementation.
+The four blocking defects found in review are fixed: the exit-code table is canonical and lives only
+in the contract, the manifest schema now enforces the prose it encodes, unknown capability keys are
+refused rather than ignored, and capability enforcement is bound to the runtime host that can
+actually provide it.
+
+Remaining open questions are listed per document and consolidated in
+`SubZeroDev.Ecosystem/19-open-questions.md`.

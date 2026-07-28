@@ -1,0 +1,433 @@
+# Plugin Contract
+
+| Field            | Value                                                                   |
+| ---------------- | ----------------------------------------------------------------------- |
+| Contract version | 1.0.0-draft                                                             |
+| Status           | Draft — blocking items resolved, open questions remain                  |
+| Destination repo | Its own repository, versioned and tagged independently                  |
+| Supersedes       | `setup-llm/docs/specifications/subzerodev-automator-plugin-contract.md` |
+
+This contract lives in its own repository so that a Node plugin, a Python plugin, and the .NET
+Automator can all consume it without any of them depending on the others. It is versioned and tagged
+independently, which is what lets a plugin pin a contract version.
+
+## Definition
+
+A plugin is an independently versioned capability that exposes one or more commands through a stable
+manifest and invocation contract.
+
+A plugin is not defined by its implementation language or packaging format. Docker is the preferred
+distribution and isolation mechanism, and the only one that can enforce the capability model, but it
+is not the definition.
+
+## The normative surface
+
+A plugin is defined by what it does at the process boundary: the commands it accepts, the JSON it
+writes to stdout, the exit code it returns, and the artifacts it leaves behind.
+
+A process boundary is the only surface every language already shares. Expressing this contract as a
+language interface — a C# or TypeScript type — would make "plugins in any language" false the moment
+it was written. In-process bindings may exist later as per-language conveniences, but they are
+optimizations over this contract, never a second definition of it.
+
+It follows that **the JSON Schemas in `schemas/` are the normative artifact, not any generated
+types.** Types may be generated from the schemas, and the schemas may in turn be authored in Zod or
+similar, but what an adapter in another language consumes is the committed, versioned schema file.
+
+## Two boundaries that are easy to confuse
+
+```text
+        ┌──────────── plugin boundary (this document) ────────────┐
+host  →  adapter  →  [ CLI → services → provider → vendor SDK ]  →  artifacts
+                                        └── provider boundary ──┘
+```
+
+- The **provider boundary** is internal: GitHub versus GitLab, OpenAI versus Anthropic. It exists
+  only inside plugins that integrate a third-party service, and it is the plugin author's business.
+- The **plugin boundary** is external: host versus plugin. Every plugin has it, and it is this
+  document.
+
+Conflating them is the likeliest way to get this wrong — for example by promoting a domain type such
+as `Project` into the contract, which would only make sense for plugins that happen to produce
+projects.
+
+## Required properties
+
+Every plugin must declare:
+
+- a globally stable ID
+- a semantic version
+- display name and description
+- manifest schema version
+- one or more commands
+- at least one runtime implementation
+- input and output schemas per command
+- declared secrets
+- declared artifacts
+- declared capabilities
+- license metadata
+- compatibility metadata
+
+Each of these is enforced by `schemas/plugin-manifest.schema.json`. Where the schema and this prose
+disagree, that is a defect in one of them — report it rather than working around it.
+
+## Identity
+
+### Plugin ID
+
+```text
+subzerodev.github
+subzerodev.requirements
+subzerodev.documentation
+subzerodev.container-ps-generator
+```
+
+Lowercase, stable, never reused for a different capability.
+
+### Command ID
+
+```text
+sync   list   stats   export   validate
+```
+
+Fully qualified: `subzerodev.github.sync`.
+
+### Name mapping
+
+One capability has several names in several systems. The mapping is mechanical, and stating it
+prevents the five-way drift recorded in `REVIEW.md` (C12):
+
+| Surface          | Form                           | Example                                     |
+| ---------------- | ------------------------------ | ------------------------------------------- |
+| Plugin ID        | `subzerodev.<name>`            | `subzerodev.github`                         |
+| CLI binary       | `subzerodev-<name>`            | `subzerodev-github`                         |
+| CLI alias        | `sz-<name>`                    | `sz-github`                                 |
+| Container image  | `<registry>/subzerodev-<name>` | `ghcr.io/the-running-dev/subzerodev-github` |
+| Language package | per-ecosystem convention       | `@subzerodev/plugin-github`                 |
+
+The long form is canonical: manifests, documentation, and examples use `subzerodev-github`. The
+`sz-` form is a convenience alias for interactive use, in the way `kubectl` is often aliased to `k`.
+Automation should not depend on the alias.
+
+## Required commands
+
+| Command       | Required       | Behavior                                                  |
+| ------------- | -------------- | --------------------------------------------------------- |
+| `manifest`    | Yes            | Print the manifest as JSON. Exit 0.                       |
+| `validate`    | Yes            | Check configuration and readiness without doing the work. |
+| `--help`      | Yes            | Usage. Exit 0.                                            |
+| `--version`   | Yes            | Plugin version. Exit 0.                                   |
+| Work commands | Plugin-defined | Declared in the manifest.                                 |
+
+`manifest` replaces the `describe` and `capabilities` commands in the original draft, which were
+listed as two commands with no stated difference between them. One command returns the whole
+manifest; a host that wants only the capabilities section reads that key.
+
+### The bare-container requirement
+
+**`manifest` must succeed with no configuration file, no secrets, no network, and no mounted
+volumes.** A host must be able to ask an unconfigured image what it is and what it would need before
+it is prepared to run it.
+
+This is easy to break by loading configuration in a shared startup path that runs before command
+dispatch. Conformance tests it directly.
+
+## Channels
+
+| Channel   | Carries                                                           |
+| --------- | ----------------------------------------------------------------- |
+| stdout    | Machine output: the manifest, or the result envelope in JSON mode |
+| stderr    | Human text and structured logs, always                            |
+| Exit code | The outcome                                                       |
+
+**Logs must never reach stdout.** One log line on stdout corrupts the envelope and breaks every
+adapter simultaneously, presenting as a parse bug rather than a logging bug. This is not
+hypothetical: several common structured loggers — Pino among them — write to stdout by default, so
+the logger must be explicitly constructed against stderr.
+
+Precisely:
+
+- `manifest` always writes one JSON document to stdout.
+- A work command writes the envelope to stdout in JSON mode, and a human summary otherwise.
+- `--help` and `--version` write human text to stdout; they are for people.
+- Everything else goes to stderr.
+
+## Manifest
+
+Authored in YAML, validated and canonicalized as JSON. See `schemas/plugin-manifest.schema.json` and
+`examples/plugin.yaml`.
+
+```yaml
+schemaVersion: "1.0.0"
+id: subzerodev.github
+name: SubZeroDev GitHub
+version: 1.0.0
+description: Collects and normalizes GitHub repository metadata.
+license: MIT
+
+commands:
+  - id: sync
+    description: Synchronize repository metadata.
+    inputSchema: schemas/sync.input.schema.json
+    outputSchema: schemas/sync.output.schema.json
+    timeout: PT15M
+    idempotency: idempotent
+    artifacts:
+      - name: projects
+        path: projects.json
+        mediaType: application/json
+        schemaRef: schemas/projects.schema.json
+        required: true
+
+runtimes:
+  - id: docker
+    type: docker
+    image: ghcr.io/the-running-dev/subzerodev-github
+    digest: "sha256:…"
+    entrypoint: ["subzerodev-github"]
+
+secrets:
+  - id: github-token
+    required: true
+    environmentVariable: GITHUB_TOKEN
+    description: GitHub personal access token with read access to repositories.
+
+capabilities:
+  network:
+    required: true
+  filesystem:
+    read: [config]
+    write: [cache, output]
+
+compatibility:
+  minimumAutomatorVersion: "1.0.0"
+  operatingSystems: [linux, windows, macos]
+  architectures: [amd64, arm64]
+```
+
+Fields that carry weight:
+
+- **`secrets` declares names, never values.** This is how a host knows what to inject without the
+  plugin ever describing a credential it holds.
+- **`capabilities` is the security surface.** It is strictly schema-constrained, and unknown keys are
+  refused rather than ignored — see Compatibility below.
+- **`digest`** pins the image immutably. A version tag is mutable and is acceptable only for
+  development runtimes.
+- **`idempotency`** is an enumeration, not a boolean: `idempotent`, `conditional`, or
+  `non-idempotent`. `conditional` requires an `idempotencyCondition` string stating what the
+  condition is, because a retry policy cannot act on an unexplained "sometimes".
+
+## Invocation
+
+| Input         | Mechanism                                                                        |
+| ------------- | -------------------------------------------------------------------------------- |
+| Configuration | Read-only mount at `/etc/subzerodev/plugin.config.json`, or `--config`           |
+| Secrets       | Environment variables only, named by the manifest                                |
+| Cache         | Writable mount, `SUBZERODEV_PLUGIN_CACHE`, default `/var/lib/subzerodev/cache`   |
+| Output        | Writable mount, `SUBZERODEV_PLUGIN_OUTPUT`, default `/var/lib/subzerodev/output` |
+
+Secrets travel through the environment and nowhere else. Not `argv`, which is world-readable via
+`/proc` on Linux; not the configuration file, which is the thing people commit.
+
+The cache and output variable names are deliberately **plugin-neutral**, so an adapter can mount
+working directories without per-plugin knowledge.
+
+Additional requirements:
+
+- The container runs as a non-root user.
+- No TTY is required, and no run may prompt for input.
+- A run must tolerate a read-only configuration mount.
+- All inputs normalize into one command input object before execution.
+
+## Result envelope
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "plugin": { "id": "subzerodev.github", "version": "1.0.0" },
+  "command": "sync",
+  "status": "partial",
+  "summary": "Synchronized 40 of 42 repositories.",
+  "startedAt": "2026-07-28T10:00:00Z",
+  "finishedAt": "2026-07-28T10:02:13Z",
+  "data": {},
+  "warnings": [],
+  "errors": [
+    {
+      "code": "repository_statistics_unavailable",
+      "message": "Statistics endpoint did not settle within the retry budget",
+      "subject": "repository:12345",
+      "retryable": true
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "projects",
+      "path": "projects.json",
+      "bytes": 48213,
+      "sha256": "…"
+    }
+  ],
+  "metrics": {},
+  "exitCode": 4
+}
+```
+
+Changes from the original draft:
+
+- **`errors[]` added.** The original had `warnings` but no errors, leaving a failing plugin nowhere
+  structured to report why.
+- **`startedAt` / `finishedAt` / `exitCode` added**, so the envelope stands alone without the host
+  having to reconstruct it.
+- **`status` is one of** `succeeded`, `partial`, `failed`, `cancelled`, `timedOut`. It duplicates
+  what the exit code says, deliberately, so an adapter can branch on a word rather than memorize a
+  table.
+- **`errors[].retryable`** lets the plugin, which knows most about the failure, advise the retry
+  policy instead of the host guessing from an exit code.
+
+### `data` is bounded
+
+**`data` carries a summary, not a payload. It is capped at 256 KiB.** Anything larger must be an
+artifact.
+
+This matters because the Automator persists normalized output in execution history on SQLite in
+early phases. Without a bound, a plugin returning a multi-megabyte result writes it into the
+database on every run.
+
+The distinction is: artifacts are the deliverable, `data` is what a human or a workflow condition
+needs to see without opening one.
+
+### Envelope versus execution record
+
+This envelope is what the **plugin emits**. The Automator's execution record — which additionally
+carries queue timing, retry history, host and agent metadata, and a log reference — is a different
+model, specified in the Automator documents. Conflating the two was an inconsistency in the original
+set.
+
+## Exit codes
+
+| Code  | Meaning                                 |
+| ----- | --------------------------------------- |
+| `0`   | Success                                 |
+| `2`   | Usage or validation error               |
+| `3`   | Operational failure                     |
+| `4`   | Partial success                         |
+| `5`   | Authentication or authorization failure |
+| `6`   | Rate-limited or quota-exhausted         |
+| `124` | Timed out                               |
+| `130` | Cancelled or interrupted                |
+
+**`1` is reserved and never assigned.** Most runtimes return it for an uncaught exception, so
+leaving it unassigned keeps "the plugin crashed" distinguishable from "the plugin reported a
+failure" — a distinction retry policy depends on, because a crash may be transient where a reported
+validation failure is deterministic.
+
+`124` and `130` follow `timeout(1)` and `128 + SIGINT`, so shell tooling and container runtimes
+already produce them.
+
+Plugins may define additional codes above `6` and must document them in the manifest. This table is
+canonical; no other document restates it.
+
+Partial success is a first-class outcome, not a failure: the run kept prior valid state for what
+failed, wrote what succeeded, and said so in `errors[]`.
+
+## Compatibility
+
+The compatibility policy the original set left open.
+
+### Manifest schema version
+
+- A host **accepts** a manifest whose `schemaVersion` major matches its own.
+- A host **refuses** a higher major, with an error naming both versions.
+- A host **accepts** a higher minor and follows the unknown-field rules below.
+
+### Unknown fields
+
+| Location          | Unknown field | Rationale                                                                  |
+| ----------------- | ------------- | -------------------------------------------------------------------------- |
+| `capabilities`    | **Refuse**    | An unrecognized permission would otherwise be neither granted nor reported |
+| `secrets`         | **Refuse**    | Same — a misunderstood secret declaration is a security failure            |
+| `runtimes[].type` | **Refuse**    | An unknown runtime cannot be executed                                      |
+| Everything else   | Ignore        | Descriptive metadata should not break forward compatibility                |
+
+Failing open on capabilities was the original schema's behavior, by way of
+`additionalProperties: true` everywhere. It was not a decision anyone made, and it is the wrong
+default for the security surface.
+
+## Idempotency, retries, and timeouts
+
+Commands declare `idempotent`, `conditional`, or `non-idempotent`. `conditional` must state its
+condition.
+
+Rules:
+
+- Non-idempotent commands are never retried automatically unless explicitly configured per step.
+- **A retry must confirm the previous attempt is dead before starting.** Container stop is
+  asynchronous; retrying a timeout without confirming termination can run two copies of a
+  non-idempotent command concurrently.
+- Retry policies key on `errors[].retryable` and on exit code. Exit `2` is never retryable: a usage
+  error is deterministic.
+- Commands creating external resources should support an idempotency key where the provider allows
+  one.
+
+## Cancellation
+
+Hosts propagate cancellation by signal, container stop, or an agent request. Plugins should clean up
+and exit `130`. A plugin that ignores cancellation is killed, and the execution records that it had
+to be.
+
+## Artifacts
+
+- Declared in the manifest with a name, path, media type, and schema reference.
+- Paths are **relative, normalized, and confined to the output directory**. A path escaping the
+  output directory is refused rather than written.
+- A declared `required: true` artifact that is absent at exit makes the run a failure, whatever the
+  exit code said.
+- An artifact written but not declared is retained and flagged in the execution record, not silently
+  discarded — it is usually a manifest bug rather than an attack.
+- Downstream consumers receive artifact references, not filesystem paths.
+
+## Determinism
+
+Given the same configuration and unchanged upstream data, two runs produce byte-identical artifacts.
+Timestamps and per-run identifiers belong in the envelope, which is expected to differ, not in the
+artifacts, which are not.
+
+This is what lets a host detect real change by comparing hashes rather than re-reading content.
+
+## Trust and distribution
+
+Trust levels and their enforcement are specified in `SubZeroDev.Automator/10-security-model.md`.
+Only first-party and development-local are establishable today; signed third-party trust is blocked
+on a signing ADR.
+
+Distribution formats — OCI image, NuGet, npm, PyPI, PowerShell Gallery, archive, remote registration
+— are separate from execution runtime. A plugin distributed as an npm package may still be executed
+by the Docker host.
+
+## Conformance
+
+The contract is only real if it is mechanically checkable. The conformance suite takes a plugin and
+asserts:
+
+1. `manifest` succeeds in a bare container and validates against the manifest schema.
+2. `--help` and `--version` exit 0; an unknown command exits 2.
+3. In JSON mode, stdout parses as exactly one JSON document — the check that catches a stray log
+   line.
+4. Every declared artifact appears where declared and validates against its schema.
+5. Declared exit codes are produced for their conditions.
+6. A secret canary appears in no output, log, or artifact.
+7. The image runs as non-root and tolerates a read-only config mount.
+8. Two identical runs produce byte-identical artifacts.
+9. Paths escaping the output directory are refused.
+
+The suite is what makes "use this plugin as a template" verifiable rather than aspirational, and it
+is the deliverable that turns this document from prose into a contract.
+
+## Open questions
+
+1. Does every plugin need a CLI, or may a plugin be remote-API-only?
+2. How are runtime-specific options represented without leaking host detail into the manifest?
+3. What signing mechanism is planned? Blocks two of the four trust levels.
+4. May one manifest declare multiple runtimes for the same command, and if so how does the host
+   choose deterministically?

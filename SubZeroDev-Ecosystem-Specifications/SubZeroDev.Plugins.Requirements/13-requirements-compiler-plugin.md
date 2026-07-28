@@ -22,6 +22,8 @@ Source requirements
 → publish
 ```
 
+Canonical binary name; `sz-requirements` is a convenience alias for interactive use.
+
 ## Inputs
 
 - Markdown specification
@@ -54,12 +56,12 @@ Source requirements
 ## CLI
 
 ```text
-sz-requirements analyze
-sz-requirements compile
-sz-requirements validate
-sz-requirements render
-sz-requirements publish
-sz-requirements plan
+subzerodev-requirements analyze
+subzerodev-requirements compile
+subzerodev-requirements validate
+subzerodev-requirements render
+subzerodev-requirements publish
+subzerodev-requirements plan
 ```
 
 ## AI provider abstraction
