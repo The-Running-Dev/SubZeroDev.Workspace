@@ -15,6 +15,23 @@ of the plan.
 Verified scaffold state at review time: `format:check`, `lint`, `typecheck`,
 `test` (11 passing), and `build` all pass.
 
+## Resolution
+
+This review has been actioned. It is kept as the record of _why_ the plan reads
+the way it now does, not as an open queue.
+
+- **Fixed in the repository:** B1 — the duplicate `setup/` specification and ADR
+  are deleted, leaving `setup-llm/docs/` canonical.
+- **Fixed in the planning documents:** B2 and B3 — `TODO-next.md` is realigned to
+  the plan's milestone numbering, the output-layout contradiction is resolved in
+  favor of consolidated-only, and authority is now stated explicitly (the plan
+  owns sequencing, the ADRs own decisions). S1, S2, S3, S4, S5, S6, S7, and the
+  smaller notes are folded into the plan's decisions table, request budget, and
+  milestones. S8's vertical slice is inserted as Milestone 3.5.
+- **Scheduled, not yet done:** B4 — the `windows-latest` matrix is now an explicit
+  Milestone 0 deliverable rather than an unenforced exit criterion, alongside the
+  `.gitattributes` and Windows entry-point-test items already sequenced there.
+
 ---
 
 ## Blocking

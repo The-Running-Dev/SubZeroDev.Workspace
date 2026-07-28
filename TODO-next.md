@@ -1,135 +1,153 @@
 # SubZeroDev.Automator.Plugins.GitHub — Next Work
 
 This is the working checklist for implementing
-[SubZeroDev.Automator.Plugins.GitHub](setup-llm/docs/specifications/subzerodev-automator-plugins-github.md). Complete it
-top to bottom, updating decisions and acceptance criteria as the project
-develops.
+[SubZeroDev.Automator.Plugins.GitHub](setup-llm/docs/specifications/subzerodev-automator-plugins-github.md).
 
-The sequenced engineering plan, architectural boundaries, validation strategy,
-and pull-request breakdown are maintained in
-[`plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md`](plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md).
+Two companion documents own the detail, and this checklist defers to both:
 
-## Current Step: Resolve Remaining Phase One Boundaries
+- [`plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md`](plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN.md)
+  is authoritative for sequencing, architectural boundaries, validation strategy,
+  and the pull-request breakdown. Milestone numbers here match it exactly.
+- The ADRs under `setup-llm/docs/decisions/` are authoritative for decisions. When
+  this file and a decision disagree, the ADR wins and this file is wrong.
 
-Before scaffolding, record the decisions that affect the normalized model,
-configuration schema, API-call budget, and cache layout.
+The [peer review](plugins/SubZeroDev.Automator.Plugins.GitHub/IMPLEMENTATION_PLAN_REVIEW.md)
+records why several of the entries below exist.
+
+## Milestone 0: Close Decisions and Stabilize the Scaffold
+
+Phase One boundary decisions are now closed in the plan's decisions table and
+are being recorded in ADR-0002:
 
 - [x] Implement it here at `plugins/SubZeroDev.Automator.Plugins.GitHub`.
 - [x] Use a standalone CLI as the first runner; defer Automator integration.
 - [x] Limit Phase One discovery to repositories owned by the authenticated user.
 - [x] Exclude forks by default and include archived repositories.
 - [x] Defer organization and contributed repositories.
-- [ ] Decide whether commit count is required in Phase One.
-- [ ] Choose consolidated output, per-repository output, or both.
+- [x] Collect commit count through `per_page=1` plus the `Link` `rel="last"` page
+      number, at one request per repository, and leave it nullable when absent.
+- [x] Emit consolidated canonical documents only; per-project output is future
+      scope.
 - [x] Atomically replace current cache; defer historical snapshots.
-- [ ] Decide whether portfolio-specific metadata belongs in the core model.
+- [x] Carry portfolio metadata in an optional provider-independent `custom`
+      object on `Project`.
 - [x] Require an explicit schema version in every exported document.
+- [x] Key repository identity on GitHub's immutable numeric ID, namespaced by
+      provider.
+- [x] Share one `SCHEMA_VERSION` across top-level documents, accept the same
+      major version, and treat pre-`1.0.0` exports as regenerate-only.
+- [x] Map only capability flags GitHub exposes directly; omit packages and
+      releases.
+- [x] Keep `node:util` `parseArgs` with two-stage parsing rather than adding a
+      CLI parser dependency.
+- [x] Remove the duplicate specification and ADR copies under `setup/`;
+      `setup-llm/docs/` is canonical.
 
-Recommended starting decisions:
+Remaining work:
 
-| Question              | Recommendation                                                                                |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| Repository scope      | Owned repositories only in Phase One.                                                         |
-| Forks                 | Excluded by default, configurable.                                                            |
-| Archived repositories | Included by default and clearly flagged.                                                      |
-| Organizations         | Defer until the owned-repository path is stable.                                              |
-| Commit count          | Defer exact counts; expose a nullable field until an efficient strategy is proven.            |
-| Output layout         | Consolidated canonical files plus optional per-project files.                                 |
-| Cache history         | Keep current state atomically; snapshots are future work.                                     |
-| Portfolio metadata    | Support an optional provider-independent `custom` section without mixing it with GitHub data. |
-| Schema version        | Required from the first export.                                                               |
-
-Exit criteria:
-
-- [ ] Decisions are recorded in an ADR.
-- [ ] The specification is updated where decisions close open questions.
-- [ ] Phase One acceptance criteria contain no unresolved scope ambiguity.
-
-## Milestone 1: Scaffold the CLI-First Plugin
-
-- [x] Create the in-repository Node.js 24+ TypeScript plugin.
-- [x] Configure ESM, strict TypeScript, package exports, and a CLI binary.
-- [x] Add Vitest, ESLint, Prettier, and type-checking scripts.
-- [x] Create the specified source directories.
-- [x] Add a minimal Dockerfile and `.dockerignore`.
-- [x] Add a PowerShell runner and document local and Docker workflows.
-- [x] Add CI for dependency audit, lint, type-check, tests, build, CLI smoke test,
-      and Docker build.
-- [x] Verify the scaffold can install, build, test, and run
-      `subzerodev-github --help`.
+- [ ] Record every decision above in
+      `setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md`.
+- [ ] Update the specification: reconcile the primary goal with the Phase One
+      discovery scope, remove the configuration-file token option, and drop the
+      packages and releases capability flags.
+- [ ] Add a root `.gitattributes` so `npm run format:check` agrees across
+      Windows and Linux.
+- [ ] Make the installed-entry-point test portable on Windows without weakening
+      Linux symlink coverage.
+- [ ] Add `windows-latest` to the `validate` job matrix.
+- [ ] Define the CLI exit codes, leaving `1` reserved for uncaught exceptions.
 
 Exit criteria:
 
-- [x] `npm run lint`
-- [x] `npm run typecheck`
-- [x] `npm test`
-- [x] `npm run build`
-- [x] `subzerodev-github --help`
+- [ ] The full check suite passes on Windows and Linux in GitHub Actions.
+- [ ] The specification, ADRs, plan, and this checklist describe the same Phase
+      One.
+- [ ] Exactly one copy of the specification and of each ADR is tracked.
 
-## Milestone 2: Define Contracts Before GitHub Integration
+## Milestone 1: Domain Contracts and Canonical Schemas
 
 - [ ] Define versioned `Project`, `Repository`, `LanguageStatistics`,
       `Release`, `Branch`, `Contributor`, `RepositoryStatistics`, and `Summary`
       models.
-- [ ] Define provider interfaces that contain no Octokit types.
-- [ ] Define configuration, cache, serializer, clock, and logger interfaces.
-- [ ] Create Zod schemas and inferred TypeScript types.
-- [ ] Generate or publish `projects.schema.json` from the canonical schema.
+- [ ] Define provider-namespaced identity on GitHub's immutable numeric ID, with
+      `owner` and `name` as mutable metadata.
+- [ ] Implement the schema-version compatibility check.
+- [ ] Create Zod schemas and inferred TypeScript types, preferring `null` over
+      `.optional()` for serialized fields.
+- [ ] Generate `projects.schema.json` with `z.toJSONSchema()`; do not add
+      `zod-to-json-schema`.
 - [ ] Add fixture-based schema and serialization tests.
 
 Exit criteria:
 
 - [ ] No GitHub/Octokit type appears outside `providers/github`.
 - [ ] JSON round trips deterministically.
+- [ ] A renamed repository resolves to the same identity as before the rename.
 - [ ] Schema validation rejects incompatible data with useful errors.
 
-## Milestone 3: Configuration and Authentication
+## Milestone 2: Ports, Configuration, and Secret Safety
 
 - [ ] Define `github.config.json` with safe defaults.
-- [ ] Load tokens from the environment without serializing or logging them.
-- [ ] Decide and document configuration-file token handling.
+- [ ] Load tokens from the environment only; the schema must not be able to
+      represent a raw token.
 - [ ] Validate configuration and output paths with Zod.
+- [ ] Define cache, clock, logger, and serializer interfaces.
 - [ ] Implement an authenticated connectivity check.
-- [ ] Add redaction tests for errors and logs.
+- [ ] Add redaction and secret-canary tests for errors and logs.
 
-## Milestone 4: GitHub Provider and Repository Discovery
+## Milestone 3: GitHub Provider and Repository Discovery
 
 - [ ] Implement an Octokit adapter behind the provider interface.
 - [ ] Discover all repositories in the agreed Phase One scope with pagination.
 - [ ] Apply fork, archived, private, disabled, and template filters.
 - [ ] Map GitHub responses into normalized models.
-- [ ] Capture rate-limit information.
+- [ ] Capture rate-limit information and count requests.
 - [ ] Add mocked provider tests for pagination, filtering, partial failure, and
       response-shape changes.
 
-## Milestone 5: Metadata and Statistics
+## Milestone 3.5: First Runnable Slice
 
+- [ ] Implement `validate` plus a discovery-and-core-metadata `sync`, and enough
+      of `list` to read the cache back.
+- [ ] Run `validate -> sync -> list` against one real account.
+- [ ] Compare observed request counts against the per-repository budget and
+      correct the budget if reality disagrees.
+- [ ] Fold any mapping correction back into the Milestone 1 fixtures.
+
+## Milestone 4: Metadata and Statistics
+
+- [ ] Build the endpoint-and-budget table, including the `202`-while-computing,
+      contributor-cap, `open_issues_count`-includes-pull-requests, and
+      Search-API-bucket hazards.
 - [ ] Collect required repository metadata.
 - [ ] Collect language bytes and deterministic percentages.
 - [ ] Collect releases, tags, branches, contributors, pull requests, and issues.
-- [ ] Implement the agreed commit-count strategy.
-- [ ] Define “most active repository” deterministically.
-- [ ] Bound concurrency and respect GitHub rate limits.
+- [ ] Implement the commit-count strategy.
+- [ ] Define "most active repository" deterministically.
+- [ ] Bound concurrency and respect both rate-limit buckets.
 
-## Milestone 6: Cache and Incremental Synchronization
+## Milestone 5: Cache and Incremental Synchronization
 
 - [ ] Define a versioned cache manifest.
 - [ ] Track successful synchronization timestamps and ETags.
 - [ ] Reuse unchanged cached data.
-- [ ] Write updates atomically.
+- [ ] Write updates atomically through per-file `rename`, never a directory swap.
 - [ ] Preserve the last valid cache after partial or total failure.
-- [ ] Test first sync, no-change sync, changed repository, deletion, corruption,
-      interruption, and rate limiting.
+- [ ] Test first sync, no-change sync, changed repository, rename, transfer,
+      deletion, corruption, interruption, and rate limiting.
 
-## Milestone 7: CLI and Exports
+## Milestone 6: Serializers and Exports
 
-- [ ] Implement `github sync`.
-- [ ] Implement `github list`.
-- [ ] Implement `github stats`.
-- [ ] Implement `github export`.
-- [ ] Implement `github validate`.
 - [ ] Produce deterministic `projects.json`, `projects.schema.json`,
       `statistics.json`, `summary.json`, and `projects.yaml`.
+- [ ] Serialize every document to staging before renaming any of them.
+- [ ] Add golden-file byte-stability tests.
+
+## Milestone 7: CLI Commands and Application Wiring
+
+- [ ] Implement `github sync`, `list`, `stats`, `export`, and `validate`.
+- [ ] Implement global and command-specific options through two-stage
+      `parseArgs`.
 - [ ] Define stable exit codes and machine-readable error behavior.
 
 ## Milestone 8: Docker, Documentation, and Release Readiness
@@ -138,10 +156,14 @@ Exit criteria:
 - [x] Support writable cache/output mounts; add the read-only configuration
       mount when configuration loading is implemented.
 - [x] Document token injection without placing secrets in image layers.
+- [ ] Add container smoke validation to the `container` workflow job, which
+      currently builds the image without running it.
 - [ ] Add quick-start, configuration, command, schema, cache, and troubleshooting
-      documentation.
+      documentation, stating that incompatible exports are regenerated rather
+      than migrated.
 - [ ] Run an end-to-end test against a controlled GitHub fixture account or
       recorded API fixtures.
+- [ ] Decide whether `npm audit` and test coverage gate a release.
 - [ ] Version and publish the Phase One package and container.
 
 ## Definition of Done
@@ -149,8 +171,9 @@ Exit criteria:
 - [ ] Every Phase One deliverable in the specification is implemented.
 - [ ] Every non-goal remains outside the package.
 - [ ] GitHub API and Octokit types do not leak beyond the provider.
+- [ ] Repository identity survives a rename or transfer.
 - [ ] Repeated unchanged synchronizations are deterministic and avoid unnecessary
-      API calls.
+      API calls, shown by a measured request count.
 - [ ] Interrupted synchronization cannot destroy the last valid cache.
 - [ ] Export schemas are explicitly versioned and validated.
 - [ ] Documentation can take a new user from token setup to validated export.
