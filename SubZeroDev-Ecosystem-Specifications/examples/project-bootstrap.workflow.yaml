@@ -1,0 +1,33 @@
+id: project-bootstrap
+name: Project Bootstrap
+version: 1.0.0
+
+inputs:
+  specification:
+    type: file
+    required: true
+
+steps:
+  - id: compile
+    uses: subzerodev.requirements.compile
+    with:
+      specification: ${{ inputs.specification }}
+
+  - id: approve
+    type: approval
+    needs:
+      - compile
+
+  - id: create-project
+    uses: subzerodev.github.create-project
+    needs:
+      - approve
+    with:
+      project: ${{ steps.compile.outputs.project }}
+
+  - id: notify
+    uses: subzerodev.notifications.send
+    needs:
+      - create-project
+    with:
+      message: Project bootstrap completed.

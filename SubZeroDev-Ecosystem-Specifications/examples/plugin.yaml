@@ -1,0 +1,36 @@
+schemaVersion: "1.0"
+id: subzerodev.github
+name: SubZeroDev GitHub
+version: 1.0.0
+description: Collects and normalizes GitHub repository metadata.
+
+commands:
+  - id: sync
+    description: Synchronize repository metadata.
+    inputSchema: schemas/sync.input.schema.json
+    outputSchema: schemas/sync.output.schema.json
+    idempotent: true
+    timeout: PT15M
+
+runtimes:
+  - id: docker
+    type: docker
+    image: ghcr.io/the-running-dev/subzerodev-github:1.0.0
+    entrypoint:
+      - sz-github
+
+  - id: node
+    type: node
+    entrypoint: dist/cli.js
+
+secrets:
+  - id: github-token
+    required: true
+    environmentVariable: GITHUB_TOKEN
+
+capabilities:
+  network:
+    required: true
+  filesystem:
+    write:
+      - output
