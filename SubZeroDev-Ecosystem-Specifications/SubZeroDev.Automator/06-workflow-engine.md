@@ -153,15 +153,32 @@ Resume behavior must be explicit for side-effecting steps.
 
 ## Workflow events
 
-- WorkflowCreated
-- WorkflowQueued
-- WorkflowStarted
-- StepQueued
-- StepStarted
-- StepSucceeded
-- StepFailed
-- WorkflowSucceeded
-- WorkflowFailed
-- WorkflowCancelled
-- WorkflowPaused
-- WorkflowResumed
+The catalogue lives in `07-execution-events-and-artifacts.md`, which owns every event Automator
+publishes and the `<Product>.<Aggregate>.<PastTenseVerb>` naming convention.
+
+An earlier draft listed workflow events here in bare `WorkflowSucceeded` form while `07` used dotted
+namespaced names. Two conventions for one event set is how subscribers end up matching on the wrong
+string; the catalogue is stated once.
+
+## Compensation failure
+
+Compensation is best-effort, which means it can fail. A workflow left partially compensated is the
+one state an operator must be told about, because automatic recovery is no longer possible:
+`Automator.Workflow.CompensationFailed` is published, the workflow is terminal, and the execution
+record names which compensating steps succeeded and which did not.
+
+Nothing retries compensation automatically. A compensating action that failed once may have partially
+applied, and re-running it blind is how a rollback makes things worse.
+
+## Retry safety
+
+Retry policy keys on `errors[].retryable` from the plugin envelope and on exit code. Two rules the
+contract requires and this engine enforces:
+
+- Exit `2` is never retryable — a usage or validation error is deterministic.
+- **A retry must confirm the previous attempt is dead before starting.** Container stop is
+  asynchronous, so retrying a timeout without confirming termination can run two copies of a
+  non-idempotent command concurrently.
+
+Non-idempotent steps are never retried automatically. A step declared `conditional` is retried only
+through the condition its manifest states.

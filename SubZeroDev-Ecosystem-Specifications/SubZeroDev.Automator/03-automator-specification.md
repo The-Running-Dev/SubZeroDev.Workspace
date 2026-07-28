@@ -113,21 +113,24 @@ An invocation includes:
 ### Execution states
 
 ```text
-Created
-Validated
-Queued
-Resolving
-Starting
-Running
-Succeeded
-Failed
-Cancelled
-TimedOut
-Skipped
-Compensated
+Queued → Running → Succeeded
+                 → Failed
+                 → Cancelled
+                 → TimedOut
+                 → Orphaned
 ```
 
-Terminal states are Succeeded, Failed, Cancelled, TimedOut, Skipped, and Compensated.
+Six terminal-or-active states, not thirteen. `Skipped` and `Compensated` only mean something once
+workflows and compensation exist, and `Created`, `Validated`, `Resolving`, and `Starting` are
+internal transitions within queueing and dispatch — persisting each as a distinct state adds rows and
+migration surface without giving an operator anything they can act on.
+
+`Orphaned` is terminal and is reached when an execution's lease expires without a heartbeat. It is
+never retried automatically: the control plane cannot know whether the work completed, partially
+completed, or never started, and guessing is how a non-idempotent command runs twice. See
+`07-execution-events-and-artifacts.md`.
+
+Workflow-level states are separate and are specified in `06-workflow-engine.md`.
 
 ### Execution result
 
@@ -401,43 +404,33 @@ Automator is not:
 - a general BPM suite
 - a low-code platform
 
-## Phase One
+## Phase scope
 
-- plugin manifest
-- plugin registry
-- Docker runtime host
-- local process runtime host
-- manual invocation
-- execution state machine
-- logs
-- artifact registration
-- REST API
-- PowerShell client
-- simple sequential workflows
-- cron scheduling
-- notifications through Platform
-- SQLite
-- one local execution node
+Phase numbering is defined once in `SubZeroDev.Ecosystem/18-roadmap.md`. This document previously
+maintained a separate "Phase One" listing fifteen items, which described a different milestone from
+the roadmap's and made the term mean two things depending on which document was open.
 
-## Phase Two
+**Phase 3 — Automator MVP:**
 
-- .NET, Node, Python, and PowerShell hosts
-- DAG workflows
-- remote agents
-- MCP
-- web UI
-- project scoping
-- PostgreSQL
-- approvals
-- resumability
+- plugin registry, installing from an OCI reference and verifying the digest
+- **Docker runtime host only**
+- execution model and the six-state machine
+- manual invocation, log capture, artifact registration
+- SQLite persistence and execution history
+- secret storage, injection, and output scanning
+- capability policy evaluation and enforcement binding
 
-## Phase Three
+Deliberately excluded from the MVP:
 
-- marketplace
-- SaaS
-- billing integration
-- distributed scheduler
-- policy engine
-- plugin signing
-- enterprise tenancy
-- advanced AI orchestration
+- **The local process host.** It cannot enforce any declared capability, so shipping it beside the
+  policy engine would make policy decorative on the host that most needs it. Phase 6.
+- REST API, PowerShell client, workflows, and cron. Docker host plus manual invocation plus execution
+  history is enough to prove the orchestration model; those follow in Phase 4.
+
+**Phase 4** adds REST, the PowerShell client, sequential workflows, cron scheduling with an explicit
+overlap policy, and notifications.
+
+**Phase 6** adds the remaining runtime hosts, remote agents, DAG workflows, PostgreSQL, and object
+storage.
+
+**Phase 7** adds MCP, approvals, and the AI project workflow. **Phase 8** is the commercial layer.

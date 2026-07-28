@@ -1,99 +1,112 @@
 # Roadmap
 
-## Phase 0 — Architecture stabilization
+**This document defines the phase vocabulary for the whole ecosystem.** No other document maintains
+its own numbering; where one needs to state scope, it references a phase from here.
 
-- review this document set
-- resolve open questions
-- create ADRs
-- define naming
-- define package boundaries
-- define manifest schema
-- define normalized invocation/result contracts
+That rule exists because the original set used "Phase One" to mean three different things — the
+Automator's fifteen-item milestone, Platform's package scope, and this roadmap's first plugin phase.
 
-## Phase 1 — Independent plugins
+## Decisions this reflects
 
-Prioritize tools already useful manually:
+| Decision           | Choice                                                                      |
+| ------------------ | --------------------------------------------------------------------------- |
+| Platform           | Minimal Platform built alongside Automator; six packages, rest deferred     |
+| Build order        | GitHub plugin → Documentation plugin → Automator MVP                        |
+| Second plugin      | Documentation — cheapest real contract test, since the image already exists |
+| Local process host | Out of the MVP                                                              |
+| Contract           | Its own repository, tagged independently                                    |
 
-1. GitHub plugin
-2. Requirements Compiler
-3. Documentation plugin packaging
-4. ContainerPSGenerator alignment with plugin contract
+## Phase 0 — Contract stabilization
 
-Deliver:
+Blocking. Small.
 
-- CLI
-- Docker
-- manifest
-- schemas
-- tests
-- docs
+- Create the contract repository and tag `v1.0.0`
+- Publish the manifest and result-envelope schemas at version-pathed URLs
+- Manifest canonicalization: YAML authoring, restricted profile, canonical JSON for validation
+- Schema test suite, including the negative corpus
+- Resolve naming, ADR numbering, and remaining specification contradictions
 
-## Phase 2 — Platform foundation
+## Phase 1 — GitHub plugin to conformance
 
-- core abstractions
-- hosting
-- configuration
-- events
-- persistence
-- notifications
-- storage
-- observability
-- API conventions
-- testing
+The plugin is already scaffolded, building, and green. This is the work to make it satisfy the
+contract.
 
-## Phase 3 — Automator local MVP
+Domain models on immutable identity; configuration and secret safety with logs on stderr; the
+`manifest` command; the result envelope; the Octokit adapter; **a first runnable slice against one
+real account**; collection profiles; statistics; cache; exports; and passing conformance.
 
-- plugin registry
-- local process host
-- Docker host
-- execution model
-- SQLite
-- REST
-- PowerShell
-- logs
-- artifacts
-- sequential workflows
-- cron
-- local mode
+The runnable slice is placed before the expensive statistics and cache work deliberately — it is the
+cheapest available de-risking, and everything after it is built against real payloads rather than
+mocks that encode the same assumptions as the code.
 
-## Phase 4 — Multi-runtime and remote agents
+## Phase 2 — Conformance suite and minimal Platform
 
-- Node host
-- .NET host
-- Python host
-- PowerShell host
-- agent protocol
-- agent selection
-- PostgreSQL
-- object storage
-- DAG workflows
+Two tracks that do not block each other.
 
-## Phase 5 — AI and project workflow
+**Conformance suite:** the runner, the nine checks, and the fixture plugins — including the leaky,
+noisy, nondeterministic, and traversing fixtures that must _fail_, because a suite that has never
+failed is not evidence.
 
-- Requirements Compiler integration
-- GitHub project publishing
-- MCP
-- AI workspace/project context
-- approval steps
-- model/provider policies
+**Minimal Platform:** Abstractions, Core, Hosting, Persistence, Observability, Testing. Six packages,
+chosen because they are the ones genuinely hard to retrofit. Everything else waits for a second
+consumer.
 
-## Phase 6 — Commercial platform
+## Phase 3 — Documentation plugin
 
-- identity
-- organizations
-- tenancy
-- billing
-- licensing
-- usage
-- hosted control plane
-- customer-hosted agents
+The second plugin, and the point of it is not the plugin.
+
+The Docusaurus image already exists, so the work is wrapping an existing capability in the contract
+rather than building a new one — which is exactly what makes it a good test. A contract validated by
+one implementation is a contract fitted to that implementation.
+
+**The deliverable is the list of things the contract got wrong**, and a contract `1.1.0` cut from it.
+The working plugin is the means.
+
+## Phase 4 — Automator MVP
+
+- plugin registry, installing from an OCI reference and verifying the digest
+- Docker runtime host with the security defaults, and its capability enforcement binding
+- execution model, six-state machine, lease and heartbeat with orphan detection
+- manual invocation, log capture, artifact registration
+- SQLite persistence and execution history
+- secret storage, injection, and output scanning
+
+No local process host, no REST, no workflows, no scheduling. This phase proves the orchestration
+model; it is not the product.
+
+## Phase 5 — Automator interfaces
+
+REST API, PowerShell client, sequential workflows, cron scheduling with an explicit overlap policy,
+and notifications through Platform.
+
+## Phase 6 — Multi-runtime and remote agents
+
+The remaining runtime hosts including local process, the agent protocol and selection, DAG workflows,
+PostgreSQL, and object storage.
+
+## Phase 7 — AI and project workflow
+
+Requirements Compiler, GitHub project publishing, MCP, approval steps, and AI provider policy.
+
+## Phase 8 — Commercial platform
+
+Identity, organizations, tenancy, billing, licensing, usage metering, hosted control plane, and
+customer-hosted agents.
+
+Carry a tenant identifier from the first schema regardless; the feature waits, the column does not.
 
 ## Explicit deferrals
 
-- marketplace
-- Kubernetes
-- low-code visual designer
-- distributed event bus
-- plugin hot loading in control process
-- enterprise SSO
-- automatic destructive reconciliation
+Marketplace, Kubernetes, low-code visual designer, distributed event bus, plugin hot-loading in the
+control process, enterprise SSO, automatic destructive reconciliation.
+
+## Critical path
+
+```text
+Phase 0 → GitHub to conformance → Documentation plugin → contract 1.1 → Automator MVP
+```
+
+The two steps that most reduce risk are the **first runnable slice** in Phase 1 and the
+**contract-correction list** from Phase 3. Both are cheap; both prevent expensive rework.
+
+The minimal Platform in Phase 2 sits off this path and can proceed in parallel.

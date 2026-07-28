@@ -44,37 +44,52 @@ The actual API is subject to review, but the developer experience should remain 
 9. Secure-by-default behavior
 10. Deterministic startup validation
 
-## Proposed package structure
+## Package structure
+
+**Decision: a minimal Platform is built alongside Automator.** Six packages near-term; the rest are
+candidates, created when a consumer needs them.
+
+### Near-term
 
 ```text
 SubZeroDev.Platform.Abstractions
 SubZeroDev.Platform.Core
 SubZeroDev.Platform.Hosting
-SubZeroDev.Platform.Configuration
 SubZeroDev.Platform.Persistence
-SubZeroDev.Platform.Events
-SubZeroDev.Platform.Identity
-SubZeroDev.Platform.Authorization
-SubZeroDev.Platform.Organizations
-SubZeroDev.Platform.Tenancy
-SubZeroDev.Platform.Notifications
-SubZeroDev.Platform.Storage
-SubZeroDev.Platform.BackgroundJobs
-SubZeroDev.Platform.Scheduling
-SubZeroDev.Platform.Plugins
-SubZeroDev.Platform.Billing
-SubZeroDev.Platform.Licensing
-SubZeroDev.Platform.Audit
 SubZeroDev.Platform.Observability
-SubZeroDev.Platform.Api
-SubZeroDev.Platform.Mcp
-SubZeroDev.Platform.Web
-SubZeroDev.Platform.UI
 SubZeroDev.Platform.Testing
-SubZeroDev.Platform.Aspire
 ```
 
-This is a target decomposition, not a requirement to create every package immediately.
+### Candidates
+
+Specified below so the shapes are agreed, and deliberately not built yet:
+
+```text
+Configuration   Events        Identity       Authorization
+Organizations   Tenancy       Notifications  Storage
+BackgroundJobs  Scheduling    Plugins        Billing
+Licensing       Audit         Api            Mcp
+Web             UI            Aspire
+```
+
+### Why the split, and the risk it carries
+
+A framework earns its abstractions from its second and third consumer. Designed from zero consumers,
+twenty-four packages encode guesses — and the first product then bends around interfaces that were
+never tested against anything.
+
+Six is the set that is genuinely hard to retrofit: hosting shape, persistence and transaction
+boundaries, observability wiring, and test infrastructure all cost far more to introduce later than
+to start with.
+
+**The risk of this middle path is honest and worth naming:** it becomes the twenty-four package plan
+by increments, one reasonable-looking addition at a time. The guard is that a candidate becomes a
+package when a _second_ consumer needs it, not when the first one does. Until then it lives inside
+Automator, where it is cheap to change.
+
+`SubZeroDev.Platform.Plugins` deserves particular care: plugin abstractions belong to the plugin
+contract, which has its own repository precisely so a non-.NET plugin need not depend on a .NET
+framework. This package, if it ever exists, is a .NET _client_ of that contract, not the contract.
 
 ## Application modules
 
@@ -213,6 +228,10 @@ Automator.Secrets.Manage
 
 ## Organizations and tenancy
 
+**Not before Phase 8**, with one exception: carry a tenant identifier in the first schema, defaulted
+to a single implicit tenant. Adding the column later is easy; adding tenant _isolation_ to queries,
+storage paths, and secret scopes after data exists is a correctness migration on every table at once.
+
 Optional module supporting:
 
 - organizations
@@ -229,6 +248,9 @@ Optional module supporting:
 Single-user local deployments should not need artificial tenant setup.
 
 ## Billing and subscriptions
+
+**Not before Phase 8.** Specified so the shape is agreed; see
+`10-tenancy-billing-licensing.md` for tenancy, metering caution, and the licensing split.
 
 Platform owns shared commercial primitives:
 
@@ -251,7 +273,7 @@ Billing must not be required for self-hosted use.
 
 ## Licensing
 
-Separate from subscription billing.
+**Not before Phase 8.** Separate from subscription billing.
 
 Capabilities:
 
@@ -447,27 +469,29 @@ Platform.Testing should provide:
 - module dependency ranges
 - shared schema versioning
 
-## Phase One Platform scope
+## Phase scope
 
-Required:
+Phase numbering is defined once in `SubZeroDev.Ecosystem/18-roadmap.md`. This document does not
+maintain its own.
 
-- abstractions
-- core
+**Phase 2 — minimal Platform, built alongside the Automator MVP:**
+
+- abstractions and core
 - hosting
-- configuration
-- logging and observability
-- events
 - persistence baseline
-- notification abstractions
-- storage abstractions
-- API conventions
+- observability
 - testing utilities
 
-Deferred:
+**Phase 5 — extracted from Automator once a second consumer exists:**
 
-- full billing
-- full licensing
-- marketplace
+- configuration, events, notifications, storage
+- background jobs and scheduling
+- API conventions
+
+**Phase 8 — commercial:**
+
+- identity, authorization, organizations, tenancy
+- billing, licensing, audit
 - shared web UI
-- distributed event bus
-- enterprise tenancy
+
+Deferred indefinitely: marketplace, distributed event bus, enterprise tenancy.

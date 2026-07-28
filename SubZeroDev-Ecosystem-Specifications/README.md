@@ -89,14 +89,17 @@ enforce the declared capability model — but it is not the definition of a plug
 
 Recorded here so the documents are read in light of them:
 
-| Decision          | Choice                                                         |
-| ----------------- | -------------------------------------------------------------- |
-| Contract home     | Its own repository, versioned and tagged independently         |
-| Platform          | Repository exists; specifications split out for manual copying |
-| Build order       | GitHub plugin → second plugin → Automator MVP                  |
-| CLI naming        | `subzerodev-<name>` canonical, `sz-<name>` alias               |
-| Repository layout | Platform, Automator, and one repository per substantial plugin |
-| GitHub plugin     | Moves to its own repository soon; preparation only for now     |
+| Decision           | Choice                                                                   |
+| ------------------ | ------------------------------------------------------------------------ |
+| Contract home      | Its own repository, versioned and tagged independently                   |
+| Platform           | Repository exists; specifications split out for manual copying           |
+| Build order        | GitHub plugin → second plugin → Automator MVP                            |
+| CLI naming         | `subzerodev-<name>` canonical, `sz-<name>` alias                         |
+| Repository layout  | Platform, Automator, contract, and one repository per substantial plugin |
+| Platform           | Minimal Platform alongside Automator — six packages, rest deferred       |
+| Second plugin      | Documentation plugin                                                     |
+| Local process host | Out of the Automator MVP                                                 |
+| GitHub plugin      | Moves to its own repository soon; preparation only for now               |
 
 ## Status of this set
 

@@ -23,7 +23,7 @@ public interface IPluginRuntimeHost
     Task<ExecutionHandle> StartAsync(
         PluginInvocation invocation,
         PluginRuntime runtime,
-        ExecutionContext context,
+        PluginExecutionContext context,
         CancellationToken cancellationToken);
 
     Task CancelAsync(
@@ -31,6 +31,14 @@ public interface IPluginRuntimeHost
         CancellationToken cancellationToken);
 }
 ```
+
+## Enforcement levels
+
+Every host declares what it can actually enforce of a plugin's declared capabilities. The levels and
+the binding rule are specified in `10-security-model.md`; this document must not restate them.
+
+The short version: only the Docker host is `enforced`. Every process-based host is `none`, and a
+plugin may resolve to a host weaker than `enforced` only when its trust level permits.
 
 ## Docker host
 
@@ -62,6 +70,11 @@ Security defaults:
 - image digest pinning in production
 
 ## Local process host
+
+**Not in the first Automator release.** It cannot enforce any declared capability — no filesystem
+confinement, no network denial, no privilege dropping — so shipping it alongside the policy engine
+would make policy decorative on the one host that most needs it. Deferred to Phase 6 with the other
+process-based hosts.
 
 Executes native commands or scripts.
 

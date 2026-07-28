@@ -50,10 +50,14 @@ A plugin command can map to:
 
 ```text
 Plugin command: subzerodev.github.sync
-MCP tool: github_sync
+MCP tool: subzerodev_github_sync
 ```
 
 The tool schema is generated from the command input schema.
+
+The namespace is retained deliberately. Collapsing `subzerodev.github.sync` to `github_sync` reads
+better until a second plugin exposes a `sync` command, at which point two tools collide and the AI
+client picks whichever registered last.
 
 ### MCP safety
 

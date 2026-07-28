@@ -94,6 +94,11 @@ All invocation styles must converge on one normalized command invocation model.
 
 ## Canonical execution model
 
+Summarized here for orientation. The binding definitions live in the plugin contract — the result
+envelope, exit codes, and artifact declarations — and in the Automator specification for the
+execution record. Where this section and either of those disagree, this one is the summary that
+drifted.
+
 ```text
 Plugin Identity
 + Plugin Version

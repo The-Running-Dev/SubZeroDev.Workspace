@@ -176,28 +176,28 @@ breakdown would be guesswork.
 
 Not owned by any single phase.
 
-| ID     | Work                                                                     | Size | Notes                                                                                               |
-| ------ | ------------------------------------------------------------------------ | ---- | --------------------------------------------------------------------------------------------------- |
-| ~~X1~~ | ~~Split `07`, `11`, `17` by destination repository~~                     | —    | **Done.** Also split `08` and the five build-tooling plugins                                        |
-| X2     | Renumber ADRs per repository once split                                  | S    | Two sequences currently exist with different zero-padding                                           |
-| X3     | Retire the superseded contract draft under `setup-llm/`                  | S    | Superseded by `04`; ADR-0003 there needs marking                                                    |
-| X4     | Signing ADR: mechanism, trust root, verification, revocation             | M    | Blocks two of the four trust levels                                                                 |
-| ~~X5~~ | ~~Orphan-execution handling~~                                            | —    | **Designed** in `07-execution-events-and-artifacts.md`: lease, heartbeat, terminal `Orphaned` state |
-| ~~X6~~ | ~~Artifact identity on deterministic re-run~~                            | —    | **Decided**: content-addressed blob, per-execution record                                           |
-| X7     | Choose the Docker plugin's builder — rootless or socket                  | M    | **Owned outside this workspace.** Decides whether socket access is ever granted                     |
-| X8     | Manifest-driven generation in ContainerPSGenerator                       | M    | **Owned outside this workspace.** Replaces `--help` inference with declared input schemas           |
-| X9     | Update `18-roadmap.md` and `19-open-questions.md` to the decisions taken | S    | Both predate the phase revision and the answered questions                                          |
-| X10    | Update `16-repository-layout-and-packaging.md`                           | S    | Still proposes copying specs between repos; predates the contract-repo decision                     |
+| ID      | Work                                                         | Size | Notes                                                                                               |
+| ------- | ------------------------------------------------------------ | ---- | --------------------------------------------------------------------------------------------------- |
+| ~~X1~~  | ~~Split `07`, `11`, `17` by destination repository~~         | —    | **Done.** Also split `08` and the five build-tooling plugins                                        |
+| X2      | Renumber ADRs per repository once split                      | S    | Two sequences currently exist with different zero-padding                                           |
+| X3      | Retire the superseded contract draft under `setup-llm/`      | S    | Superseded by `04`; ADR-0003 there needs marking                                                    |
+| X4      | Signing ADR: mechanism, trust root, verification, revocation | M    | Blocks two of the four trust levels                                                                 |
+| ~~X5~~  | ~~Orphan-execution handling~~                                | —    | **Designed** in `07-execution-events-and-artifacts.md`: lease, heartbeat, terminal `Orphaned` state |
+| ~~X6~~  | ~~Artifact identity on deterministic re-run~~                | —    | **Decided**: content-addressed blob, per-execution record                                           |
+| X7      | Choose the Docker plugin's builder — rootless or socket      | M    | **Owned outside this workspace.** Decides whether socket access is ever granted                     |
+| X8      | Manifest-driven generation in ContainerPSGenerator           | M    | **Owned outside this workspace.** Replaces `--help` inference with declared input schemas           |
+| ~~X9~~  | ~~Update `18` and `19` to the decisions taken~~              | —    | **Done.** `18` now owns the phase vocabulary; `19` separates open from resolved                     |
+| ~~X10~~ | ~~Update `16-repository-layout-and-packaging.md`~~           | —    | **Done.** Move-don't-copy is now a rule, with the two incidents that motivated it                   |
 
 ---
 
 ## Decisions still needed
 
-1. **Platform: extract from Automator, or design up front?** Recommended above as extraction. This
-   is the largest reversible decision in the set and is not yet settled.
-2. **Which plugin is second — Requirements Compiler or Documentation?** Requirements Compiler is more
-   valuable and much larger; Documentation is a cheaper contract test because the image exists.
-3. **Is the local process host in the Automator MVP?** Recommended out.
+1. ~~**Platform: extract or design up front?**~~ **Decided:** minimal Platform alongside Automator —
+   six packages near-term, the rest deferred until a second consumer needs them.
+2. ~~**Which plugin is second?**~~ **Decided:** the Documentation plugin, because the image already
+   exists and the work is wrapping it in the contract rather than building a capability.
+3. ~~**Is the local process host in the Automator MVP?**~~ **Decided:** out. Deferred to Phase 6.
 4. **What is the trust root?** Blocks W4.4's policy work from meaning anything for third-party
    plugins, though not for first-party ones.
 5. **Do portfolio overrides live in a separate file or in the project model?** Both are currently
