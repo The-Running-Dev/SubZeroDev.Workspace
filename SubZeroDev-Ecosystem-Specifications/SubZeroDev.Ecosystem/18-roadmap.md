@@ -25,6 +25,9 @@ Blocking. Small.
 - Manifest canonicalization: YAML authoring, restricted profile, canonical JSON for validation
 - Schema test suite, including the negative corpus
 - Resolve naming, ADR numbering, and remaining specification contradictions
+- **Reserve the `SubZeroDev.*` identifiers** on NuGet, npm, the container registry, and PowerShell
+  Gallery. Free, and it has to happen before the first publish rather than after the first
+  collision — see `adr/ADR-002`
 
 ## Phase 1 — GitHub plugin to conformance
 

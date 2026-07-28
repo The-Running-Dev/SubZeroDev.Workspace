@@ -93,13 +93,76 @@ identifier from the first migration, defaulted to a single implicit tenant and n
 tenancy ships. Adding the column later is trivial; adding tenant _isolation_ to queries, storage
 paths, and secret scopes after data exists is a correctness migration touching every table at once.
 
-## Still open — commercial decisions
+## Billing provider
 
-These are not engineering calls and are left for the product owner:
+**Paddle first, behind the Platform billing abstraction.**
 
-1. **Which billing provider first — Stripe or Paddle?** Paddle acts as merchant of record and handles
-   sales tax; Stripe gives more control and lower fees but leaves tax compliance to you. The
-   abstraction means the choice is deferrable, but not indefinitely, since entitlement modelling
-   follows from it.
-2. **Which license model?** Per-seat, per-node, and feature-tiered each imply different enforcement
-   points, and self-hosted licensing must work offline.
+Paddle acts as merchant of record: it sells to the customer, and it owns sales tax registration,
+calculation, remittance, and liability across every jurisdiction. Stripe is a payment processor —
+cheaper per transaction, and it leaves you as the merchant of record.
+
+The fee gap is roughly two percentage points. The compliance gap is EU VAT, UK VAT, and US state
+sales tax thresholds, each with its own registration trigger and filing cadence. For a small team
+selling a developer tool internationally, two points is far cheaper than the accounting work, and
+much cheaper than getting it wrong.
+
+**What would change this answer:** a shift to a handful of large invoiced B2B contracts. At that
+shape, tax handling is per-contract anyway, volume makes the fee difference material, and Stripe or
+direct invoicing wins. Paddle also vets what it will sell, so approval is a prerequisite rather than
+a formality.
+
+Nothing outside the billing module may branch on provider, so this remains a swap rather than a
+migration.
+
+### Metered dimensions
+
+Meter **completed executions** and **stored artifact bytes**. Both are durably recorded and
+independently verifiable by the customer.
+
+Do not meter execution minutes. As noted above, wall-clock accuracy depends on the failure paths
+where timing is least reliable — a killed run, a crashed agent, an expired lease — and a bill nobody
+can reproduce is worse than a coarser one they can.
+
+## License model
+
+**Open-core, feature-tiered, enforced per installation, with agent count as the paid dimension.**
+
+| Edition    | Licence                                | Gates                                         |
+| ---------- | -------------------------------------- | --------------------------------------------- |
+| Community  | **None. No licence code path exists.** | Single execution node; every plugin available |
+| Pro        | Signed offline licence document        | Multiple agents, advanced workflow features   |
+| Enterprise | Signed offline licence document        | SSO, tenancy, audit export, priority support  |
+
+### Why agents rather than seats
+
+This tool's value does not scale with the number of humans using it — it scales with how much
+automation runs. Per-seat pricing would charge least for the case the product is best at, one person
+automating a great deal, and would meter a number nobody wants to think about.
+
+Agent count tracks capacity, which is what actually costs to run and what a customer recognizes as
+the thing they are buying more of.
+
+### Enforcement rules
+
+These matter more than the pricing, because getting them wrong makes the product untrustworthy for
+self-hosting:
+
+- **Community has no licence check at all** — not a check that always passes, no code path. A build
+  that cannot phone home is one that cannot be made to.
+- **Licences verify offline.** A signed document with a claim set; signature verified against a
+  public key compiled into the build. No network, ever, unless the operator opts into revocation
+  checks.
+- **Expiry degrades features; it never touches data or running work.** A lapsed licence stops new
+  paid-feature use after a 30-day grace period. It does not stop executions already scheduled, does
+  not lock the database, and never prevents export. An automation platform that halts on a billing
+  event is one nobody will trust with anything important.
+- **Failure is open, not closed.** If licence verification itself errors — a corrupt file, a clock
+  problem — the system logs loudly and continues at the last known tier. The alternative is a
+  self-inflicted outage, and the threat model here is casual over-use rather than determined piracy.
+
+**What would change this answer:** a shift to hosted-only. With no self-hosted deployment there is
+nothing to license, and entitlements collapse into the subscription record.
+
+## Decided elsewhere
+
+The root package name is settled in `SubZeroDev.Ecosystem/adr/ADR-002`.

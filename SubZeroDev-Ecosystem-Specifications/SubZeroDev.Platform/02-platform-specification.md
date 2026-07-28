@@ -249,8 +249,8 @@ Single-user local deployments should not need artificial tenant setup.
 
 ## Billing and subscriptions
 
-**Not before Phase 8.** Specified so the shape is agreed; see
-`10-tenancy-billing-licensing.md` for tenancy, metering caution, and the licensing split.
+**Not before Phase 8.** Specified so the shape is agreed. The provider decision (Paddle, as merchant
+of record), the metered dimensions, and the licence model are in `10-tenancy-billing-licensing.md`.
 
 Platform owns shared commercial primitives:
 

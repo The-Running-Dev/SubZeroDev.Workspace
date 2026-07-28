@@ -193,19 +193,11 @@ Not owned by any single phase.
 
 ## Decisions still needed
 
-1. ~~**Platform: extract or design up front?**~~ **Decided:** minimal Platform alongside Automator —
-   six packages near-term, the rest deferred until a second consumer needs them.
-2. ~~**Which plugin is second?**~~ **Decided:** the Documentation plugin, because the image already
-   exists and the work is wrapping it in the contract rather than building a capability.
-3. ~~**Is the local process host in the Automator MVP?**~~ **Decided:** out. Deferred to Phase 6.
-4. **What is the trust root?** Blocks W4.4's policy work from meaning anything for third-party
-   plugins, though not for first-party ones.
-5. **Do portfolio overrides live in a separate file or in the project model?** Both are currently
-   specified; whichever wins must key on the immutable ID.
-6. **Does the control plane execute plugins directly, or always dispatch to an agent?** Changes where
-   enforcement lives, and therefore W4.3 and W4.4.
+One, and it is owned outside this workspace: the Docker plugin's builder, and ContainerPSGenerator's
+generation path.
 
----
+Everything else is decided. `SubZeroDev.Ecosystem/19-open-questions.md` records the full set, and
+each document states what would change a decision that rests on an assumption.
 
 ## Critical path
 

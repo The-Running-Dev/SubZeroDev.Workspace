@@ -5,24 +5,12 @@ and nobody reopens them by accident.
 
 ## Open
 
-Four questions remain, and none is an engineering call left undone.
+**One item, and it is owned outside this workspace:** the Docker plugin's builder — rootless
+BuildKit, Buildah, or Kaniko — and whether ContainerPSGenerator becomes manifest-driven before or
+after its inference path.
 
-### Commercial — for the product owner
-
-1. **Which billing provider first — Stripe or Paddle?** Paddle acts as merchant of record and handles
-   sales tax; Stripe gives more control and lower fees but leaves tax compliance to you. Deferrable
-   behind the abstraction, but entitlement modelling follows from it.
-2. **Which license model?** Per-seat, per-node, and feature-tiered imply different enforcement points,
-   and self-hosted licensing must work offline.
-3. **Is `SubZeroDev.Platform` the final root name?** Cheap to change now, expensive after packages
-   publish.
-
-### Owned outside this workspace
-
-4. The Docker plugin's builder — rootless BuildKit, Buildah, or Kaniko — and whether
-   ContainerPSGenerator becomes manifest-driven before or after its inference path.
-
-Everything else that was open is now decided and recorded below, or in the document that owns it.
+Everything else is decided and recorded below, or in the document that owns it. Where a decision
+rests on an assumption that could change, the document states what would change it.
 
 ## Resolved
 
@@ -94,3 +82,9 @@ Everything else that was open is now decided and recorded below, or in the docum
 | Commit activity granularity                                   | Weekly, matching GitHub's own buckets                                                                             |
 | AI summaries                                                  | Stored with provenance, never regenerated on read                                                                 |
 | Screenshots and badges                                        | External, referenced by URL                                                                                       |
+| Billing provider                                              | Paddle first, as merchant of record; swaps behind the Platform abstraction                                        |
+| Metered dimensions                                            | Completed executions and stored bytes, never execution minutes                                                    |
+| Licence model                                                 | Open-core, feature-tiered, per installation, agents as the paid dimension                                         |
+| Community edition licensing                                   | No licence code path at all — not a check that passes                                                             |
+| Licence enforcement                                           | Offline verification; expiry degrades features, never data or running work; fails open                            |
+| Root namespace                                                | `SubZeroDev` kept; identifiers reserved before first publish                                                      |
