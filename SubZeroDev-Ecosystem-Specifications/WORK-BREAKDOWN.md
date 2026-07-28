@@ -184,8 +184,8 @@ Not owned by any single phase.
 | X4     | Signing ADR: mechanism, trust root, verification, revocation             | M    | Blocks two of the four trust levels                                                                 |
 | ~~X5~~ | ~~Orphan-execution handling~~                                            | —    | **Designed** in `07-execution-events-and-artifacts.md`: lease, heartbeat, terminal `Orphaned` state |
 | ~~X6~~ | ~~Artifact identity on deterministic re-run~~                            | —    | **Decided**: content-addressed blob, per-execution record                                           |
-| X7     | Choose the Docker plugin's builder — rootless or socket                  | M    | Decides whether socket access is ever granted                                                       |
-| X8     | Manifest-driven generation in ContainerPSGenerator                       | M    | Replaces `--help` inference with declared input schemas                                             |
+| X7     | Choose the Docker plugin's builder — rootless or socket                  | M    | **Owned outside this workspace.** Decides whether socket access is ever granted                     |
+| X8     | Manifest-driven generation in ContainerPSGenerator                       | M    | **Owned outside this workspace.** Replaces `--help` inference with declared input schemas           |
 | X9     | Update `18-roadmap.md` and `19-open-questions.md` to the decisions taken | S    | Both predate the phase revision and the answered questions                                          |
 | X10    | Update `16-repository-layout-and-packaging.md`                           | S    | Still proposes copying specs between repos; predates the contract-repo decision                     |
 
