@@ -561,6 +561,11 @@ Implement:
   tests; never use a developer’s live account in CI.
 - Package provenance, license/files review, container labels, and pinned release
   workflow.
+- Clear the packaging blockers before the first publish attempt rather than
+  discovering them during it. `package.json` currently sets `private: true`,
+  which makes `npm publish` refuse outright, and declares neither `license` nor
+  `repository`, so a published package would be unlicensed and carry no
+  provenance link. All three are correct for a scaffold and wrong for a release.
 - Decide whether `npm audit --audit-level=high` blocks a release. It runs in CI
   today but is absent from `npm run check`, so a new advisory in a transitive
   dependency can red the branch for reasons unrelated to any pull request.

@@ -167,6 +167,8 @@ Exit criteria:
 - [ ] Run an end-to-end test against a controlled GitHub fixture account or
       recorded API fixtures.
 - [ ] Decide whether `npm audit` and test coverage gate a release.
+- [ ] Clear the packaging blockers: `private: true` makes `npm publish` refuse,
+      and neither `license` nor `repository` is declared.
 - [ ] Version and publish the Phase One package and container.
 
 ## Definition of Done

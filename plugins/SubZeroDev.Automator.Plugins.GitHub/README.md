@@ -35,8 +35,13 @@ Build and run the local CLI. Positional arguments are passed to the CLI. Use
 
 ```powershell
 ./run.ps1 -Mode Local -CliArgument '--help'
-./run.ps1 -Mode Local -SkipInstall validate
+./run.ps1 -Mode Local -SkipInstall -CliArgument '--version'
 ```
+
+> **The five commands are not implemented yet.** `sync`, `list`, `stats`,
+> `export`, and `validate` currently print a message and exit `3`, and `run.ps1`
+> surfaces that as a failed command. That is the scaffold reporting honestly, not
+> a broken install. Only `--help` and `--version` do real work today.
 
 Build the Docker image and run the CLI:
 
@@ -52,6 +57,9 @@ place the token value in the Docker command:
 $env:GITHUB_TOKEN = 'github_pat_replace_me'
 ./run.ps1 -Mode Docker -BuildImage sync
 ```
+
+This is the shape the command will take. `sync` exits `3` until Milestone 3.5
+implements it.
 
 Docker mode mounts `.cache/` at `/data/cache` and `output/` at `/data/output`.
 Override them with `-CachePath` and `-OutputPath`. Reuse an existing image by
@@ -89,12 +97,35 @@ docker run --rm \
 ## CLI
 
 ```bash
-subzerodev-github sync
-subzerodev-github list
-subzerodev-github stats
-subzerodev-github export
-subzerodev-github validate
+subzerodev-github sync      # not implemented
+subzerodev-github list      # not implemented
+subzerodev-github stats     # not implemented
+subzerodev-github export    # not implemented
+subzerodev-github validate  # not implemented
 ```
 
-Command behavior will be implemented milestone by milestone. The current
-scaffold establishes the runner and stable command surface.
+Command behavior is implemented milestone by milestone. The current scaffold
+establishes the runner and a stable command surface; each command prints a
+message and exits `3` until its milestone lands.
+
+Exit codes are fixed now so callers can rely on them:
+
+| Code | Meaning                               |
+| ---- | ------------------------------------- |
+| `0`  | Success                               |
+| `2`  | Usage or validation error             |
+| `3`  | Operational failure                   |
+| `4`  | Partial synchronization               |
+| `5`  | Authentication or authorization error |
+| `6`  | Rate-limited before completion        |
+
+`1` is unused, so an uncaught exception stays distinguishable from a handled
+failure.
+
+## Documents
+
+- [Specification](../../setup-llm/docs/specifications/subzerodev-automator-plugins-github.md) — what Phase One is
+- [Implementation plan](IMPLEMENTATION_PLAN.md) — the order it is built in
+- [Plan review](IMPLEMENTATION_PLAN_REVIEW.md) — why it reads the way it does
+- [ADR-0001](../../setup-llm/docs/decisions/0001-subzerodev-automator-github-plugin-hosting.md) — hosting and versioning
+- [ADR-0002](../../setup-llm/docs/decisions/0002-github-plugin-phase-one-boundaries.md) — Phase One boundaries

@@ -2,7 +2,9 @@ FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-COPY tsconfig*.json eslint.config.js .prettierrc.json ./
+# Only what `npm run build` reads. Copying the lint and format configs here would
+# invalidate this layer whenever they change, for a stage that never lints.
+COPY tsconfig*.json ./
 COPY src ./src
 RUN npm run build
 
