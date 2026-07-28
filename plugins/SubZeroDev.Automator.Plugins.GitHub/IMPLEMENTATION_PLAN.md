@@ -169,16 +169,17 @@ Done:
   reserving it keeps a crash distinguishable from a handled failure. The codes
   are wired through the commands in Milestone 7.
 
-Remaining:
-
-- Configure repository line-ending behavior through a root `.gitattributes`, which
-  does not yet exist, so `npm run format:check` behaves consistently on Windows
-  and Linux.
-- Make the installed-entry-point test portable on Windows, using a junction,
-  hard link, permission-aware skip, or platform-specific assertion without
-  weakening Linux symlink coverage.
-- Add `windows-latest` to the `validate` job matrix, so the Windows claim below
-  is enforced rather than asserted.
+- A root `.gitattributes` pins every text file to LF in the working tree, so a
+  Windows checkout no longer hands CRLF to Prettier. Verified to renormalize
+  nothing: the repository was already LF throughout.
+- The installed-entry-point test probes symlink support once and skips that case
+  where the platform forbids it, keeping it mandatory everywhere else. Windows
+  loses no real coverage, because npm installs a `.cmd` shim there and the shim
+  invokes node with the module's actual path — the direct-invocation case the
+  suite already asserts.
+- The `validate` job runs a `[ubuntu-latest, windows-latest]` matrix with
+  `fail-fast: false`, defaulting to `bash` so the smoke tests stay one script
+  across both. The Windows claim is now enforced rather than asserted.
 
 Verification:
 

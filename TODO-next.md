@@ -51,20 +51,21 @@ Remaining work:
       One discovery scope, remove the configuration-file token option, drop the
       packages and releases capability flags, bind the counting and summary
       semantics, and close the questions the ADR answered.
-- [ ] Add a root `.gitattributes` so `npm run format:check` agrees across
+- [x] Add a root `.gitattributes` so `npm run format:check` agrees across
       Windows and Linux.
-- [ ] Make the installed-entry-point test portable on Windows without weakening
+- [x] Make the installed-entry-point test portable on Windows without weakening
       Linux symlink coverage.
-- [ ] Add `windows-latest` to the `validate` job matrix.
+- [x] Add `windows-latest` to the `validate` job matrix.
 - [x] Define the CLI exit codes, leaving `1` reserved for uncaught exceptions.
       They are wired through the commands in Milestone 7.
 
 Exit criteria:
 
 - [ ] The full check suite passes on Windows and Linux in GitHub Actions.
-- [ ] The specification, ADRs, plan, and this checklist describe the same Phase
+      Awaiting the first Windows run.
+- [x] The specification, ADRs, plan, and this checklist describe the same Phase
       One.
-- [ ] Exactly one copy of the specification and of each ADR is tracked.
+- [x] Exactly one copy of the specification and of each ADR is tracked.
 
 ## Milestone 1: Domain Contracts and Canonical Schemas
 
