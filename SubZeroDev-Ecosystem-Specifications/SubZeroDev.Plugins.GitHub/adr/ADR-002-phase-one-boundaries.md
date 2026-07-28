@@ -1,7 +1,8 @@
 # ADR-002: GitHub Plugin Phase One Boundaries
 
-**Status:** Accepted
-**Date:** 2026-07-28
+## Status
+
+Accepted — 2026-07-28
 
 ## Amendment (2026-07-28)
 

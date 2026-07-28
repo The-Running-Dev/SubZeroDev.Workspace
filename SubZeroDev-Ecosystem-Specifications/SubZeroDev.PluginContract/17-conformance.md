@@ -65,6 +65,23 @@ Asserts stdout parses as exactly one JSON document validating against the envelo
 it will. This is the check that catches a logger left on stdout, and it is the highest-value check in
 the suite because that defect breaks every adapter simultaneously and presents as a parse error.
 
+### C3b — Envelope invariants the schema cannot express
+
+`result-envelope.schema.json` enforces the envelope's shape, including that `status` and `exitCode`
+agree. Three rules are outside what JSON Schema can state, so they are asserted here or they are not
+asserted anywhere:
+
+| Rule                                                        | Why the schema cannot say it            |
+| ----------------------------------------------------------- | --------------------------------------- |
+| `data` is at most 256 KiB serialized                        | No serialized-size keyword exists       |
+| `finishedAt` is at or after `startedAt`                     | No cross-field comparison               |
+| `failed` and `partial` carry at least one entry in `errors` | Conditional on a sibling array's length |
+
+Also asserts the envelope's `exitCode` equals the process exit code the runner observed, and that
+each `artifacts[]` entry matches the file on disk in both `bytes` and `sha256`. The envelope is what
+a host records; an envelope that disagrees with reality is worse than a missing one, because nothing
+downstream re-checks it.
+
 ### C4 — Declared artifacts
 
 Asserts every artifact declared `required: true` exists at its declared path after a successful run,

@@ -269,6 +269,9 @@ Additional requirements:
 
 ## Result envelope
 
+Normative definition: `schemas/result-envelope.schema.json`. The example below illustrates it and
+does not replace it.
+
 ```json
 {
   "schemaVersion": "1.0.0",
@@ -312,6 +315,32 @@ Changes from the original draft:
   table.
 - **`errors[].retryable`** lets the plugin, which knows most about the failure, advise the retry
   policy instead of the host guessing from an exit code.
+
+### What the schema decides that the prose left open
+
+Writing the schema forced four questions the description had not answered.
+
+**Every field above is required.** `data`, `warnings`, `errors`, `artifacts`, and `metrics` are
+emitted as `{}` or `[]` rather than omitted, following the serialization rule that absence is written
+rather than implied. A consumer never has to distinguish "no warnings" from "this plugin does not
+report warnings".
+
+**`status` and `exitCode` cannot disagree.** The schema constrains each status to its code —
+`succeeded` to `0`, `partial` to `4`, `timedOut` to `124`, `cancelled` to `130`, and `failed` to
+anything else assignable. The two fields are deliberate duplication, and duplication that is allowed
+to drift is how the `3`/`5` collision in ADR-003 happened. Here it is checkable, so it is checked.
+
+**Timestamps are UTC with a `Z` suffix**, not a local offset. One representation keeps host-side
+ordering and comparison free of timezone handling.
+
+**Plan tokens are top-level, not inside `data`.** A `plan` object carrying `planId`, `expiresAt`, and
+`fingerprint` appears on the read-only half of a plan-apply pair. Inside `data` it would be
+plugin-shaped and invisible to a generic host, which defeats the point of a structural gate — a host
+must be able to see that an approval is pending without knowing what the plugin does.
+
+Three envelope rules are not expressible in JSON Schema and belong to the conformance suite instead:
+the 256 KiB cap on `data`, `finishedAt` being at or after `startedAt`, and a `failed` or `partial`
+status carrying at least one entry in `errors`.
 
 ### `data` is bounded
 
@@ -404,7 +433,8 @@ Where a command writes to a system outside the plugin's own storage, the write i
 from a prior read-only call.
 
 1. A read-only command computes what would change and returns an opaque `planId` — random, not a
-   hash of the content — plus a rendering a human can review.
+   hash of the content — plus a rendering a human can review. Both travel in the envelope's
+   top-level `plan` block, so a host sees the pending approval without understanding the plugin.
 2. The write command takes **only** the `planId`. No target, no content, nothing that would let it
    act without a plan.
 3. A plan is single-use, TTL-bounded, and carries a fingerprint of the state it was computed
@@ -523,19 +553,24 @@ by the Docker host.
 
 ## Conformance
 
-The contract is only real if it is mechanically checkable. The conformance suite takes a plugin and
-asserts:
+The contract is only real if it is mechanically checkable. `17-conformance.md` specifies the suite
+and is authoritative for the check list; this is the summary of what it asserts:
 
 1. `manifest` succeeds in a bare container and validates against the manifest schema.
 2. `--help` and `--version` exit 0; an unknown command exits 2.
 3. In JSON mode, stdout parses as exactly one JSON document — the check that catches a stray log
-   line.
-4. Every declared artifact appears where declared and validates against its schema.
-5. Declared exit codes are produced for their conditions.
-6. A secret canary appears in no output, log, or artifact.
-7. The image runs as non-root and tolerates a read-only config mount.
-8. Two identical runs produce byte-identical artifacts.
-9. Paths escaping the output directory are refused.
+   line — and that document validates against the result-envelope schema.
+4. The envelope satisfies the three rules the schema cannot express: `data` is at most 256 KiB
+   serialized, `finishedAt` is at or after `startedAt`, and a `failed` or `partial` status carries at
+   least one entry in `errors`.
+5. Every declared artifact appears where declared and validates against its schema, and every
+   `artifacts[]` entry in the envelope matches the file on disk in size and digest.
+6. Declared exit codes are produced for their conditions, and the envelope's `exitCode` equals the
+   process exit code.
+7. A secret canary appears in no output, log, or artifact.
+8. The image runs as non-root and tolerates a read-only config mount.
+9. Two identical runs produce byte-identical artifacts.
+10. Paths escaping the output directory are refused.
 
 The suite is what makes "use this plugin as a template" verifiable rather than aspirational, and it
 is the deliverable that turns this document from prose into a contract.

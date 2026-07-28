@@ -30,13 +30,13 @@ orchestrator has nothing to orchestrate until two things exist.
 The contract is depended on by every plugin and by the Automator, and depends on nothing. It must
 exist as a tagged artifact before anything can pin it.
 
-| ID   | Work                                                                                    | Size | Depends on |
-| ---- | --------------------------------------------------------------------------------------- | ---- | ---------- |
-| W0.1 | Create the contract repository from `SubZeroDev.PluginContract/`                        | S    | —          |
-| W0.2 | Publish `plugin-manifest.schema.json` at a versioned path and tag `v1.0.0`              | S    | W0.1       |
-| W0.3 | Add `result-envelope.schema.json` — currently prose in `04`, not a schema               | S    | W0.1       |
-| W0.4 | Manifest canonicalization: YAML → canonical JSON, with a restricted YAML profile        | M    | W0.2       |
-| W0.5 | Schema test suite: the reference manifest validates, and each negative case is rejected | S    | W0.2       |
+| ID       | Work                                                                                    | Size | Depends on |
+| -------- | --------------------------------------------------------------------------------------- | ---- | ---------- |
+| W0.1     | Create the contract repository from `SubZeroDev.PluginContract/`                        | S    | —          |
+| W0.2     | Publish `plugin-manifest.schema.json` at a versioned path and tag `v1.0.0`              | S    | W0.1       |
+| ~~W0.3~~ | ~~Add `result-envelope.schema.json`~~ — **done**, authored and validated in place       | —    | —          |
+| W0.4     | Manifest canonicalization: YAML → canonical JSON, with a restricted YAML profile        | M    | W0.2       |
+| W0.5     | Schema test suite: the reference manifest validates, and each negative case is rejected | S    | W0.2       |
 
 **W0.4 detail.** YAML is the authoring format and JSON is what gets validated and eventually signed.
 The restricted profile matters because manifests will eventually be loaded from untrusted third
@@ -44,9 +44,16 @@ parties: YAML 1.2 core schema only, no anchors or aliases, no custom tags, dupli
 and a document size limit. Signing must operate on the canonical JSON, never the YAML — otherwise
 two byte-different YAML files with identical meaning produce different signatures.
 
-The starting harness for W0.5 already exists: the schema was validated during this review against
-the reference manifest plus twelve negative cases, all of which reject. That check should become a
-committed test rather than a one-off.
+The starting harness for W0.5 already exists: both schemas were validated during review — the
+manifest against the reference document plus twelve negative cases, and the envelope against nine
+positive and twenty-seven negative cases. Every negative case rejects and every positive case
+accepts, under ajv strict mode. Those checks should become committed tests rather than one-offs, and
+W0.5 is that work.
+
+**Three envelope rules are not expressible in JSON Schema** and belong to the conformance suite
+instead: the 256 KiB cap on `data`, `finishedAt` being at or after `startedAt`, and a `failed` or
+`partial` status carrying at least one entry in `errors`. They are listed in the contract's
+conformance section so they are not lost between the schema and the suite.
 
 ---
 
@@ -60,7 +67,7 @@ contract.
 | W1.1  | Domain models and canonical schemas; identity on the immutable provider ID       | M    | W0.2        |
 | W1.2  | Configuration, ports, logging to **stderr**, secret redaction and canary tests   | M    | W1.1        |
 | W1.3  | `manifest` command, working in a bare container                                  | S    | W0.2, W1.2  |
-| W1.4  | Result envelope emission, with `--json` mode                                     | S    | W0.3, W1.2  |
+| W1.4  | Result envelope emission, with `--json` mode                                     | S    | W1.2        |
 | W1.5  | Octokit adapter: discovery, pagination, rate limits, ETags                       | M    | W1.2        |
 | W1.6  | **First runnable slice** — `validate` → `sync` → `list` against one real account | S    | W1.5        |
 | W1.7  | Collection profiles: Basic, Standard, Detailed                                   | M    | W1.6        |
@@ -91,13 +98,13 @@ Already done on the current branch: scaffold, cross-platform CI, line-ending pol
 The suite is what makes "use the GitHub plugin as a template" verifiable rather than aspirational.
 It tests the contract, not the copy.
 
-| ID   | Work                                                                                | Size | Depends on |
-| ---- | ----------------------------------------------------------------------------------- | ---- | ---------- |
-| W2.1 | Conformance runner: takes an image or a local command, runs the nine checks in `04` | M    | W0.2, W0.3 |
-| W2.2 | Fixture plugins: echo, failing, timeout, artifact-producing, secret-leaking         | M    | W2.1       |
-| W2.3 | Wire conformance into plugin CI as a required check                                 | S    | W2.1       |
-| W2.4 | Minimal Platform: Abstractions, Core, Hosting                                       | L    | —          |
-| W2.5 | Minimal Platform: Persistence, Observability, Testing                               | L    | W2.4       |
+| ID   | Work                                                                           | Size | Depends on |
+| ---- | ------------------------------------------------------------------------------ | ---- | ---------- |
+| W2.1 | Conformance runner: takes an image or a local command, runs the checks in `17` | M    | W0.2       |
+| W2.2 | Fixture plugins: echo, failing, timeout, artifact-producing, secret-leaking    | M    | W2.1       |
+| W2.3 | Wire conformance into plugin CI as a required check                            | S    | W2.1       |
+| W2.4 | Minimal Platform: Abstractions, Core, Hosting                                  | L    | —          |
+| W2.5 | Minimal Platform: Persistence, Observability, Testing                          | L    | W2.4       |
 
 **W2.2 matters more than it looks.** The secret-leaking and failing fixtures are how you prove the
 suite detects problems rather than merely passing everything you point it at. A conformance suite

@@ -116,5 +116,14 @@ the superseded contract draft is deleted, and all ADRs sit with the repository t
 renumbered from `001` per repository. Nothing about the ecosystem remains under `setup-llm/docs/`,
 which now holds only workstation-toolkit documentation.
 
+**No ADR is left in `Proposed`.** The five carried over from the draft are now decided and written
+out with their context, consequences, and rejected alternatives, and each records the number it
+carried in the original global sequence so the renumbering is traceable.
+
+**Both normative schemas exist.** `plugin-manifest.schema.json` and `result-envelope.schema.json`
+live in `SubZeroDev.PluginContract/schemas/` and are validated under ajv strict mode. The contract
+states that the schemas — not any generated types — are the normative artifact, so an envelope
+specified only in prose was a gap in the contract's own terms.
+
 Remaining open questions are listed per document and consolidated in
 `SubZeroDev.Ecosystem/19-open-questions.md`.

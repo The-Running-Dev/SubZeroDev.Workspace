@@ -342,10 +342,16 @@ Also asked for explicitly.
   intent, but an underspecified template language is a code-injection surface.
 - Event naming is inconsistent: `Automator.Execution.Completed` (`07`) versus `WorkflowSucceeded`
   (`06`).
-- ADR-005's status is "Accepted in existing practice", which is not an ADR status. Use `Accepted`
-  with a context note.
-- ADRs 001–004 are all `Proposed` while `18` Phase 0 asks to "create ADRs". They exist; they need
-  accepting or revising.
+- ~~ADR-005's status is "Accepted in existing practice", which is not an ADR status.~~ **Fixed.** Now
+  `Accepted`, with a note recording that it ratifies existing practice rather than proposing
+  something new.
+- ~~ADRs 001–004 are all `Proposed` while `18` Phase 0 asks to "create ADRs".~~ **Fixed.** All four
+  are decided and rewritten with context, consequences, and rejected alternatives. Two acquired
+  substance in the process rather than merely a status line: the standalone-execution ADR lost its
+  "wherever practical" hedge, which was unenforceable, and the out-of-process ADR lost its
+  trusted-plugin exception, which had no principled boundary. Each ADR records the number it carried
+  in the original global sequence, since the filenames were renumbered per repository but the titles
+  were not.
 - `12`'s project model includes `"status": "active"` with no definition — derived from `archived`,
   from `pushedAt` recency, or user-set?
 - Manifest serialization is listed as an open question in `19`, but `plugin.yaml`, `04`, and `16`
