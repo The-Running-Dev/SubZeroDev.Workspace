@@ -64,6 +64,14 @@ function Get-NpxCommand {
     return @{ FilePath = 'npx'; PrefixArguments = @() }
 }
 
+function Get-NpmCommand {
+    if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
+        $npmCommand = Get-Command 'npm.cmd' -ErrorAction Stop
+        return @{ FilePath = $npmCommand.Source; PrefixArguments = @() }
+    }
+    return @{ FilePath = 'npm'; PrefixArguments = @() }
+}
+
 function Assert-CommandAvailable {
     param(
         [Parameter(Mandatory)][string]$Name,
@@ -1002,6 +1010,7 @@ Export-ModuleMember -Function @(
     'Write-WarningMessage'
     'Test-CommandAvailable'
     'Update-SessionPath'
+    'Get-NpmCommand'
     'Get-NpxCommand'
     'Assert-CommandAvailable'
     'Invoke-NativeCommand'

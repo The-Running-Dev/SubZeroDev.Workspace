@@ -59,7 +59,9 @@ function Test-GlobalNpmCommand {
 
     if (-not (Test-CommandAvailable -Name 'npm')) { return $false }
 
-    $npmPrefixOutput = & npm prefix --global 2>$null | Out-String
+    $npmCommand = Get-NpmCommand
+    $npmPrefixArguments = @($npmCommand.PrefixArguments) + @('prefix', '--global')
+    $npmPrefixOutput = & $npmCommand.FilePath @npmPrefixArguments 2>$null | Out-String
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefixOutput)) { return $false }
 
     $npmPrefix = [System.IO.Path]::GetFullPath($npmPrefixOutput.Trim())

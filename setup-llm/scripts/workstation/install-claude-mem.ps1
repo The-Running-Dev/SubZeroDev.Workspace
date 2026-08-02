@@ -7,6 +7,7 @@ Write-Step 'Installing optional third-party claude-mem'
 Assert-CommandAvailable -Name 'node' -InstallHint 'Install the current Node.js LTS release first.'
 Assert-CommandAvailable -Name 'npm' -InstallHint 'Install npm with the current Node.js LTS release first.'
 Assert-CommandAvailable -Name 'claude' -InstallHint 'Install Claude Code first.'
+$npmCommand = Get-NpmCommand
 
 Write-WarningMessage 'claude-mem captures and stores coding-session activity. Review its privacy, storage, sync, and exclusion settings before private-repository use.'
 
@@ -14,14 +15,14 @@ if ($PSCmdlet.ShouldProcess('claude-mem', 'Install the official npm package glob
     # npx/npm exec can intermittently omit the temporary package bin directory
     # on Windows. A global install creates a stable command shim that can also
     # be resolved by absolute path in the current PowerShell session.
-    Invoke-NativeCommand -FilePath 'npm' -ArgumentList @(
-        'install', '--global', 'claude-mem@latest'
-    )
+    $npmInstallArguments = @($npmCommand.PrefixArguments) + @('install', '--global', 'claude-mem@latest')
+    Invoke-NativeCommand -FilePath $npmCommand.FilePath -ArgumentList $npmInstallArguments
     Update-SessionPath
 }
 
 if (-not $WhatIfPreference) {
-    $npmPrefix = (& npm prefix --global 2>&1 | Out-String).Trim()
+    $npmPrefixArguments = @($npmCommand.PrefixArguments) + @('prefix', '--global')
+    $npmPrefix = (& $npmCommand.FilePath @npmPrefixArguments 2>&1 | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefix)) {
         throw 'Could not determine the global npm prefix.'
     }
