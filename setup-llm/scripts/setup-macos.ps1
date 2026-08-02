@@ -42,6 +42,7 @@ function Install-NpmCommand {
 }
 
 Write-Step 'Installing macOS prerequisites with Homebrew and npm'
+if (-not (Test-CommandAvailable 'node')) { Install-BrewCommand 'node' 'node' 'Node.js' }
 if (-not (Test-CommandAvailable 'npm') -or -not (Test-CommandAvailable 'npx')) { Install-BrewCommand 'npm' 'node' 'Node.js LTS' }
 Install-BrewCommand 'act' 'act' 'act local GitHub Actions runner'
 if (-not $SkipGitHub) { Install-BrewCommand 'gh' 'gh' 'GitHub CLI' }

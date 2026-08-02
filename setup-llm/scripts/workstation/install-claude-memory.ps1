@@ -41,6 +41,17 @@ function Test-GlobalNpmCommand {
     return $false
 }
 
+function Add-NodeDirectoryToPath {
+    $nodeCommand = Get-Command 'node' -ErrorAction SilentlyContinue
+    if ($null -eq $nodeCommand) {
+        throw "The resolved npm installation requires Node.js, but 'node' is not available on PATH. Install Node.js and rerun setup."
+    }
+
+    $nodeDirectory = Split-Path -Parent $nodeCommand.Source
+    $separator = [System.IO.Path]::PathSeparator
+    $env:PATH = "$nodeDirectory$separator$env:PATH"
+}
+
 Write-Step 'Checking Claude Code built-in memory'
 Assert-CommandAvailable -Name 'claude' -InstallHint "Install or update Claude Code using Anthropic's current official installer, then rerun."
 
@@ -55,6 +66,7 @@ else {
     if ($versionInfo.Version -lt $minimumVersion) {
         Write-WarningMessage "Claude Code $($versionInfo.Version) is older than the required version $minimumVersion."
 
+        Update-SessionPath
         $usesGlobalNpm = Test-GlobalNpmCommand -CommandPath $versionInfo.CommandPath
         $updateDescription = if ($usesGlobalNpm) {
             'Update the resolved global npm package to the latest version'
@@ -69,6 +81,10 @@ else {
         }
 
         if ($usesGlobalNpm) {
+            # npm lifecycle scripts invoke `node` by name in a child shell. Put
+            # the resolved runtime first even when npm itself can find an
+            # adjacent node.exe without relying on PATH.
+            Add-NodeDirectoryToPath
             Invoke-NativeCommand -FilePath 'npm' -ArgumentList @('install', '--global', '@anthropic-ai/claude-code@latest')
         }
         else {
