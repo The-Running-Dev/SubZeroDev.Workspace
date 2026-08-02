@@ -1,24 +1,93 @@
-[CmdletBinding()]
+[CmdletBinding(SupportsShouldProcess)]
 param()
 $modulePath = Join-Path $PSScriptRoot '../modules/Setup.psm1'
 Import-Module $modulePath -Force
 
+function Get-ClaudeCodeVersionInfo {
+    $command = Get-Command 'claude' -ErrorAction Stop
+    $output = & $command.Source --version 2>&1 | Out-String
+    $versionMatch = [regex]::Match($output, '(\d+)\.(\d+)\.(\d+)')
+
+    [pscustomobject]@{
+        CommandPath = $command.Source
+        Output = $output.Trim()
+        Version = if ($versionMatch.Success) { [version]$versionMatch.Value } else { $null }
+    }
+}
+
+function Test-GlobalNpmCommand {
+    param([Parameter(Mandatory)][string]$CommandPath)
+
+    if (-not (Test-CommandAvailable -Name 'npm')) { return $false }
+
+    $npmPrefixOutput = & npm prefix --global 2>$null | Out-String
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefixOutput)) { return $false }
+
+    $npmPrefix = [System.IO.Path]::GetFullPath($npmPrefixOutput.Trim())
+    $commandDirectory = [System.IO.Path]::GetFullPath((Split-Path -Parent $CommandPath))
+    $candidateDirectories = @($npmPrefix, (Join-Path $npmPrefix 'bin'))
+    $comparison = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
+        [System.StringComparison]::OrdinalIgnoreCase
+    }
+    else {
+        [System.StringComparison]::Ordinal
+    }
+
+    foreach ($candidateDirectory in $candidateDirectories) {
+        $candidatePath = [System.IO.Path]::GetFullPath($candidateDirectory)
+        if ([string]::Equals($commandDirectory, $candidatePath, $comparison)) { return $true }
+    }
+
+    return $false
+}
+
 Write-Step 'Checking Claude Code built-in memory'
 Assert-CommandAvailable -Name 'claude' -InstallHint "Install or update Claude Code using Anthropic's current official installer, then rerun."
 
-$versionOutput = & claude --version 2>&1 | Out-String
-Write-Host $versionOutput.Trim()
+$minimumVersion = [version]'2.1.59'
+$versionInfo = Get-ClaudeCodeVersionInfo
+Write-Host $versionInfo.Output
 
-$versionMatch = [regex]::Match($versionOutput, '(\d+)\.(\d+)\.(\d+)')
-if (-not $versionMatch.Success) {
-    Write-WarningMessage 'Could not parse the Claude Code version. Built-in auto-memory requires version 2.1.59 or later.'
+if ($null -eq $versionInfo.Version) {
+    Write-WarningMessage "Could not parse the Claude Code version. Built-in auto-memory requires version $minimumVersion or later."
 }
 else {
-    $installedVersion = [version]$versionMatch.Value
-    if ($installedVersion -lt [version]'2.1.59') {
-        throw "Claude Code $installedVersion is installed. Update to 2.1.59 or later for built-in auto-memory."
+    if ($versionInfo.Version -lt $minimumVersion) {
+        Write-WarningMessage "Claude Code $($versionInfo.Version) is older than the required version $minimumVersion."
+
+        $usesGlobalNpm = Test-GlobalNpmCommand -CommandPath $versionInfo.CommandPath
+        $updateDescription = if ($usesGlobalNpm) {
+            'Update the resolved global npm package to the latest version'
+        }
+        else {
+            'Run the Claude Code installer-aware updater'
+        }
+
+        if (-not $PSCmdlet.ShouldProcess($versionInfo.CommandPath, $updateDescription)) {
+            Write-WarningMessage 'Claude Code was not updated, so built-in auto-memory cannot be verified.'
+            return
+        }
+
+        if ($usesGlobalNpm) {
+            Invoke-NativeCommand -FilePath 'npm' -ArgumentList @('install', '--global', '@anthropic-ai/claude-code@latest')
+        }
+        else {
+            Invoke-NativeCommand -FilePath $versionInfo.CommandPath -ArgumentList @('update')
+        }
+
+        Update-SessionPath
+        $versionInfo = Get-ClaudeCodeVersionInfo
+        Write-Host $versionInfo.Output
+
+        if ($null -eq $versionInfo.Version) {
+            throw "Claude Code was updated, but its version could not be parsed from '$($versionInfo.Output)'."
+        }
+        if ($versionInfo.Version -lt $minimumVersion) {
+            throw "Claude Code still resolves to $($versionInfo.Version) at '$($versionInfo.CommandPath)' after updating. Remove or update the older installation that appears first on PATH."
+        }
     }
-    Write-Success "Claude Code $installedVersion supports built-in auto-memory."
+
+    Write-Success "Claude Code $($versionInfo.Version) supports built-in auto-memory."
 }
 
 Write-Host 'Inside each repository, run /init once to create project instructions.'
