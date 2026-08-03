@@ -74,10 +74,12 @@ $hadComposeEnv = Test-Path -LiteralPath $composeEnvFile -PathType Leaf
 $composeEnvBackup = Join-Path $composeDir '.env.contract.backup'
 $masterKey = "master-$([guid]::NewGuid().ToString('N'))"
 $backendKey = "backend-$([guid]::NewGuid().ToString('N'))"
+$webUiSecretKey = "webui-$([guid]::NewGuid().ToString('N'))"
 
 $envLines = @(
     "LITELLM_MASTER_KEY=$masterKey"
     "LOCAL_INFERENCE_API_KEY=$backendKey"
+    "WEBUI_SECRET_KEY=$webUiSecretKey"
     "GATEWAY_BIND_PORT=$GatewayPort"
     'LOCAL_CODING_BASE_URL=http://coding-backend:8081/v1'
     'LOCAL_EMBEDDINGS_BASE_URL=http://embeddings-backend:8082/v1'
@@ -112,7 +114,7 @@ try {
     Invoke-CheckedCommand -FilePath 'docker' -ArgumentList ($baseComposeArgs + @('--profile', 'headless', 'up', '-d', 'gateway', 'coding-backend', 'embeddings-backend'))
 
     $authHeader = @{ Authorization = "Bearer $masterKey" }
-    Wait-ForHttp -Url "http://127.0.0.1:$GatewayPort/health" -Headers $authHeader
+    Wait-ForHttp -Url "http://127.0.0.1:$GatewayPort/health" -Headers $authHeader -TimeoutSeconds 180
 
     $models = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/models" -Headers $authHeader -Method Get
     if (-not $models.data) { throw '/v1/models returned no model data.' }

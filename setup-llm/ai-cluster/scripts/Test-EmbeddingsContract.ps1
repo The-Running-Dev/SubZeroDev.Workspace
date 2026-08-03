@@ -88,10 +88,12 @@ $hadComposeEnv = Test-Path -LiteralPath $composeEnvFile -PathType Leaf
 $composeEnvBackup = Join-Path $composeDir '.env.embeddings-contract.backup'
 $masterKey = "master-$([guid]::NewGuid().ToString('N'))"
 $backendKey = "backend-$([guid]::NewGuid().ToString('N'))"
+$webUiSecretKey = "webui-$([guid]::NewGuid().ToString('N'))"
 
 $envLines = @(
     "LITELLM_MASTER_KEY=$masterKey"
     "LOCAL_INFERENCE_API_KEY=$backendKey"
+    "WEBUI_SECRET_KEY=$webUiSecretKey"
     "GATEWAY_BIND_PORT=$GatewayPort"
     'LOCAL_CODING_BASE_URL=http://coding-backend:8081/v1'
     'LOCAL_EMBEDDINGS_BASE_URL=http://embeddings-backend:8082/v1'
