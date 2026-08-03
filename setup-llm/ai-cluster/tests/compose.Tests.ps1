@@ -43,7 +43,6 @@ Describe 'AI cluster compose skeleton' {
             }
         }
     }
-
     It 'preserves a pre-existing environment file during validation' {
         $testScript = Join-Path $PSScriptRoot '../scripts/Test-AiCluster.ps1'
         $composeDirectory = Join-Path $TestDrive 'compose-validation'

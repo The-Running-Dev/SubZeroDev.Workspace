@@ -20,7 +20,6 @@ Describe 'Workspace MCP profile contract' {
         $specText | Should -Match 'Docker MCP'
         $specText | Should -Match 'MCP tool plane'
     }
-
     It 'returns a failing exit code for unhealthy profiles in JSON mode' {
         $doctorScript = Join-Path $PSScriptRoot '../../scripts/doctor-workstation.ps1'
         $fakeBin = Join-Path $TestDrive 'bin'
