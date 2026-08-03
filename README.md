@@ -102,6 +102,8 @@ Recommended first run without third-party session memory:
 
 The default setup installs or configures Node.js, the selected assistant CLIs, GitHub CLI, `act`, Astral `uv`, Graphify, Claude Code memory support, optional `claude-mem`, GitHub MCP, and Playwright MCP.
 
+For a VS Code task-driven flow, run **Tasks: Run Task** and select **Workstation Setup + Memory/Context7/GitHub/Docker MCP**. This task runs the standard workstation setup and then registers Context7 and Docker MCP servers for both Codex and Claude Code.
+
 Select one or both supported clients:
 
 ```powershell
@@ -193,6 +195,13 @@ The shared setup orchestrator calls focused installers:
 - `setup-llm/scripts/workstation/install-database-mcp.ps1`
 
 Most component scripts preserve existing registrations. The GitHub installer intentionally replaces the existing `github` registration so it points to the Compose-managed service.
+
+The root workspace task file is available at `.vscode/tasks.json` and includes:
+
+- `Workstation Setup (Preview)`
+- `Workstation Setup`
+- `Workstation Setup (No claude-mem)`
+- `Workstation Setup + Memory/Context7/GitHub/Docker MCP`
 
 ## Create a Project
 
