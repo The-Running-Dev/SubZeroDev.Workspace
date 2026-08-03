@@ -107,7 +107,38 @@ This script executes scenario-based checks against the same logical `coding` rou
 - explicit rate-limit propagation (`429`)
 - malformed backend response failure handling
 
+### Operational Controls and Diagnostics (T8)
+
+Run T8 operational controls validation:
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Test-OperationalControls.ps1
+```
+
+Run redacted diagnostics output:
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Get-AiClusterDiagnostics.ps1 -AsJson
+pwsh -File setup-llm/ai-cluster/scripts/Get-AiClusterDiagnostics.ps1 -ProbeGateway -AsJson
+```
+
+T8 controls currently enforce or document:
+
+- health-gated startup for containerized gateway and mock backends
+- loopback-only gateway host bind (`127.0.0.1:${GATEWAY_BIND_PORT}:4000`)
+- local secret/state/log path ignore rules (`.env`, `.env.*`, `state/`, `logs/`)
+- placeholder-secret rejection for runtime `.env` values when present
+- host-native inference metrics enabled via `--metrics` while template defaults avoid verbose prompt logging flags
+- route/backend/status/latency/token diagnostics without exposing raw keys or prompt payloads
+
+Security and operations notes:
+
+- Firewall/bind-address: gateway and Open WebUI are loopback-bound by default and are not externally reachable unless operators change port bindings.
+- Cloud egress: default headless profile uses local routes only; cloud/fallback behavior remains explicit opt-in via route/env configuration.
+- Data retention: runtime state and logs are local files under `setup-llm/ai-cluster/state` and `setup-llm/ai-cluster/logs`; these are intentionally excluded from source control.
+- Deletion behavior: `docker compose down --volumes --remove-orphans` removes transient containers/volumes for compose-run scenarios; local state/log directories can be removed manually when desired.
+- MCP boundary: MCP services remain a separate authenticated tool plane from gateway bearer-key authentication and are not delegated by gateway model routing.
+
 ## Next Steps
 
-- T8: security, health, and observability controls.
 - T9/T10: CI automation and setup/operator documentation hardening.

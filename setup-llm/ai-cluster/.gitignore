@@ -1,5 +1,6 @@
 # Local AI cluster secrets and state
 .env
+.env.*
 state/
 logs/
 
