@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 $modulePath = Join-Path $PSScriptRoot 'modules/Setup.psm1'
 Import-Module $modulePath -Force
 
-if (-not ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows)) { throw 'setup-windows.ps1 can only run on Windows.' }
+if (-not (Test-IsWindowsPlatform)) { throw 'setup-windows.ps1 can only run on Windows.' }
 
 function Install-WingetCommand {
     param([string]$Command, [string]$PackageId, [string]$DisplayName)

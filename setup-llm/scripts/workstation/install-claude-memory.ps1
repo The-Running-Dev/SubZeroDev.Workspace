@@ -3,55 +3,46 @@ param()
 $modulePath = Join-Path $PSScriptRoot '../modules/Setup.psm1'
 Import-Module $modulePath -Force
 
-function Get-ClaudeCodeVersionInfo {
-    param([string]$CommandPath)
+function Get-ClaudeCodeCommandPath {
+    $seenPaths = [System.Collections.Generic.HashSet[string]]::new((Get-PathComparer))
 
-    if ([string]::IsNullOrWhiteSpace($CommandPath)) {
-        $CommandPath = (Get-Command 'claude' -ErrorAction Stop).Source
+    foreach ($command in Get-Command 'claude' -All -ErrorAction SilentlyContinue) {
+        if ($command.CommandType -notin @('Application', 'ExternalScript')) { continue }
+        if ((Test-IsWindowsPlatform) -and
+            [string]::IsNullOrWhiteSpace([System.IO.Path]::GetExtension($command.Source))) {
+            continue
+        }
+        if ($seenPaths.Add($command.Source)) { $command.Source }
     }
+}
+
+function Get-ClaudeCodeVersionInfo {
+    param([Parameter(Mandatory)][string]$CommandPath)
 
     $output = & $CommandPath --version 2>&1 | Out-String
+    $exitCode = $LASTEXITCODE
     $versionMatch = [regex]::Match($output, '(\d+)\.(\d+)\.(\d+)')
 
     [pscustomobject]@{
         CommandPath = $CommandPath
         Output = $output.Trim()
+        ExitCode = $exitCode
         Version = if ($versionMatch.Success) { [version]$versionMatch.Value } else { $null }
     }
 }
 
 function Get-ClaudeCodeVersionCandidate {
-    $comparison = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
-        [System.StringComparer]::OrdinalIgnoreCase
-    }
-    else {
-        [System.StringComparer]::Ordinal
-    }
-    $seenPaths = [System.Collections.Generic.HashSet[string]]::new($comparison)
-
-    foreach ($command in Get-Command 'claude' -All -ErrorAction SilentlyContinue) {
-        if (($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) -and
-            [string]::IsNullOrWhiteSpace([System.IO.Path]::GetExtension($command.Source))) {
-            continue
-        }
-        if (-not $seenPaths.Add($command.Source)) { continue }
-
+    foreach ($commandPath in Get-ClaudeCodeCommandPath) {
         try {
-            $candidate = Get-ClaudeCodeVersionInfo -CommandPath $command.Source
-            if ($null -ne $candidate.Version) { $candidate }
+            $candidate = Get-ClaudeCodeVersionInfo -CommandPath $commandPath
+            # A launcher that cannot run is skipped; one that runs but reports an
+            # unrecognized version is still usable and handled by the caller.
+            if ($candidate.ExitCode -eq 0) { $candidate }
         }
         catch {
-            Write-WarningMessage "Could not inspect Claude Code candidate '$($command.Source)': $_"
+            Write-WarningMessage "Could not inspect Claude Code candidate '$commandPath': $_"
         }
     }
-}
-
-function Select-ClaudeCodeCommand {
-    param([Parameter(Mandatory)][string]$CommandPath)
-
-    $commandDirectory = Split-Path -Parent $CommandPath
-    $separator = [System.IO.Path]::PathSeparator
-    $env:PATH = "$commandDirectory$separator$env:PATH"
 }
 
 function Test-GlobalNpmCommand {
@@ -61,32 +52,27 @@ function Test-GlobalNpmCommand {
 
     $npmCommand = Get-NpmCommand
     $npmPrefixArguments = @($npmCommand.PrefixArguments) + @('prefix', '--global')
-    $npmPrefixOutput = & $npmCommand.FilePath @npmPrefixArguments 2>$null | Out-String
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefixOutput)) { return $false }
+    $npmPrefix = (& $npmCommand.FilePath @npmPrefixArguments 2>$null | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmPrefix)) { return $false }
 
-    $npmPrefix = [System.IO.Path]::GetFullPath($npmPrefixOutput.Trim())
+    $comparer = Get-PathComparer
     $commandDirectory = [System.IO.Path]::GetFullPath((Split-Path -Parent $CommandPath))
-    $candidateDirectories = @($npmPrefix, (Join-Path $npmPrefix 'bin'))
-    $comparison = if ($PSVersionTable.PSVersion.Major -le 5 -or $IsWindows) {
-        [System.StringComparison]::OrdinalIgnoreCase
-    }
-    else {
-        [System.StringComparison]::Ordinal
-    }
 
-    foreach ($candidateDirectory in $candidateDirectories) {
-        $candidatePath = [System.IO.Path]::GetFullPath($candidateDirectory)
-        if ([string]::Equals($commandDirectory, $candidatePath, $comparison)) { return $true }
+    foreach ($directory in @($npmPrefix, (Join-Path $npmPrefix 'bin'))) {
+        if ($comparer.Equals($commandDirectory, [System.IO.Path]::GetFullPath($directory))) { return $true }
     }
 
     return $false
 }
 
 Write-Step 'Checking Claude Code built-in memory'
-Assert-CommandAvailable -Name 'claude' -InstallHint "Install or update Claude Code using Anthropic's current official installer, then rerun."
+Update-SessionPath
+$versionInfo = Get-ClaudeCodeVersionCandidate | Select-Object -First 1
+if ($null -eq $versionInfo) {
+    throw "No runnable Claude Code installation was found. Install or update Claude Code using Anthropic's current official installer, then rerun."
+}
 
 $minimumVersion = [version]'2.1.59'
-$versionInfo = Get-ClaudeCodeVersionInfo
 Write-Host $versionInfo.Output
 
 if ($null -eq $versionInfo.Version) {
@@ -103,18 +89,20 @@ else {
             Select-Object -First 1
 
         if ($null -ne $newerCandidate -and $newerCandidate.CommandPath -ne $versionInfo.CommandPath) {
-            $updateDescription = "Use newer installed Claude Code $($newerCandidate.Version)"
-            if (-not $PSCmdlet.ShouldProcess($newerCandidate.CommandPath, $updateDescription)) {
+            if (-not $PSCmdlet.ShouldProcess($newerCandidate.CommandPath, "Use newer installed Claude Code $($newerCandidate.Version)")) {
                 Write-WarningMessage 'The newer Claude Code installation was not selected, so built-in auto-memory cannot be verified.'
                 return
             }
 
-            Select-ClaudeCodeCommand -CommandPath $newerCandidate.CommandPath
+            Add-DirectoryToSessionPath -Directory (Split-Path -Parent $newerCandidate.CommandPath)
             $versionInfo = $newerCandidate
             Write-Host $versionInfo.Output
         }
         else {
+            # 'install latest' migrates off the npm build, whose Windows post-install
+            # child shell can fail to resolve node even when npm itself ran under node.
             $usesGlobalNpm = Test-GlobalNpmCommand -CommandPath $versionInfo.CommandPath
+            $updateArguments = if ($usesGlobalNpm) { @('install', 'latest') } else { @('update') }
             $updateDescription = if ($usesGlobalNpm) {
                 'Install the latest native Claude Code build from the resolved npm launcher'
             }
@@ -127,31 +115,24 @@ else {
                 return
             }
 
-            if ($usesGlobalNpm) {
-                # Migrate away from the legacy npm installation. This avoids npm's
-                # Windows post-install child shell, which may fail to resolve node
-                # even though npm itself was launched by node.exe.
-                Invoke-NativeCommand -FilePath $versionInfo.CommandPath -ArgumentList @('install', 'latest')
-            }
-            else {
-                Invoke-NativeCommand -FilePath $versionInfo.CommandPath -ArgumentList @('update')
-            }
-
+            Invoke-NativeCommand -FilePath $versionInfo.CommandPath -ArgumentList $updateArguments
             Update-SessionPath
+
             $versionInfo = Get-ClaudeCodeVersionCandidate |
                 Sort-Object -Property Version -Descending |
                 Select-Object -First 1
-            if ($null -ne $versionInfo) {
-                Select-ClaudeCodeCommand -CommandPath $versionInfo.CommandPath
+            if ($null -eq $versionInfo) {
+                throw 'Claude Code was updated, but no runnable installation could be inspected afterward.'
             }
-            else {
-                $versionInfo = Get-ClaudeCodeVersionInfo
-            }
+
+            Add-DirectoryToSessionPath -Directory (Split-Path -Parent $versionInfo.CommandPath)
             Write-Host $versionInfo.Output
 
             if ($null -eq $versionInfo.Version) {
-                throw "Claude Code was updated, but its version could not be parsed from '$($versionInfo.Output)'."
+                Write-WarningMessage "Could not parse the Claude Code version after updating. Built-in auto-memory requires version $minimumVersion or later."
+                return
             }
+
             if ($versionInfo.Version -lt $minimumVersion) {
                 throw "Claude Code still resolves to $($versionInfo.Version) at '$($versionInfo.CommandPath)' after updating. Remove or update the older installation that appears first on PATH."
             }
