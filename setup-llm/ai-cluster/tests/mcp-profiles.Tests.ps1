@@ -20,4 +20,48 @@ Describe 'Workspace MCP profile contract' {
         $specText | Should -Match 'Docker MCP'
         $specText | Should -Match 'MCP tool plane'
     }
+    It 'allows optional profiles to be absent without failing in JSON mode' {
+        $doctorScript = Join-Path $PSScriptRoot '../../scripts/doctor-workstation.ps1'
+        $fakeBin = Join-Path $TestDrive 'bin'
+        $codexShim = Join-Path $fakeBin 'codex.ps1'
+        $dockerShim = Join-Path $fakeBin 'docker.ps1'
+        $pwsh = (Get-Command pwsh -ErrorAction Stop).Source
+
+        New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
+        $codexOutput = @'
+Write-Output 'github'
+Write-Output 'playwright'
+Write-Output 'filesystem'
+'@
+        Set-Content -LiteralPath $codexShim -Value $codexOutput
+        Set-Content -LiteralPath $dockerShim -Value 'exit 0'
+
+        $command = "`$env:PATH = '$($fakeBin.Replace("'", "''"))' + [IO.Path]::PathSeparator + `$env:PATH; & '$($doctorScript.Replace("'", "''"))' -Client Codex -AsJson"
+        $output = & $pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command $command
+        $exitCode = $LASTEXITCODE
+
+        $exitCode | Should -Be 0
+        $parsed = ($output -join [Environment]::NewLine) | ConvertFrom-Json
+        @($parsed).Count | Should -Be 5
+        @($parsed | Where-Object { $_.status -eq 'missing' }).Count | Should -Be 2
+    }
+
+    It 'returns a failing exit code for unhealthy profiles in JSON mode' {
+        $doctorScript = Join-Path $PSScriptRoot '../../scripts/doctor-workstation.ps1'
+        $fakeBin = Join-Path $TestDrive 'bin'
+        $codexShim = Join-Path $fakeBin 'codex.ps1'
+        $pwsh = (Get-Command pwsh -ErrorAction Stop).Source
+
+        New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
+        Set-Content -LiteralPath $codexShim -Value "'No MCP servers registered.'"
+
+        $command = "`$env:PATH = '$($fakeBin.Replace("'", "''"))' + [IO.Path]::PathSeparator + `$env:PATH; & '$($doctorScript.Replace("'", "''"))' -Client Codex -AsJson"
+        $output = & $pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command $command
+        $exitCode = $LASTEXITCODE
+
+        $exitCode | Should -Be 1
+        $parsed = ($output -join [Environment]::NewLine) | ConvertFrom-Json
+        @($parsed).Count | Should -Be 5
+        @($parsed | Where-Object { $_.status -eq 'missing' }).Count | Should -Be 5
+    }
 }

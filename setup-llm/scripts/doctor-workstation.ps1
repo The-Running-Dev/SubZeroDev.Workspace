@@ -33,11 +33,11 @@ function Test-McpServerRegistered {
 }
 
 $profiles = @(
-    [ordered]@{ name = 'github'; requiresDocker = $true; description = 'GitHub MCP server (read-only, Docker Compose managed)' }
-    [ordered]@{ name = 'playwright'; requiresDocker = $false; description = 'Playwright MCP server' }
-    [ordered]@{ name = 'filesystem'; requiresDocker = $false; description = 'Filesystem MCP server' }
-    [ordered]@{ name = 'context7'; requiresDocker = $false; description = 'Context7 MCP server' }
-    [ordered]@{ name = 'docker'; requiresDocker = $true; description = 'Docker MCP gateway' }
+    [ordered]@{ name = 'github'; requiresDocker = $true; optional = $false; description = 'GitHub MCP server (read-only, Docker Compose managed)' }
+    [ordered]@{ name = 'playwright'; requiresDocker = $false; optional = $false; description = 'Playwright MCP server' }
+    [ordered]@{ name = 'filesystem'; requiresDocker = $false; optional = $false; description = 'Filesystem MCP server' }
+    [ordered]@{ name = 'context7'; requiresDocker = $false; optional = $true; description = 'Context7 MCP server' }
+    [ordered]@{ name = 'docker'; requiresDocker = $true; optional = $true; description = 'Docker MCP gateway' }
 )
 
 $clients = switch ($Client) {
@@ -58,29 +58,31 @@ foreach ($clientName in $clients) {
             profile = $profile.name
             status = $status
             description = $profile.description
+            optional = $profile.optional
         }
     }
 }
 
+$unhealthyRequiredProfiles = @($results | Where-Object { $_.status -ne 'healthy' -and -not $_.optional }).Count
+
 if ($AsJson) {
     $results | ConvertTo-Json -Depth 6
-    return
 }
+else {
+    Write-Host 'Workstation MCP profile doctor:' -ForegroundColor Cyan
+    foreach ($entry in $results) {
+        $color = switch ($entry.status) {
+            'healthy' { 'Green' }
+            'missing' { 'Yellow' }
+            'docker-unavailable' { 'Yellow' }
+            default { 'Red' }
+        }
 
-Write-Host 'Workstation MCP profile doctor:' -ForegroundColor Cyan
-foreach ($entry in $results) {
-    $color = switch ($entry.status) {
-        'healthy' { 'Green' }
-        'missing' { 'Yellow' }
-        'docker-unavailable' { 'Yellow' }
-        default { 'Red' }
+        Write-Host ("- {0}/{1}: {2} ({3})" -f $entry.client, $entry.profile, $entry.status, $entry.description) -ForegroundColor $color
     }
-
-    Write-Host ("- {0}/{1}: {2} ({3})" -f $entry.client, $entry.profile, $entry.status, $entry.description) -ForegroundColor $color
 }
 
-$errors = @($results | Where-Object { $_.status -eq 'error' }).Count
-if ($errors -gt 0) {
+if ($unhealthyRequiredProfiles -gt 0) {
     exit 1
 }
 

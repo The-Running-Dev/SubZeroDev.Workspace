@@ -43,4 +43,32 @@ Describe 'AI cluster compose skeleton' {
             }
         }
     }
+    It 'preserves a pre-existing environment file during validation' {
+        $testScript = Join-Path $PSScriptRoot '../scripts/Test-AiCluster.ps1'
+        $composeDirectory = Join-Path $TestDrive 'compose-validation'
+        $composePath = Join-Path $composeDirectory 'compose.yaml'
+        $envExample = Join-Path $composeDirectory '.env.example'
+        $envFile = Join-Path $composeDirectory '.env'
+        $fakeBin = Join-Path $TestDrive 'bin'
+        $dockerShim = Join-Path $fakeBin 'docker.ps1'
+        $originalPath = $env:PATH
+        $operatorEnv = 'OPERATOR_SECRET=preserve-me'
+
+        New-Item -ItemType Directory -Path $composeDirectory, $fakeBin -Force | Out-Null
+        Set-Content -LiteralPath $composePath -Value 'services: {}'
+        Set-Content -LiteralPath $envExample -Value 'EXAMPLE_ONLY=true'
+        Set-Content -LiteralPath $envFile -Value $operatorEnv
+        Set-Content -LiteralPath $dockerShim -Value 'exit 0'
+
+        try {
+            $env:PATH = "$fakeBin$([IO.Path]::PathSeparator)$originalPath"
+            & $testScript -ComposeFile $composePath
+
+            $LASTEXITCODE | Should -Be 0
+            (Get-Content -LiteralPath $envFile -Raw).Trim() | Should -Be $operatorEnv
+        }
+        finally {
+            $env:PATH = $originalPath
+        }
+    }
 }
