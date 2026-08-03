@@ -112,6 +112,13 @@ $baseComposeArgs = @(
 
 Push-Location $composeDir
 try {
+    try {
+        & docker @($baseComposeArgs + @('down', '--volumes', '--remove-orphans')) *> $null
+    }
+    catch {
+        Write-Warning "Pre-cleanup before embeddings contract run returned a non-fatal error: $_"
+    }
+
     Invoke-CheckedCommand -FilePath 'docker' -ArgumentList ($baseComposeArgs + @('--profile', 'headless', 'up', '-d', 'gateway', 'coding-backend', 'embeddings-backend'))
 
     $authHeader = @{ Authorization = "Bearer $masterKey" }

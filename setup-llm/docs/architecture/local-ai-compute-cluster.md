@@ -139,6 +139,28 @@ Security and operations notes:
 - Deletion behavior: `docker compose down --volumes --remove-orphans` removes transient containers/volumes for compose-run scenarios; local state/log directories can be removed manually when desired.
 - MCP boundary: MCP services remain a separate authenticated tool plane from gateway bearer-key authentication and are not delegated by gateway model routing.
 
+### Automated Validation and CI (T9)
+
+GitHub Actions workflow:
+
+- `.github/workflows/ai-cluster-ci.yml`
+
+The workflow runs GPU-independent checks on `ubuntu-latest`:
+
+- `Test-AiCluster.ps1`
+- `Test-OperationalControls.ps1`
+- Pester suite under `setup-llm/ai-cluster/tests`
+- deterministic contract runs:
+  - `Test-GatewayContract.ps1`
+  - `Test-EmbeddingsContract.ps1`
+  - `Test-ProviderReplacementAndFailure.ps1`
+
+Hardware-only smoke validation is represented by:
+
+- `setup-llm/ai-cluster/scripts/Test-HardwareSmoke.ps1`
+
+In standard CI it exits with an explicit `[SKIP]` reason. Set `AI_CLUSTER_RUN_HARDWARE_SMOKE=1` (or run with `-Force` locally) to enable it.
+
 ## Next Steps
 
-- T9/T10: CI automation and setup/operator documentation hardening.
+- T10: setup integration and full operator documentation hardening.

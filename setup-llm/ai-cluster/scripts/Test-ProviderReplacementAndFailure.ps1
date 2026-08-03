@@ -82,6 +82,13 @@ function Invoke-Scenario {
 
     Push-Location $composeDir
     try {
+        try {
+            & docker @($baseComposeArgs + @('down', '--volumes', '--remove-orphans')) *> $null
+        }
+        catch {
+            Write-Warning "Scenario '$Name' pre-cleanup returned a non-fatal error: $_"
+        }
+
         Invoke-CheckedCommand -FilePath 'docker' -ArgumentList ($baseComposeArgs + @('--profile', 'headless', '--profile', 'cloud', 'up', '-d') + $Services)
 
         $auth = @{ Authorization = "Bearer $masterKey" }

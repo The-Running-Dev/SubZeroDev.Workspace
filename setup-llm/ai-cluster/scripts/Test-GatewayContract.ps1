@@ -41,6 +41,27 @@ function Wait-ForHttp {
     throw "Timed out waiting for $Url"
 }
 
+function Remove-StaleComposeArtifacts {
+    param([Parameter(Mandatory)][string]$ProjectName)
+
+    # Recover from interrupted runs where containers survive detached from the compose network.
+    $containerIds = @(docker ps -aq --filter "label=com.docker.compose.project=$ProjectName" 2>$null)
+    foreach ($id in $containerIds) {
+        if (-not [string]::IsNullOrWhiteSpace([string]$id)) {
+            & docker rm -f $id *> $null
+        }
+    }
+
+    $networkNames = @(
+        "$ProjectName-ai-cluster-net"
+        "$ProjectName`_ai-cluster-net"
+    )
+
+    foreach ($networkName in $networkNames) {
+        & docker network rm $networkName *> $null
+    }
+}
+
 if ($null -eq (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw 'Docker is required for gateway contract tests.'
 }
@@ -79,6 +100,15 @@ $baseComposeArgs = @(
 
 Push-Location $composeDir
 try {
+    try {
+        & docker @($baseComposeArgs + @('down', '--volumes', '--remove-orphans')) *> $null
+    }
+    catch {
+        Write-Warning "Pre-cleanup before gateway contract run returned a non-fatal error: $_"
+    }
+
+    Remove-StaleComposeArtifacts -ProjectName $ProjectName
+
     Invoke-CheckedCommand -FilePath 'docker' -ArgumentList ($baseComposeArgs + @('--profile', 'headless', 'up', '-d', 'gateway', 'coding-backend', 'embeddings-backend'))
 
     $authHeader = @{ Authorization = "Bearer $masterKey" }
