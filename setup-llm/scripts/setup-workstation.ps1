@@ -7,6 +7,8 @@ param(
     [switch]$SkipGitHub,
     [switch]$SkipPlaywright,
     [switch]$SkipGraphify,
+    [switch]$IncludeContext7,
+    [switch]$IncludeDockerMcp,
 
     [switch]$IncludeFilesystem,
     [string[]]$FilesystemPath = @(),
@@ -56,6 +58,14 @@ if (-not $SkipGitHub) {
 
 if (-not $SkipPlaywright) {
     Invoke-SetupScript -ScriptName 'install-playwright-mcp.ps1' -Parameters @{ Client = $Client; WhatIf = $WhatIfPreference }
+}
+
+if ($IncludeContext7) {
+    Invoke-SetupScript -ScriptName 'install-context7-mcp.ps1' -Parameters @{ Client = $Client; WhatIf = $WhatIfPreference }
+}
+
+if ($IncludeDockerMcp) {
+    Invoke-SetupScript -ScriptName 'install-docker-mcp.ps1' -Parameters @{ Client = $Client; WhatIf = $WhatIfPreference }
 }
 
 if ($IncludeFilesystem) {

@@ -4,7 +4,7 @@ sidebar_position: 5
 description: T1 implementation contract and delivery baseline for issue #16.
 ---
 
-# AI Cluster MVP Implementation Contract
+## AI Cluster MVP Implementation Contract
 
 This contract translates issue #16 into implementation constraints for T1-T10.
 
@@ -30,6 +30,8 @@ Required aliases:
 
 - `coding`
 - `general`
+- `vision`
+- `multimodal`
 - `embeddings`
 
 Contract rules:
@@ -37,6 +39,8 @@ Contract rules:
 - Clients must use aliases, not backend-specific identifiers.
 - Alias remapping must not require client-code changes.
 - Fallback to cloud providers must be explicit and observable.
+- `vision` and `multimodal` are capability aliases, not a promise of a distinct backend implementation.
+- Unsupported multimodal capability must fail explicitly or be remapped in configuration, never silently downgraded.
 
 ## Error and fallback semantics
 

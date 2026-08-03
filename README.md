@@ -11,12 +11,15 @@ The complete setup documentation is published at **[workspace.subzerodev.com](ht
 - [Quick Start](setup-llm/docs/getting-started/quickstart.md) — create and open a new AI-assisted project with the shortest supported workflow.
 - [Start a New Project](setup-llm/docs/getting-started/new-project.md) — follow the complete Claude Desktop, Claude Code, and Codex workflow.
 - [Setup Overview](setup-llm/docs/index.md) — understand the combined setup, authentication, integrations, and platform prerequisites. On the published site, this page is available at [the documentation root](https://workspace.subzerodev.com/docs/).
+- [AI Cluster Operations](setup-llm/docs/getting-started/ai-cluster-operations.md) — run opt-in setup, doctor checks, startup/smoke/shutdown, and troubleshooting for the Local AI Compute Cluster.
 
 ### Architecture and Setup Design
 
 - [Modular Architecture](setup-llm/docs/architecture/modular-architecture.md) — understand the workstation and project setup modules.
 - [Setup Flowcharts](setup-llm/docs/architecture/setup-flowcharts.md) — review the installation and project-creation flows visually.
 - [Setup Specification](setup-llm/docs/architecture/setup-specification.md) — review inputs, outputs, validation, and required project files.
+- [Local AI Compute Cluster](setup-llm/docs/architecture/local-ai-compute-cluster.md) — review the Issue #16 T3 AI-cluster skeleton, compose profiles, and validation flow.
+- [Memory and RAG Retention Contract](setup-llm/docs/architecture/memory-rag-contract.md) — review retrieval boundaries, index lifecycle, deletion guarantees, and smoke-test expectations for durable memory layers.
 - [Workspace Blueprint](setup-llm/docs/architecture/workspace-blueprint.md) — review the recommended AI development workspace and rollout plan.
 
 ### Reference
@@ -64,6 +67,25 @@ The setup scripts support Windows, macOS, and Ubuntu/Debian. PowerShell automati
 ```
 
 The preview command shows prerequisite actions without installing them. The second command performs workstation setup while omitting the optional third-party `claude-mem` integration.
+
+## Local AI Cluster (Opt-in)
+
+The Local AI Compute Cluster is not part of default workstation setup and does not auto-download model artifacts.
+
+Initialize local templates and run baseline validation:
+
+```powershell
+./setup-llm/scripts/setup-ai-cluster.ps1 -InitializeEnv -InitializeLocalInferenceConfig -RunHeadlessConfigTest
+```
+
+Run an operator doctor summary:
+
+```powershell
+./setup-llm/scripts/doctor-ai-cluster.ps1
+./setup-llm/scripts/doctor-ai-cluster.ps1 -RunContracts
+```
+
+Use the VS Code tasks `AI Cluster Setup (Opt-in)` and `AI Cluster Doctor` for task-driven operation.
 
 ## Workstation Setup
 
