@@ -57,6 +57,7 @@ $backendKey = "backend-$([guid]::NewGuid().ToString('N'))"
 $envLines = @(
     "LITELLM_MASTER_KEY=$masterKey"
     "LOCAL_INFERENCE_API_KEY=$backendKey"
+    "GATEWAY_BIND_PORT=$GatewayPort"
     'LOCAL_CODING_BASE_URL=http://coding-backend:8081/v1'
     'LOCAL_EMBEDDINGS_BASE_URL=http://embeddings-backend:8082/v1'
 )

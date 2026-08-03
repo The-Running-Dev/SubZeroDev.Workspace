@@ -14,6 +14,7 @@ $requiredPaths = @(
     (Join-Path $PSScriptRoot '../config/litellm.yaml')
     (Join-Path $PSScriptRoot '../config/model-manifest.example.yaml')
     (Join-Path $PSScriptRoot '../config/local-inference.example.json')
+    (Join-Path $PSScriptRoot '../config/embeddings-contract.example.json')
 )
 
 foreach ($path in $requiredPaths) {

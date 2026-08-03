@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def _json_bytes(payload):
     return json.dumps(payload).encode("utf-8")
+
+
+def _deterministic_embedding(text, dimensions=8):
+    digest = hashlib.sha256(text.encode("utf-8")).digest()
+    values = []
+    for index in range(dimensions):
+        byte_value = digest[index % len(digest)]
+        # Keep vectors intentionally non-normalized so contract checks can assert this.
+        values.append(round(float(byte_value) / 25.5, 6))
+    return values
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -94,8 +105,12 @@ class Handler(BaseHTTPRequestHandler):
                 inputs = [inputs]
 
             data = []
-            for idx, _ in enumerate(inputs):
-                data.append({"object": "embedding", "index": idx, "embedding": [0.11, 0.22, 0.33, 0.44]})
+            for idx, item in enumerate(inputs):
+                data.append({
+                    "object": "embedding",
+                    "index": idx,
+                    "embedding": _deterministic_embedding(str(item), dimensions=8),
+                })
 
             self._write_json(200, {
                 "object": "list",

@@ -6,11 +6,11 @@ description: Phase T3 skeleton for the Local AI Compute Cluster MVP.
 
 ## Local AI Compute Cluster (T3 Skeleton)
 
-This document records the initial project skeleton introduced for Issue #16.
+This document records incremental AI-cluster implementation slices for Issue #16.
 
 ## Scope of This Slice
 
-This T3 slice provides:
+Current implemented slices provide:
 
 - `setup-llm/ai-cluster/compose.yaml` with dedicated `headless`, `ui`, `cloud`, and `intel-sycl-linux` profiles.
 - Environment and route scaffolding:
@@ -19,8 +19,8 @@ This T3 slice provides:
   - `setup-llm/ai-cluster/config/model-manifest.example.yaml`
 - Local runtime config template:
   - `setup-llm/ai-cluster/config/local-inference.example.json`
-- Lifecycle and validation script placeholders under `setup-llm/ai-cluster/scripts/`.
-- Test placeholders under `setup-llm/ai-cluster/tests/`.
+- Lifecycle and validation scripts under `setup-llm/ai-cluster/scripts/`.
+- Route and contract tests under `setup-llm/ai-cluster/tests/`.
 
 ## Design Constraints Preserved
 
@@ -75,8 +75,25 @@ The script provisions a temporary Docker Compose project with deterministic mock
 
 and then tears the environment down.
 
+### Embeddings Contract Test (T6)
+
+Run the embeddings contract checks:
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Test-EmbeddingsContract.ps1
+```
+
+The script validates the embeddings route contract using `config/embeddings-contract.example.json`:
+
+- batch request handling preserves count and order
+- vector dimension matches the contract (`8`)
+- deterministic output for identical input
+- distinct output for different input
+- cosine similarity sanity (`self ~= 1`, cross-input lower)
+- normalization behavior matches the contract (`normalized = false`)
+
 ## Next Steps
 
-- T4: implement host-native `llama-server` process management.
-- T5: replace mock backend wiring with production LiteLLM route/health behavior.
-- T6+: complete embeddings, fallback policy, and CI contract tests.
+- T7: provider replacement and safe failure behavior tests.
+- T8: security, health, and observability controls.
+- T9/T10: CI automation and setup/operator documentation hardening.
