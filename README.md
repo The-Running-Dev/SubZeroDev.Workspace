@@ -19,6 +19,7 @@ The complete setup documentation is published at **[workspace.subzerodev.com](ht
 - [Setup Flowcharts](setup-llm/docs/architecture/setup-flowcharts.md) — review the installation and project-creation flows visually.
 - [Setup Specification](setup-llm/docs/architecture/setup-specification.md) — review inputs, outputs, validation, and required project files.
 - [Local AI Compute Cluster](setup-llm/docs/architecture/local-ai-compute-cluster.md) — review the Issue #16 T3 AI-cluster skeleton, compose profiles, and validation flow.
+- [Memory and RAG Retention Contract](setup-llm/docs/architecture/memory-rag-contract.md) — review retrieval boundaries, index lifecycle, deletion guarantees, and smoke-test expectations for durable memory layers.
 - [Workspace Blueprint](setup-llm/docs/architecture/workspace-blueprint.md) — review the recommended AI development workspace and rollout plan.
 
 ### Reference
