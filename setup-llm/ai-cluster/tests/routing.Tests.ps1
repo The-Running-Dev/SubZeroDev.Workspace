@@ -6,5 +6,7 @@ Describe 'LiteLLM route contract skeleton' {
         $text | Should -Match 'model_name:\s*coding'
         $text | Should -Match 'model_name:\s*general'
         $text | Should -Match 'model_name:\s*embeddings'
+        $text | Should -Match 'model:\s*openai/local-coding'
+        $text | Should -Match 'model:\s*openai/local-embeddings'
     }
 }

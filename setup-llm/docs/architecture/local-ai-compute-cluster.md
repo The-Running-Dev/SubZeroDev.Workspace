@@ -57,6 +57,24 @@ pwsh -File setup-llm/ai-cluster/scripts/Stop-LocalInference.ps1
 
 The start script validates model paths, optional model hashes, API key presence, and writes PID/log state under `setup-llm/ai-cluster/state` and `setup-llm/ai-cluster/logs`.
 
+### Gateway Contract Test (T5)
+
+Run the gateway contract smoke test:
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Test-GatewayContract.ps1
+```
+
+The script provisions a temporary Docker Compose project with deterministic mock OpenAI backends, validates:
+
+- authenticated `/v1/models`
+- unauthenticated request rejection
+- chat completions (including streaming)
+- embeddings responses
+- normalized unknown-model failure behavior
+
+and then tears the environment down.
+
 ## Next Steps
 
 - T4: implement host-native `llama-server` process management.
