@@ -57,6 +57,17 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/v1/chat/completions":
             if self.mode != "chat":
+                if self.mode == "rate-limit":
+                    self._write_json(429, {"error": {"message": "rate limit", "type": "rate_limit_error"}})
+                    return
+                if self.mode == "malformed":
+                    bad_payload = b"this is not json"
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(bad_payload)))
+                    self.end_headers()
+                    self.wfile.write(bad_payload)
+                    return
                 self._write_json(400, {"error": {"message": "chat disabled", "type": "invalid_request_error"}})
                 return
 
@@ -88,7 +99,7 @@ class Handler(BaseHTTPRequestHandler):
                     {
                         "index": 0,
                         "finish_reason": "stop",
-                        "message": {"role": "assistant", "content": f"mock response: {prompt_text}"},
+                        "message": {"role": "assistant", "content": f"mock[{self.model_name}] response: {prompt_text}"},
                     }
                 ],
                 "usage": {"prompt_tokens": 5, "completion_tokens": 5, "total_tokens": 10},
@@ -128,7 +139,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["chat", "embeddings"], required=True)
+    parser.add_argument("--mode", choices=["chat", "embeddings", "rate-limit", "malformed"], required=True)
     parser.add_argument("--name", required=True)
     parser.add_argument("--port", type=int, required=True)
     args = parser.parse_args()

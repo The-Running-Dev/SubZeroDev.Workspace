@@ -99,6 +99,87 @@ services:
       - ui
       - cloud
 
+  coding-backend-alt:
+    image: python:3.12-alpine
+    command:
+      - python
+      - /app/mock-openai-backend.py
+      - --mode
+      - chat
+      - --port
+      - "8083"
+      - --name
+      - local-coding-alt
+    volumes:
+      - ./tests/fixtures/mock-openai-backend.py:/app/mock-openai-backend.py:ro
+    environment:
+      BACKEND_API_KEY: ${LOCAL_INFERENCE_API_KEY:?Set LOCAL_INFERENCE_API_KEY in ai-cluster/.env}
+    networks:
+      - ai-cluster-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8083/health', timeout=5)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    profiles:
+      - cloud
+
+  coding-backend-rate-limit:
+    image: python:3.12-alpine
+    command:
+      - python
+      - /app/mock-openai-backend.py
+      - --mode
+      - rate-limit
+      - --port
+      - "8084"
+      - --name
+      - local-coding-rate-limit
+    volumes:
+      - ./tests/fixtures/mock-openai-backend.py:/app/mock-openai-backend.py:ro
+    environment:
+      BACKEND_API_KEY: ${LOCAL_INFERENCE_API_KEY:?Set LOCAL_INFERENCE_API_KEY in ai-cluster/.env}
+    networks:
+      - ai-cluster-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8084/health', timeout=5)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    profiles:
+      - cloud
+
+  coding-backend-malformed:
+    image: python:3.12-alpine
+    command:
+      - python
+      - /app/mock-openai-backend.py
+      - --mode
+      - malformed
+      - --port
+      - "8085"
+      - --name
+      - local-coding-malformed
+    volumes:
+      - ./tests/fixtures/mock-openai-backend.py:/app/mock-openai-backend.py:ro
+    environment:
+      BACKEND_API_KEY: ${LOCAL_INFERENCE_API_KEY:?Set LOCAL_INFERENCE_API_KEY in ai-cluster/.env}
+    networks:
+      - ai-cluster-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8085/health', timeout=5)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    profiles:
+      - cloud
+
   open-webui:
     image: ghcr.io/open-webui/open-webui:v0.6.6
     environment:

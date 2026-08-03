@@ -92,8 +92,22 @@ The script validates the embeddings route contract using `config/embeddings-cont
 - cosine similarity sanity (`self ~= 1`, cross-input lower)
 - normalization behavior matches the contract (`normalized = false`)
 
+### Provider Replacement and Failure Test (T7)
+
+Run provider replacement and failure-path validation:
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Test-ProviderReplacementAndFailure.ps1
+```
+
+This script executes scenario-based checks against the same logical `coding` route:
+
+- provider replacement without client changes (`local-coding` -> `local-coding-alt`)
+- unreachable backend failure (no silent fallback)
+- explicit rate-limit propagation (`429`)
+- malformed backend response failure handling
+
 ## Next Steps
 
-- T7: provider replacement and safe failure behavior tests.
 - T8: security, health, and observability controls.
 - T9/T10: CI automation and setup/operator documentation hardening.
