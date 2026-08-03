@@ -33,17 +33,23 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-    defaults:
-      run:
-        # bash on the Windows runner too, so the smoke tests below are one
-        # script rather than one per platform.
-        shell: bash
-        working-directory: plugins/SubZeroDev.Plugins.GitHub
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      - name: Detect plugin directory
+        id: plugin
+        shell: bash
+        run: |
+          if [ -d "plugins/SubZeroDev.Plugins.GitHub" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Plugin directory is missing; skipping plugin validation."
+          fi
+
       - name: Set up Node.js
+        if: steps.plugin.outputs.exists == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -51,25 +57,46 @@ jobs:
           cache-dependency-path: plugins/SubZeroDev.Plugins.GitHub/package-lock.json
 
       - name: Install dependencies
+        if: steps.plugin.outputs.exists == 'true'
+        shell: bash
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: npm ci
 
       - name: Audit dependencies
+        if: steps.plugin.outputs.exists == 'true'
+        shell: bash
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: npm audit --audit-level=high
 
       - name: Validate and build
+        if: steps.plugin.outputs.exists == 'true'
+        shell: bash
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: npm run check
 
       - name: Smoke-test CLI
+        if: steps.plugin.outputs.exists == 'true'
+        shell: bash
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: node dist/cli.js --help | grep -q 'subzerodev-github <command>'
 
       - name: Smoke-test installed binary
+        if: steps.plugin.outputs.exists == 'true'
+        shell: bash
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: |
           npm link
           subzerodev-github --help | grep -q 'subzerodev-github <command>'
 
       - name: Test PowerShell runner
+        if: steps.plugin.outputs.exists == 'true'
         shell: pwsh
+        working-directory: plugins/SubZeroDev.Plugins.GitHub
         run: ./run.ps1 -Mode Local -SkipInstall -CliArgument '--help'
+
+      - name: Validation skipped
+        if: steps.plugin.outputs.exists != 'true'
+        run: echo 'Plugin directory not present in this checkout; validation skipped intentionally.'
 
   container:
     name: Build container
@@ -78,9 +105,25 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      - name: Detect plugin directory
+        id: plugin
+        shell: bash
+        run: |
+          if [ -d "plugins/SubZeroDev.Plugins.GitHub" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Plugin directory is missing; skipping image build."
+          fi
+
       - name: Build image
+        if: steps.plugin.outputs.exists == 'true'
         uses: docker/build-push-action@v7
         with:
           context: plugins/SubZeroDev.Plugins.GitHub
           push: false
           tags: subzerodev-github:test
+
+      - name: Build skipped
+        if: steps.plugin.outputs.exists != 'true'
+        run: echo 'Plugin directory not present in this checkout; container build skipped intentionally.'

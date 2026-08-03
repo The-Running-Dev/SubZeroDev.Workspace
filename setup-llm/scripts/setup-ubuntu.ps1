@@ -76,6 +76,7 @@ function Install-ActCommand {
 }
 
 Write-Step 'Installing Ubuntu prerequisites with apt, pipx, and npm'
+if (-not (Test-CommandAvailable 'node')) { Install-AptCommand 'node' @('nodejs', 'npm') 'Node.js and npm' }
 if (-not (Test-CommandAvailable 'npm') -or -not (Test-CommandAvailable 'npx')) { Install-AptCommand 'npm' @('nodejs', 'npm') 'Node.js and npm' }
 Install-ActCommand
 if (-not $SkipGitHub) { Install-AptCommand 'gh' @('gh') 'GitHub CLI' }

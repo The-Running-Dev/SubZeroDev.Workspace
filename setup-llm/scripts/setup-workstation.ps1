@@ -43,7 +43,7 @@ if (-not $SkipGraphify) {
 }
 
 if ($Client -in @('ClaudeCode', 'Both')) {
-    Invoke-SetupScript -ScriptName 'install-claude-memory.ps1'
+    Invoke-SetupScript -ScriptName 'install-claude-memory.ps1' -Parameters @{ WhatIf = $WhatIfPreference }
 
     if (-not $SkipClaudeMem) {
         Invoke-SetupScript -ScriptName 'install-claude-mem.ps1' -Parameters @{ WhatIf = $WhatIfPreference }
