@@ -17,6 +17,8 @@ This T3 slice provides:
   - `setup-llm/ai-cluster/.env.example`
   - `setup-llm/ai-cluster/config/litellm.yaml`
   - `setup-llm/ai-cluster/config/model-manifest.example.yaml`
+- Local runtime config template:
+  - `setup-llm/ai-cluster/config/local-inference.example.json`
 - Lifecycle and validation script placeholders under `setup-llm/ai-cluster/scripts/`.
 - Test placeholders under `setup-llm/ai-cluster/tests/`.
 
@@ -35,6 +37,25 @@ pwsh -File setup-llm/ai-cluster/scripts/Test-AiCluster.ps1
 ```
 
 This currently validates static structure and optionally runs `docker compose config` when Docker is available.
+
+### Local Inference Lifecycle (T4)
+
+Copy the template and fill in executable/model paths:
+
+```powershell
+Copy-Item setup-llm/ai-cluster/config/local-inference.example.json setup-llm/ai-cluster/config/local-inference.json
+```
+
+Set the backend key in your shell and start providers:
+
+```powershell
+$env:LOCAL_INFERENCE_API_KEY = 'replace-me-before-use'
+pwsh -File setup-llm/ai-cluster/scripts/Start-LocalInference.ps1
+pwsh -File setup-llm/ai-cluster/scripts/Get-LocalInferenceStatus.ps1
+pwsh -File setup-llm/ai-cluster/scripts/Stop-LocalInference.ps1
+```
+
+The start script validates model paths, optional model hashes, API key presence, and writes PID/log state under `setup-llm/ai-cluster/state` and `setup-llm/ai-cluster/logs`.
 
 ## Next Steps
 

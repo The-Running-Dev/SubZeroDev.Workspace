@@ -13,6 +13,7 @@ $requiredPaths = @(
     (Join-Path $PSScriptRoot '../.env.example')
     (Join-Path $PSScriptRoot '../config/litellm.yaml')
     (Join-Path $PSScriptRoot '../config/model-manifest.example.yaml')
+    (Join-Path $PSScriptRoot '../config/local-inference.example.json')
 )
 
 foreach ($path in $requiredPaths) {
@@ -46,4 +47,7 @@ try {
 }
 finally {
     Pop-Location
+    if (Test-Path -LiteralPath $envFile -PathType Leaf) {
+        Remove-Item -LiteralPath $envFile -Force -ErrorAction SilentlyContinue
+    }
 }
