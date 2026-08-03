@@ -11,6 +11,7 @@ The complete setup documentation is published at **[workspace.subzerodev.com](ht
 - [Quick Start](setup-llm/docs/getting-started/quickstart.md) — create and open a new AI-assisted project with the shortest supported workflow.
 - [Start a New Project](setup-llm/docs/getting-started/new-project.md) — follow the complete Claude Desktop, Claude Code, and Codex workflow.
 - [Setup Overview](setup-llm/docs/index.md) — understand the combined setup, authentication, integrations, and platform prerequisites. On the published site, this page is available at [the documentation root](https://workspace.subzerodev.com/docs/).
+- [AI Cluster Operations](setup-llm/docs/getting-started/ai-cluster-operations.md) — run opt-in setup, doctor checks, startup/smoke/shutdown, and troubleshooting for the Local AI Compute Cluster.
 
 ### Architecture and Setup Design
 
@@ -65,6 +66,25 @@ The setup scripts support Windows, macOS, and Ubuntu/Debian. PowerShell automati
 ```
 
 The preview command shows prerequisite actions without installing them. The second command performs workstation setup while omitting the optional third-party `claude-mem` integration.
+
+## Local AI Cluster (Opt-in)
+
+The Local AI Compute Cluster is not part of default workstation setup and does not auto-download model artifacts.
+
+Initialize local templates and run baseline validation:
+
+```powershell
+./setup-llm/scripts/setup-ai-cluster.ps1 -InitializeEnv -InitializeLocalInferenceConfig -RunHeadlessConfigTest
+```
+
+Run an operator doctor summary:
+
+```powershell
+./setup-llm/scripts/doctor-ai-cluster.ps1
+./setup-llm/scripts/doctor-ai-cluster.ps1 -RunContracts
+```
+
+Use the VS Code tasks `AI Cluster Setup (Opt-in)` and `AI Cluster Doctor` for task-driven operation.
 
 ## Workstation Setup
 

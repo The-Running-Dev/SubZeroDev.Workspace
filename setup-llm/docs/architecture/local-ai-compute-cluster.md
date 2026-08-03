@@ -161,6 +161,27 @@ Hardware-only smoke validation is represented by:
 
 In standard CI it exits with an explicit `[SKIP]` reason. Set `AI_CLUSTER_RUN_HARDWARE_SMOKE=1` (or run with `-Force` locally) to enable it.
 
+### Setup Integration and Operator Workflow (T10)
+
+Opt-in setup and doctor entry points:
+
+- `setup-llm/scripts/setup-ai-cluster.ps1`
+- `setup-llm/scripts/doctor-ai-cluster.ps1`
+
+Example usage:
+
+```powershell
+pwsh -File setup-llm/scripts/setup-ai-cluster.ps1 -InitializeEnv -InitializeLocalInferenceConfig -RunHeadlessConfigTest
+pwsh -File setup-llm/scripts/doctor-ai-cluster.ps1
+pwsh -File setup-llm/scripts/doctor-ai-cluster.ps1 -RunContracts
+```
+
+Operator guidance page:
+
+- `setup-llm/docs/getting-started/ai-cluster-operations.md`
+
+This covers prerequisites, model acquisition and hash expectations, startup/smoke/shutdown, upgrade and local backup guidance, retention/deletion behavior, Windows host-native SYCL troubleshooting notes, and the optional Linux `/dev/dri` profile caveat.
+
 ## Next Steps
 
-- T10: setup integration and full operator documentation hardening.
+- T10 complete for MVP scope; next work continues as follow-up issues (vision, memory/RAG, MCP expansions, Open WebUI hardening, monitoring, orchestration).
