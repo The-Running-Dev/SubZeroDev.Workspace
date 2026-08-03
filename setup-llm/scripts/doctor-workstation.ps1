@@ -33,11 +33,11 @@ function Test-McpServerRegistered {
 }
 
 $profiles = @(
-    [ordered]@{ name = 'github'; requiresDocker = $true; description = 'GitHub MCP server (read-only, Docker Compose managed)' }
-    [ordered]@{ name = 'playwright'; requiresDocker = $false; description = 'Playwright MCP server' }
-    [ordered]@{ name = 'filesystem'; requiresDocker = $false; description = 'Filesystem MCP server' }
-    [ordered]@{ name = 'context7'; requiresDocker = $false; description = 'Context7 MCP server' }
-    [ordered]@{ name = 'docker'; requiresDocker = $true; description = 'Docker MCP gateway' }
+    [ordered]@{ name = 'github'; requiresDocker = $true; optional = $false; description = 'GitHub MCP server (read-only, Docker Compose managed)' }
+    [ordered]@{ name = 'playwright'; requiresDocker = $false; optional = $false; description = 'Playwright MCP server' }
+    [ordered]@{ name = 'filesystem'; requiresDocker = $false; optional = $false; description = 'Filesystem MCP server' }
+    [ordered]@{ name = 'context7'; requiresDocker = $false; optional = $true; description = 'Context7 MCP server' }
+    [ordered]@{ name = 'docker'; requiresDocker = $true; optional = $true; description = 'Docker MCP gateway' }
 )
 
 $clients = switch ($Client) {
@@ -58,11 +58,12 @@ foreach ($clientName in $clients) {
             profile = $profile.name
             status = $status
             description = $profile.description
+            optional = $profile.optional
         }
     }
 }
 
-$unhealthyProfiles = @($results | Where-Object { $_.status -ne 'healthy' }).Count
+$unhealthyRequiredProfiles = @($results | Where-Object { $_.status -ne 'healthy' -and -not $_.optional }).Count
 
 if ($AsJson) {
     $results | ConvertTo-Json -Depth 6
@@ -81,7 +82,7 @@ else {
     }
 }
 
-if ($unhealthyProfiles -gt 0) {
+if ($unhealthyRequiredProfiles -gt 0) {
     exit 1
 }
 
