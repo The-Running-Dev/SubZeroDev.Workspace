@@ -32,9 +32,11 @@ if ($null -eq (Get-Command docker -ErrorAction SilentlyContinue)) {
 $composeDirectory = Split-Path -Parent $ComposeFile
 $envExample = Join-Path $composeDirectory '.env.example'
 $envFile = Join-Path $composeDirectory '.env'
+$createdEnvFile = $false
 
 if (-not (Test-Path -LiteralPath $envFile -PathType Leaf)) {
     Copy-Item -LiteralPath $envExample -Destination $envFile -Force
+    $createdEnvFile = $true
     Write-Host "Created temporary $envFile from .env.example for validation." -ForegroundColor Yellow
 }
 
@@ -48,7 +50,7 @@ try {
 }
 finally {
     Pop-Location
-    if (Test-Path -LiteralPath $envFile -PathType Leaf) {
+    if ($createdEnvFile -and (Test-Path -LiteralPath $envFile -PathType Leaf)) {
         Remove-Item -LiteralPath $envFile -Force -ErrorAction SilentlyContinue
     }
 }

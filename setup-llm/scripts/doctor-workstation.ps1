@@ -62,25 +62,26 @@ foreach ($clientName in $clients) {
     }
 }
 
+$unhealthyProfiles = @($results | Where-Object { $_.status -ne 'healthy' }).Count
+
 if ($AsJson) {
     $results | ConvertTo-Json -Depth 6
-    return
 }
+else {
+    Write-Host 'Workstation MCP profile doctor:' -ForegroundColor Cyan
+    foreach ($entry in $results) {
+        $color = switch ($entry.status) {
+            'healthy' { 'Green' }
+            'missing' { 'Yellow' }
+            'docker-unavailable' { 'Yellow' }
+            default { 'Red' }
+        }
 
-Write-Host 'Workstation MCP profile doctor:' -ForegroundColor Cyan
-foreach ($entry in $results) {
-    $color = switch ($entry.status) {
-        'healthy' { 'Green' }
-        'missing' { 'Yellow' }
-        'docker-unavailable' { 'Yellow' }
-        default { 'Red' }
+        Write-Host ("- {0}/{1}: {2} ({3})" -f $entry.client, $entry.profile, $entry.status, $entry.description) -ForegroundColor $color
     }
-
-    Write-Host ("- {0}/{1}: {2} ({3})" -f $entry.client, $entry.profile, $entry.status, $entry.description) -ForegroundColor $color
 }
 
-$errors = @($results | Where-Object { $_.status -eq 'error' }).Count
-if ($errors -gt 0) {
+if ($unhealthyProfiles -gt 0) {
     exit 1
 }
 
