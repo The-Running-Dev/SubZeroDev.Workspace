@@ -1,0 +1,131 @@
+name: ai-cluster
+
+services:
+  gateway:
+    image: ghcr.io/berriai/litellm:main-stable
+    command:
+      - --config
+      - /app/config/litellm.yaml
+      - --port
+      - "4000"
+      - --num_workers
+      - "1"
+    env_file:
+      - .env
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Set LITELLM_MASTER_KEY in ai-cluster/.env}
+      LOCAL_CODING_BASE_URL: ${LOCAL_CODING_BASE_URL:-http://host.docker.internal:8081/v1}
+      LOCAL_EMBEDDINGS_BASE_URL: ${LOCAL_EMBEDDINGS_BASE_URL:-http://host.docker.internal:8082/v1}
+      LOCAL_INFERENCE_API_KEY: ${LOCAL_INFERENCE_API_KEY:?Set LOCAL_INFERENCE_API_KEY in ai-cluster/.env}
+    ports:
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - ./config/litellm.yaml:/app/config/litellm.yaml:ro
+      - litellm-data:/app/.cache/litellm
+    networks:
+      - ai-cluster-net
+    depends_on:
+      mock-coding:
+        condition: service_healthy
+      mock-embeddings:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health', timeout=5)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    profiles:
+      - headless
+      - ui
+      - cloud
+
+  mock-coding:
+    image: mendhak/http-https-echo:31
+    environment:
+      HTTP_PORT: "8081"
+    networks:
+      - ai-cluster-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8081/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    profiles:
+      - headless
+      - ui
+      - cloud
+
+  mock-embeddings:
+    image: mendhak/http-https-echo:31
+    environment:
+      HTTP_PORT: "8082"
+    networks:
+      - ai-cluster-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8082/"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    profiles:
+      - headless
+      - ui
+      - cloud
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.6.6
+    environment:
+      WEBUI_AUTH: "False"
+      OPENAI_API_BASE_URL: http://gateway:4000/v1
+      OPENAI_API_KEY: ${LITELLM_MASTER_KEY}
+    ports:
+      - "127.0.0.1:3001:8080"
+    volumes:
+      - webui-data:/app/backend/data
+    networks:
+      - ai-cluster-net
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    restart: unless-stopped
+    profiles:
+      - ui
+
+  cloud-placeholder:
+    image: curlimages/curl:8.9.1
+    command: ["sh", "-c", "echo cloud profile enabled && sleep infinity"]
+    networks:
+      - ai-cluster-net
+    restart: unless-stopped
+    profiles:
+      - cloud
+
+  intel-sycl-linux-placeholder:
+    image: ubuntu:24.04
+    command: ["bash", "-lc", "echo intel-sycl-linux profile placeholder; sleep infinity"]
+    devices:
+      - /dev/dri:/dev/dri
+    networks:
+      - ai-cluster-net
+    restart: unless-stopped
+    profiles:
+      - intel-sycl-linux
+
+networks:
+  ai-cluster-net:
+    name: ai-cluster-net
+
+volumes:
+  litellm-data:
+  webui-data:
