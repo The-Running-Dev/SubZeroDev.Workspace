@@ -11,6 +11,18 @@ model_list:
       api_base: os.environ/LOCAL_CODING_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 
+  - model_name: vision
+    litellm_params:
+      model: openai/local-coding
+      api_base: os.environ/LOCAL_CODING_BASE_URL
+      api_key: os.environ/LOCAL_INFERENCE_API_KEY
+
+  - model_name: multimodal
+    litellm_params:
+      model: openai/local-coding
+      api_base: os.environ/LOCAL_CODING_BASE_URL
+      api_key: os.environ/LOCAL_INFERENCE_API_KEY
+
   - model_name: embeddings
     litellm_params:
       model: openai/local-embeddings

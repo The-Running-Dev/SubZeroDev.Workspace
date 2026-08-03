@@ -117,6 +117,13 @@ try {
     $models = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/models" -Headers $authHeader -Method Get
     if (-not $models.data) { throw '/v1/models returned no model data.' }
 
+    $modelIds = @($models.data | ForEach-Object { [string]$_.id })
+    foreach ($requiredModel in @('coding', 'general', 'vision', 'multimodal', 'embeddings')) {
+        if ($modelIds -notcontains $requiredModel) {
+            throw "Expected model list to include alias '$requiredModel'."
+        }
+    }
+
     try {
         $null = Invoke-WebRequest -Uri "http://127.0.0.1:$GatewayPort/v1/models" -UseBasicParsing -Method Get -TimeoutSec 5
         throw 'Unauthenticated /v1/models request unexpectedly succeeded.'
@@ -135,6 +142,27 @@ try {
     $chat = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/chat/completions" -Headers $authHeader -Method Post -ContentType 'application/json' -Body $chatBody
     if (-not $chat.choices -or -not $chat.choices[0].message.content) {
         throw 'Chat completion response did not include assistant content.'
+    }
+
+    $multimodalBody = @{
+        model = 'vision'
+        messages = @(
+            @{
+                role = 'user'
+                content = @(
+                    @{ type = 'text'; text = 'describe this image' },
+                    @{ type = 'image_url'; image_url = @{ url = 'https://example.invalid/image.png' } }
+                )
+            }
+        )
+    } | ConvertTo-Json -Depth 8
+
+    $multimodal = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/chat/completions" -Headers $authHeader -Method Post -ContentType 'application/json' -Body $multimodalBody
+    if (-not $multimodal.choices -or -not $multimodal.choices[0].message.content) {
+        throw 'Multimodal request did not return assistant content.'
+    }
+    if ($multimodal.choices[0].message.content -notmatch 'image_url') {
+        throw 'Multimodal request did not preserve multimodal-shaped content through the gateway.'
     }
 
     $streamBody = @{

@@ -139,6 +139,29 @@ Security and operations notes:
 - Deletion behavior: `docker compose down --volumes --remove-orphans` removes transient containers/volumes for compose-run scenarios; local state/log directories can be removed manually when desired.
 - MCP boundary: MCP services remain a separate authenticated tool plane from gateway bearer-key authentication and are not delegated by gateway model routing.
 
+### Vision and Multimodal Routing (T11 / Issue #24)
+
+The MVP now exposes additional capability aliases for provider-neutral multimodal routing:
+
+- `vision`
+- `multimodal`
+
+Current capability matrix:
+
+| Alias | Default backend | Notes |
+| --- | --- | --- |
+| `coding` | local coding backend | Text-first code/chat generation |
+| `general` | local coding backend | General text generation |
+| `vision` | local coding backend | Multimodal-shaped chat requests are routed here for deterministic MVP validation |
+| `multimodal` | local coding backend | Same backend as `vision`; reserved for future provider-specific multimodal swaps |
+| `embeddings` | local embeddings backend | Separate vector route |
+
+Mismatch handling:
+
+- Unsupported multimodal capabilities must fail explicitly instead of falling back silently.
+- If a future provider advertises a narrower capability set, the gateway config or diagnostics must make the mismatch visible.
+- The gateway contract test now includes a multimodal-shaped chat request to prove the route remains stable without client changes.
+
 ### Automated Validation and CI (T9)
 
 GitHub Actions workflow:
@@ -184,4 +207,4 @@ This covers prerequisites, model acquisition and hash expectations, startup/smok
 
 ## Next Steps
 
-- T10 complete for MVP scope; next work continues as follow-up issues (vision, memory/RAG, MCP expansions, Open WebUI hardening, monitoring, orchestration).
+- Follow-up issues continue from the MVP baseline, starting with vision/multimodal routing, memory/RAG retention, MCP profile growth, Open WebUI hardening, monitoring, and orchestration.
