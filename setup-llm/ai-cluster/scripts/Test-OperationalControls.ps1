@@ -18,10 +18,10 @@ function Assert-PathExists {
     )
 
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "$Label is missing: $Path"
+        throw ('{0} is missing: {1}' -f $Label, $Path)
     }
 
-    Write-Host ("[OK] {0}: {1}" -f $Label, $Path) -ForegroundColor Green
+    Write-Host ('[OK] ' + $Label + ' / ' + $Path) -ForegroundColor Green
 }
 
 function Assert-Match {
@@ -38,7 +38,7 @@ function Assert-Match {
     Write-Host "[OK] $Label" -ForegroundColor Green
 }
 
-function Get-EnvMap {
+function Get-EnvironmentMap {
     param([Parameter(Mandatory)][string]$Path)
 
     $result = @{}
@@ -121,10 +121,17 @@ Assert-PathExists -Path $StartScript -Label 'start script'
 
 $composeText = Get-Content -LiteralPath $ComposeFile -Raw
 $gitignoreText = Get-Content -LiteralPath $GitIgnoreFile -Raw
-$envExampleMap = Get-EnvMap -Path $EnvExampleFile
+$envExampleMap = Get-EnvironmentMap -Path $EnvExampleFile
 $startScriptText = Get-Content -LiteralPath $StartScript -Raw
 
 Assert-Match -Text $composeText -Pattern 'gateway:\s*[\s\S]*ports:\s*[\s\S]*127\.0\.0\.1:\$\{GATEWAY_BIND_PORT:-4000\}:4000' -Label 'gateway bound to loopback host address'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*ports:\s*[\s\S]*127\.0\.0\.1:3001:8080' -Label 'Open WebUI bound to loopback host address'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*WEBUI_AUTH:\s*\$\{WEBUI_AUTH:-true\}' -Label 'Open WebUI auth enabled by default'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*WEBUI_SESSION_COOKIE_SAME_SITE:\s*\$\{WEBUI_SESSION_COOKIE_SAME_SITE:-strict\}' -Label 'Open WebUI session cookies use strict same-site by default'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*WEBUI_AUTH_COOKIE_SAME_SITE:\s*\$\{WEBUI_AUTH_COOKIE_SAME_SITE:-strict\}' -Label 'Open WebUI auth cookies use strict same-site by default'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*WEBUI_SECRET_KEY:\s*\$\{WEBUI_SECRET_KEY:\?Set WEBUI_SECRET_KEY in ai-cluster/\.env\}' -Label 'Open WebUI secret key required from environment'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*DEFAULT_USER_ROLE:\s*\$\{DEFAULT_USER_ROLE:-pending\}' -Label 'Open WebUI default user role is pending'
+Assert-Match -Text $composeText -Pattern 'open-webui:\s*[\s\S]*ENABLE_PERSISTENT_CONFIG:\s*\$\{ENABLE_PERSISTENT_CONFIG:-false\}' -Label 'Open WebUI persistent config is disabled by default'
 Assert-Match -Text $composeText -Pattern 'depends_on:\s*[\s\S]*coding-backend:\s*[\s\S]*condition:\s*service_healthy' -Label 'gateway depends on healthy coding backend'
 Assert-Match -Text $composeText -Pattern 'depends_on:\s*[\s\S]*embeddings-backend:\s*[\s\S]*condition:\s*service_healthy' -Label 'gateway depends on healthy embeddings backend'
 Assert-Match -Text $composeText -Pattern 'gateway:\s*[\s\S]*healthcheck:' -Label 'gateway has healthcheck'
@@ -139,6 +146,7 @@ Assert-Match -Text $gitignoreText -Pattern '(?m)^logs/\r?$' -Label 'logs directo
 
 Assert-PlaceholderValue -EnvMap $envExampleMap -Key 'LITELLM_MASTER_KEY'
 Assert-PlaceholderValue -EnvMap $envExampleMap -Key 'LOCAL_INFERENCE_API_KEY'
+Assert-PlaceholderValue -EnvMap $envExampleMap -Key 'WEBUI_SECRET_KEY'
 
 $templateConfig = Get-Content -LiteralPath $LocalInferenceTemplate -Raw | ConvertFrom-Json
 if (-not $templateConfig.providers -or $templateConfig.providers.Count -lt 2) {
@@ -161,7 +169,7 @@ foreach ($provider in $templateConfig.providers) {
 }
 
 if (Test-Path -LiteralPath $EnvFile -PathType Leaf) {
-    $envMap = Get-EnvMap -Path $EnvFile
+    $envMap = Get-EnvironmentMap -Path $EnvFile
     Assert-SecretValue -EnvMap $envMap -Key 'LITELLM_MASTER_KEY'
     Assert-SecretValue -EnvMap $envMap -Key 'LOCAL_INFERENCE_API_KEY'
 }

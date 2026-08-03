@@ -119,6 +119,8 @@ Remove-Item setup-llm/ai-cluster/logs -Recurse -Force -ErrorAction SilentlyConti
 - Gateway bearer-key auth is separate from MCP authentication.
 - MCP tool plane remains independently authenticated and least-privileged.
 - Default profile avoids silent fallback to billable providers.
+- Open WebUI runs with auth enabled, strict cookies, a required secret key, and persistent config disabled by default.
+- The downgrade path for local-only experimentation is to set `WEBUI_AUTH=false` and restart the service; keep the port bound to `127.0.0.1` either way.
 
 ## Follow-up Backlog Seeds
 

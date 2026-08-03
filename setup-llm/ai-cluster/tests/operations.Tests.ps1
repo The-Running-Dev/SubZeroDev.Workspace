@@ -26,5 +26,6 @@ Describe 'Operational controls and diagnostics scripts' {
         $text | Should -Match 'placeholder'
         $text | Should -Match 'LITELLM_MASTER_KEY'
         $text | Should -Match 'LOCAL_INFERENCE_API_KEY'
+        $text | Should -Match 'WEBUI_SECRET_KEY'
     }
 }

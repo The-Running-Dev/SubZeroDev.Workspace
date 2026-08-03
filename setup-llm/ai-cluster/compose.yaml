@@ -183,7 +183,14 @@ services:
   open-webui:
     image: ghcr.io/open-webui/open-webui:v0.6.6
     environment:
-      WEBUI_AUTH: "False"
+      WEBUI_AUTH: ${WEBUI_AUTH:-true}
+      WEBUI_SESSION_COOKIE_SAME_SITE: ${WEBUI_SESSION_COOKIE_SAME_SITE:-strict}
+      WEBUI_SESSION_COOKIE_SECURE: ${WEBUI_SESSION_COOKIE_SECURE:-false}
+      WEBUI_AUTH_COOKIE_SAME_SITE: ${WEBUI_AUTH_COOKIE_SAME_SITE:-strict}
+      WEBUI_AUTH_COOKIE_SECURE: ${WEBUI_AUTH_COOKIE_SECURE:-false}
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?Set WEBUI_SECRET_KEY in ai-cluster/.env}
+      DEFAULT_USER_ROLE: ${DEFAULT_USER_ROLE:-pending}
+      ENABLE_PERSISTENT_CONFIG: ${ENABLE_PERSISTENT_CONFIG:-false}
       OPENAI_API_BASE_URL: http://gateway:4000/v1
       OPENAI_API_KEY: ${LITELLM_MASTER_KEY}
     ports:
