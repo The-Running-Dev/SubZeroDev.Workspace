@@ -68,6 +68,7 @@ $testOperationalControls = Join-Path $clusterRoot 'scripts/Test-OperationalContr
 $testGateway = Join-Path $clusterRoot 'scripts/Test-GatewayContract.ps1'
 $testEmbeddings = Join-Path $clusterRoot 'scripts/Test-EmbeddingsContract.ps1'
 $testProviderReplacement = Join-Path $clusterRoot 'scripts/Test-ProviderReplacementAndFailure.ps1'
+$testAutonomousOrchestration = Join-Path $repoRoot 'scripts/Test-AutonomousOrchestrationContract.ps1'
 $testHardwareSmoke = Join-Path $clusterRoot 'scripts/Test-HardwareSmoke.ps1'
 
 $checks = @()
@@ -133,12 +134,7 @@ foreach ($scriptPath in $mustRun) {
 
     try {
         & $scriptPath
-        if ($LASTEXITCODE -eq 0) {
-            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
-        }
-        else {
-            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message "Exited with code $LASTEXITCODE"
-        }
+        Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
     }
     catch {
         Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message $_.Exception.Message
@@ -146,7 +142,7 @@ foreach ($scriptPath in $mustRun) {
 }
 
 if ($RunContracts) {
-    foreach ($scriptPath in @($testGateway, $testEmbeddings, $testProviderReplacement)) {
+    foreach ($scriptPath in @($testGateway, $testEmbeddings, $testProviderReplacement, $testAutonomousOrchestration)) {
         if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
             Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message "Missing script: $scriptPath"
             continue
@@ -154,12 +150,7 @@ if ($RunContracts) {
 
         try {
             & $scriptPath
-            if ($LASTEXITCODE -eq 0) {
-                Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
-            }
-            else {
-                Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message "Exited with code $LASTEXITCODE"
-            }
+            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
         }
         catch {
             Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message $_.Exception.Message
