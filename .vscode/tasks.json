@@ -99,6 +99,29 @@
       "problemMatcher": []
     },
     {
+      "label": "MCP: Register Memory (Codex)",
+      "type": "shell",
+      "command": "codex",
+      "args": [
+        "mcp",
+        "add",
+        "memory",
+        "--",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "MCP: Register Docker (Codex)",
       "type": "shell",
       "command": "codex",
@@ -136,6 +159,31 @@
         "npx",
         "-y",
         "@upstash/context7-mcp@latest"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: Register Memory (Claude Code)",
+      "type": "shell",
+      "command": "claude",
+      "args": [
+        "mcp",
+        "add",
+        "--scope",
+        "user",
+        "memory",
+        "--",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -201,8 +249,10 @@
       "dependsOn": [
         "Workstation Setup",
         "MCP: Register Context7 (Codex)",
+        "MCP: Register Memory (Codex)",
         "MCP: Register Docker (Codex)",
         "MCP: Register Context7 (Claude Code)",
+        "MCP: Register Memory (Claude Code)",
         "MCP: Register Docker (Claude Code)"
       ],
       "problemMatcher": []

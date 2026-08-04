@@ -37,6 +37,7 @@ $profiles = @(
     [ordered]@{ name = 'playwright'; requiresDocker = $false; optional = $false; description = 'Playwright MCP server' }
     [ordered]@{ name = 'filesystem'; requiresDocker = $false; optional = $false; description = 'Filesystem MCP server' }
     [ordered]@{ name = 'context7'; requiresDocker = $false; optional = $true; description = 'Context7 MCP server' }
+    [ordered]@{ name = 'memory'; requiresDocker = $false; optional = $true; description = 'Memory MCP server (shared multi-agent memory)' }
     [ordered]@{ name = 'docker'; requiresDocker = $true; optional = $true; description = 'Docker MCP gateway' }
 )
 

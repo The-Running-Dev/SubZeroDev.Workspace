@@ -8,6 +8,7 @@ param(
     [switch]$SkipPlaywright,
     [switch]$SkipGraphify,
     [switch]$IncludeContext7,
+    [switch]$IncludeMemoryMcp,
     [switch]$IncludeDockerMcp,
 
     [switch]$IncludeFilesystem,
@@ -62,6 +63,10 @@ if (-not $SkipPlaywright) {
 
 if ($IncludeContext7) {
     Invoke-SetupScript -ScriptName 'install-context7-mcp.ps1' -Parameters @{ Client = $Client; WhatIf = $WhatIfPreference }
+}
+
+if ($IncludeMemoryMcp) {
+    Invoke-SetupScript -ScriptName 'install-memory-mcp.ps1' -Parameters @{ Client = $Client; WhatIf = $WhatIfPreference }
 }
 
 if ($IncludeDockerMcp) {
