@@ -2,7 +2,7 @@
 param(
     [ValidateSet('Codex', 'ClaudeCode', 'Both')][string]$Client = 'Both',
     [switch]$SkipClaudeMem, [switch]$SkipGitHub, [switch]$SkipPlaywright, [switch]$SkipGraphify,
-    [switch]$IncludeContext7, [switch]$IncludeDockerMcp,
+    [switch]$IncludeContext7, [switch]$IncludeMemoryMcp, [switch]$IncludeDockerMcp,
     [switch]$IncludeFilesystem, [string[]]$FilesystemPath = @(),
     [switch]$IncludeDatabase, [string]$DatabaseName, [string]$DatabaseCommand,
     [string[]]$DatabaseArgument = @()

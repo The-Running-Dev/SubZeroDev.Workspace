@@ -139,11 +139,14 @@ Skip optional components when they are not required:
 ```powershell
 ./setup-llm/scripts/setup.ps1 `
   -Client Both `
+  -IncludeMemoryMcp `
   -SkipGraphify `
   -SkipClaudeMem `
   -SkipGitHub `
   -SkipPlaywright
 ```
+
+Use `-IncludeMemoryMcp` only when you need shared memory across multiple tools or agents through MCP. Leave it off for normal single-tool workflows.
 
 ### Restrict Filesystem MCP
 
@@ -214,6 +217,7 @@ The shared setup orchestrator calls focused installers:
 - `setup-llm/scripts/workstation/install-github-mcp.ps1`
 - `setup-llm/scripts/workstation/install-filesystem-mcp.ps1`
 - `setup-llm/scripts/workstation/install-playwright-mcp.ps1`
+- `setup-llm/scripts/workstation/install-memory-mcp.ps1`
 - `setup-llm/scripts/workstation/install-database-mcp.ps1`
 
 Most component scripts preserve existing registrations. The GitHub installer intentionally replaces the existing `github` registration so it points to the Compose-managed service.
