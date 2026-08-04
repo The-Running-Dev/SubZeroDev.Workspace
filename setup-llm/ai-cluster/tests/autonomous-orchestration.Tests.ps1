@@ -24,4 +24,13 @@ Describe 'Autonomous orchestration contract' {
 
         $doctorText | Should -Match 'Test-AutonomousOrchestrationContract'
     }
+
+    It 'treats a completed PowerShell validator as successful without using a native exit code' {
+        $doctorText = Get-Content -LiteralPath (Join-Path $PSScriptRoot '../../scripts/doctor-ai-cluster.ps1') -Raw
+        $contractBlock = [regex]::Match($doctorText, '(?s)if \(\$RunContracts\) \{.*?\n\}\nelse \{').Value
+
+        $contractBlock | Should -Match '\$testAutonomousOrchestration'
+        $contractBlock | Should -Match '& \$scriptPath\s+Add-Check.*?Status ''ok'''
+        $contractBlock | Should -Not -Match '\$LASTEXITCODE'
+    }
 }

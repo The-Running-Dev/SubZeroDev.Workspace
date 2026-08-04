@@ -134,12 +134,7 @@ foreach ($scriptPath in $mustRun) {
 
     try {
         & $scriptPath
-        if ($LASTEXITCODE -eq 0) {
-            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
-        }
-        else {
-            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message "Exited with code $LASTEXITCODE"
-        }
+        Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
     }
     catch {
         Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message $_.Exception.Message
@@ -155,12 +150,7 @@ if ($RunContracts) {
 
         try {
             & $scriptPath
-            if ($LASTEXITCODE -eq 0) {
-                Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
-            }
-            else {
-                Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message "Exited with code $LASTEXITCODE"
-            }
+            Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'ok' -Message 'Pass'
         }
         catch {
             Add-Check -Name ([IO.Path]::GetFileNameWithoutExtension($scriptPath)) -Status 'error' -Message $_.Exception.Message
