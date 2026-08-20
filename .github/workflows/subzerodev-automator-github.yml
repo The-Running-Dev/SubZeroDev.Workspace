@@ -43,20 +43,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # verification: true
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
+      # verification: true
       - name: Validate and build
         run: npm run check
 
+      # verification: true
       - name: Smoke-test CLI
         run: node dist/cli.js --help | grep -q 'subzerodev-github <command>'
 
+      # verification: true
       - name: Smoke-test installed binary
         run: |
           npm link
           subzerodev-github --help | grep -q 'subzerodev-github <command>'
 
+      # verification: true
       - name: Test PowerShell runner
         shell: pwsh
         run: ./run.ps1 -Mode Local -SkipInstall -CliArgument '--help'
@@ -68,6 +73,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      # verification: true
       - name: Build image
         uses: docker/build-push-action@v7
         with:
