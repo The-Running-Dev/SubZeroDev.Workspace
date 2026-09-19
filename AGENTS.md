@@ -1,5 +1,8 @@
 # Agent contract
 
+**Read [`AGENTS.shared.md`](C:/Users/Ben/.agent-kit/AGENTS.shared.md) completely before this file.** It holds the rules every repository using the kit shares.
+
+
 ## Project identity
 
 This repository — **SubZeroDev.Workspace** — owns reusable PowerShell tooling that prepares AI-assisted development workstations (Windows, macOS, Ubuntu/Debian) and scaffolds new projects for Codex and Claude Code. It also owns the documentation pipeline that publishes that tooling: source pages under `setup-llm/docs/`, synchronized into the pinned `docs-template` Docusaurus submodule and built into a container published to `ghcr.io/the-running-dev/subzerodev-workspace`. An opt-in Local AI Compute Cluster (`setup-llm/scripts/setup-ai-cluster.ps1`, `setup-llm/scripts/doctor-ai-cluster.ps1`) lives here too.
