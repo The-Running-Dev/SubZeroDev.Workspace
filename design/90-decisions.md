@@ -7,6 +7,11 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 ---
 
+### 2026-10-06 — Remove the per-repository SessionEnd cost hook
+Context: `.claude/settings.json` ran `pwsh … tools/Measure-Session.ps1` on `SessionEnd`, but that script no longer exists — it left this repository when the kit moved to a single home install, and the kit later ported it to Node as `measure-session.ts` — so the hook failed at the end of every session. The kit's setup installs one global `SessionEnd` hook in `~/.claude/settings.json` that logs every project.
+Chosen: remove this repository's `hooks.SessionEnd` entry, in the AgentKit sync to `v2026.10.06.1`. Nothing else in `settings.json` changes.
+Rejected: point it at `measure-session.ts` — the global hook already runs that script, so every session would be logged twice; leave it — it keeps failing at every session end.
+
 ### 2026-08-23 — Re-install: sync cores/tools to kit HEAD `9911712`, catch `AGENTS.md` up
 Context: a re-install from `SubZeroDev.AgentKit` (kit HEAD `9911712619cd3e6522d015158edf702371a5971c`), reconciling this repository, which was last synced at `syncedCommit` `80a19bdd25d715248ba40fdad93eddd2e2538984` (2026-08-20, PR #36, already merged to `main`). `.claude/kit.json`'s `commit` field was still `6bdd8dcc` — the 2026-08-13 install's own record — never advanced to `80a19bd`, evidently missed by that pass.
 Chosen:
