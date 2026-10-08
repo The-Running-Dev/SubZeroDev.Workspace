@@ -5,7 +5,25 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 ## Open
 <A staging area, not a home. Things noticed mid-slice that were deliberately not acted on. `/track` turns each into a GitHub issue and removes it from here. An item that is a *decision* rather than a *todo* belongs below as an entry, not in an issue.>
 
+- Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
+
 ---
+
+### 2026-10-08 — Serve Gemma 4 through Ollama behind the existing gateway
+Context: the Local Inference Infrastructure plan targets Gemma 4 on Ollama, starting on an Intel Arc B580 workstation. ADR 0001 (`setup-llm/docs/decisions/0001-ai-cluster-mvp-architecture.md`) chose host-native llama.cpp SYCL behind a loopback LiteLLM gateway. Ollama's OpenAI-compatible endpoint routes on the model id, which llama-server ignores, and the versioned routes hard-coded llama.cpp ids.
+Chosen:
+- Ollama is an additional host-native backend, not a replacement. llama.cpp SYCL stays supported.
+- Every local route reads its model id from `LOCAL_*_MODEL`. The defaults keep the llama.cpp ids, so existing `.env` files behave exactly as before.
+- One new alias, `fast`, with its own base URL. The existing alias names are unchanged.
+- No `reasoning` or `large` alias yet: `gemma4:31b` would need CPU offload on 12 GB and has not been measured.
+- The Phase 1 proof is `Test-OllamaRuntime.ps1`. `Test-HardwareSmoke.ps1` delegates to it. It never pulls a model, refuses non-loopback URLs and cloud models, and stores no prompt or response text.
+- Ollama itself is a host install the operator performs. No package dependency is added to this repository.
+Rejected:
+- Replacing llama.cpp with Ollama outright: it would discard the SYCL path ADR 0001 chose, while Ollama on Arc is still unmeasured here.
+- A separate set of Ollama-specific aliases (`ollama-coding`, …): clients would have to name a runtime, which breaks the alias contract.
+- Clients calling Ollama directly: Ollama has no authentication, and the gateway's no-silent-fallback and redaction controls would be bypassed.
+- Pulling models from the check script: downloads stay explicit operator actions, as for llama.cpp models.
+Reversibility: cheap. Unsetting the `LOCAL_*_MODEL` overrides restores the llama.cpp routes, and `fast` is additive.
 
 ### 2026-10-06 — Remove the per-repository SessionEnd cost hook
 Context: `.claude/settings.json` ran `pwsh … tools/Measure-Session.ps1` on `SessionEnd`, but that script no longer exists — it left this repository when the kit moved to a single home install, and the kit later ported it to Node as `measure-session.ts` — so the hook failed at the end of every session. The kit's setup installs one global `SessionEnd` hook in `~/.claude/settings.json` that logs every project.

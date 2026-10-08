@@ -155,6 +155,7 @@ Current capability matrix:
 | `vision` | local coding backend | Multimodal-shaped chat requests are routed here for deterministic MVP validation |
 | `multimodal` | local coding backend | Same backend as `vision`; reserved for future provider-specific multimodal swaps |
 | `embeddings` | local embeddings backend | Separate vector route |
+| `fast` | local fast backend (`LOCAL_FAST_BASE_URL`) | Smaller model for short requests; defaults to the coding backend |
 
 Mismatch handling:
 
@@ -182,7 +183,7 @@ Hardware-only smoke validation is represented by:
 
 - `setup-llm/ai-cluster/scripts/Test-HardwareSmoke.ps1`
 
-In standard CI it exits with an explicit `[SKIP]` reason. Set `AI_CLUSTER_RUN_HARDWARE_SMOKE=1` (or run with `-Force` locally) to enable it.
+In standard CI it exits with an explicit `[SKIP]` reason. Set `AI_CLUSTER_RUN_HARDWARE_SMOKE=1` (or run with `-Force` locally) to enable it. When enabled, it runs the Ollama runtime check (`Test-OllamaRuntime.ps1`), and fails if no local Ollama is reachable. The llama.cpp SYCL path still has no hardware probe. See [Local Inference with Ollama and Gemma 4](local-inference-ollama-gemma4.md).
 
 ### Setup Integration and Operator Workflow (T10)
 

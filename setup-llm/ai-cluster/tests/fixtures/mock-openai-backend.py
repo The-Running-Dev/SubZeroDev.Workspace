@@ -99,7 +99,7 @@ class Handler(BaseHTTPRequestHandler):
                     {
                         "index": 0,
                         "finish_reason": "stop",
-                        "message": {"role": "assistant", "content": f"mock[{self.model_name}] response: {prompt_text}"},
+                        "message": {"role": "assistant", "content": f"mock[{self.model_name}] requested={body.get('model', '')} response: {prompt_text}"},
                     }
                 ],
                 "usage": {"prompt_tokens": 5, "completion_tokens": 5, "total_tokens": 10},

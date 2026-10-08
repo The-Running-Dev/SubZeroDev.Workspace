@@ -19,7 +19,7 @@ pwsh -File setup-llm/scripts/doctor-ai-cluster.ps1
 
 - Docker Desktop (Windows/macOS) or Docker Engine (Linux)
 - PowerShell
-- Host-native `llama-server` binaries and model files for local SYCL workflows
+- Host-native `llama-server` binaries and model files for local SYCL workflows, or Ollama with pulled models ([Local Inference with Ollama and Gemma 4](../architecture/local-inference-ollama-gemma4.md))
 - Runtime keys in `setup-llm/ai-cluster/.env`
 
 ## Model Acquisition and Integrity
@@ -69,6 +69,12 @@ pwsh -File setup-llm/ai-cluster/scripts/Test-EmbeddingsContract.ps1
 pwsh -File setup-llm/ai-cluster/scripts/Test-ProviderReplacementAndFailure.ps1
 ```
 
+1. On the GPU host, if a route points at Ollama, run the runtime check (it skips in CI).
+
+```powershell
+pwsh -File setup-llm/ai-cluster/scripts/Test-OllamaRuntime.ps1 -Force -Model gemma4:12b
+```
+
 1. Run doctor summary.
 
 ```powershell
@@ -112,6 +118,8 @@ Remove-Item setup-llm/ai-cluster/logs -Recurse -Force -ErrorAction SilentlyConti
 - Partial offload instability: adjust `default_gpu_layers` and context settings in local inference config.
 - Gateway connectivity failure: run `Test-GatewayContract.ps1` and `Get-AiClusterDiagnostics.ps1 -ProbeGateway -AsJson`.
 - Model hash mismatch: update local model artifact or expected hash in local config/manifest.
+- Ollama model only partly in GPU memory (`placement` warning): use a smaller model or a smaller `-ContextTokens`.
+- Ollama `loopback-binding` failure: `OLLAMA_HOST` is set to a non-loopback address; unset it or set it to `127.0.0.1`.
 - Windows vs Linux profile caveat: host-native Windows SYCL is the verified path in this milestone; Linux `/dev/dri` container profile remains optional and environment-dependent.
 
 ## Security Boundary Notes
