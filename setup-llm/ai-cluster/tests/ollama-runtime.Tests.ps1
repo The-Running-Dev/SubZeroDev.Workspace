@@ -12,7 +12,10 @@ BeforeAll {
         $port = $listener.LocalEndpoint.Port
         $listener.Stop()
 
-        $process = Start-Process -FilePath $script:python -ArgumentList (@($script:mockScript, '--port', $port) + $ExtraArgs) -PassThru -WindowStyle Hidden
+        $startArgs = @{ FilePath = $script:python; ArgumentList = (@($script:mockScript, '--port', $port) + $ExtraArgs); PassThru = $true }
+        # -WindowStyle is Windows-only; pwsh on Linux rejects it.
+        if ($IsWindows) { $startArgs.WindowStyle = 'Hidden' }
+        $process = Start-Process @startArgs
         $deadline = (Get-Date).AddSeconds(15)
         while ((Get-Date) -lt $deadline) {
             try {
@@ -135,7 +138,7 @@ Describe 'Test-OllamaRuntime.ps1' {
 
     Context 'against a mock runtime fully on GPU' {
         BeforeAll { $script:mock = Start-MockOllama }
-        AfterAll { Stop-Process -Id $script:mock.Process.Id -Force -ErrorAction SilentlyContinue }
+        AfterAll { if ($script:mock) { Stop-Process -Id $script:mock.Process.Id -Force -ErrorAction SilentlyContinue } }
 
         It 'passes and records measured metrics without prompt or response text' {
             $run = Invoke-RuntimeCheck -BaseUrl $script:mock.BaseUrl
@@ -162,7 +165,7 @@ Describe 'Test-OllamaRuntime.ps1' {
 
     Context 'against a mock runtime with cloud models and CPU offload' {
         BeforeAll { $script:mock = Start-MockOllama -ExtraArgs @('--vram-fraction', '0.5', '--include-cloud') }
-        AfterAll { Stop-Process -Id $script:mock.Process.Id -Force -ErrorAction SilentlyContinue }
+        AfterAll { if ($script:mock) { Stop-Process -Id $script:mock.Process.Id -Force -ErrorAction SilentlyContinue } }
 
         It 'refuses to benchmark a cloud model' {
             $run = Invoke-RuntimeCheck -BaseUrl $script:mock.BaseUrl -Model 'gemma4:31b-cloud' -Runs 1
