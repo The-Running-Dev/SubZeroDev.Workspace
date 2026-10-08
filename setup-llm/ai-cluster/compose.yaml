@@ -16,6 +16,10 @@ services:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Set LITELLM_MASTER_KEY in ai-cluster/.env}
       LOCAL_CODING_BASE_URL: ${LOCAL_CODING_BASE_URL:-http://host.docker.internal:8081/v1}
       LOCAL_EMBEDDINGS_BASE_URL: ${LOCAL_EMBEDDINGS_BASE_URL:-http://host.docker.internal:8082/v1}
+      LOCAL_CODING_MODEL: ${LOCAL_CODING_MODEL:-openai/local-coding}
+      LOCAL_FAST_MODEL: ${LOCAL_FAST_MODEL:-openai/local-coding}
+      LOCAL_FAST_BASE_URL: ${LOCAL_FAST_BASE_URL:-http://host.docker.internal:8081/v1}
+      LOCAL_EMBEDDINGS_MODEL: ${LOCAL_EMBEDDINGS_MODEL:-openai/local-embeddings}
       LOCAL_INFERENCE_API_KEY: ${LOCAL_INFERENCE_API_KEY:?Set LOCAL_INFERENCE_API_KEY in ai-cluster/.env}
     ports:
       - "127.0.0.1:${GATEWAY_BIND_PORT:-4000}:4000"

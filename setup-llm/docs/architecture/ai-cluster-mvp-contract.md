@@ -33,6 +33,7 @@ Required aliases:
 - `vision`
 - `multimodal`
 - `embeddings`
+- `fast`
 
 Contract rules:
 
@@ -41,6 +42,8 @@ Contract rules:
 - Fallback to cloud providers must be explicit and observable.
 - `vision` and `multimodal` are capability aliases, not a promise of a distinct backend implementation.
 - Unsupported multimodal capability must fail explicitly or be remapped in configuration, never silently downgraded.
+- `fast` is a latency alias for short requests. It has its own backend URL so it can point at a smaller model than `coding`.
+- Each alias takes its backend model id from the environment (`LOCAL_*_MODEL`), so the same alias can be served by llama.cpp or by Ollama ([Local Inference with Ollama and Gemma 4](local-inference-ollama-gemma4.md)). Cloud-hosted model tags are never valid values.
 
 ## Error and fallback semantics
 

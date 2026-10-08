@@ -83,6 +83,8 @@ $envLines = @(
     "GATEWAY_BIND_PORT=$GatewayPort"
     'LOCAL_CODING_BASE_URL=http://coding-backend:8081/v1'
     'LOCAL_EMBEDDINGS_BASE_URL=http://embeddings-backend:8082/v1'
+    'LOCAL_FAST_BASE_URL=http://coding-backend:8081/v1'
+    'LOCAL_FAST_MODEL=openai/gemma4:e4b'
 )
 
 $envLines | Set-Content -LiteralPath $tempEnvFile -Encoding UTF8
@@ -120,7 +122,7 @@ try {
     if (-not $models.data) { throw '/v1/models returned no model data.' }
 
     $modelIds = @($models.data | ForEach-Object { [string]$_.id })
-    foreach ($requiredModel in @('coding', 'general', 'vision', 'multimodal', 'embeddings')) {
+    foreach ($requiredModel in @('coding', 'general', 'vision', 'multimodal', 'fast', 'embeddings')) {
         if ($modelIds -notcontains $requiredModel) {
             throw "Expected model list to include alias '$requiredModel'."
         }
@@ -144,6 +146,17 @@ try {
     $chat = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/chat/completions" -Headers $authHeader -Method Post -ContentType 'application/json' -Body $chatBody
     if (-not $chat.choices -or -not $chat.choices[0].message.content) {
         throw 'Chat completion response did not include assistant content.'
+    }
+
+    # The backend model id is environment-driven (LOCAL_FAST_MODEL); the mock echoes what it was asked for.
+    $fastBody = @{
+        model = 'fast'
+        messages = @(@{ role = 'user'; content = 'say hello' })
+    } | ConvertTo-Json -Depth 8
+
+    $fast = Invoke-RestMethod -Uri "http://127.0.0.1:$GatewayPort/v1/chat/completions" -Headers $authHeader -Method Post -ContentType 'application/json' -Body $fastBody
+    if ([string]$fast.choices[0].message.content -notmatch 'requested=gemma4:e4b') {
+        throw "Fast alias did not forward the environment-configured backend model id. Got: $($fast.choices[0].message.content)"
     }
 
     $multimodalBody = @{

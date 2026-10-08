@@ -1,31 +1,40 @@
+# Backend model ids are environment-driven so one alias set serves either runtime:
+# llama-server ignores the id (openai/local-coding), Ollama needs the tag (openai/gemma4:12b).
+# Defaults live in compose.yaml; see .env.example for the Ollama profile.
 model_list:
   - model_name: coding
     litellm_params:
-      model: openai/local-coding
+      model: os.environ/LOCAL_CODING_MODEL
       api_base: os.environ/LOCAL_CODING_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 
   - model_name: general
     litellm_params:
-      model: openai/local-coding
+      model: os.environ/LOCAL_CODING_MODEL
       api_base: os.environ/LOCAL_CODING_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 
   - model_name: vision
     litellm_params:
-      model: openai/local-coding
+      model: os.environ/LOCAL_CODING_MODEL
       api_base: os.environ/LOCAL_CODING_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 
   - model_name: multimodal
     litellm_params:
-      model: openai/local-coding
+      model: os.environ/LOCAL_CODING_MODEL
       api_base: os.environ/LOCAL_CODING_BASE_URL
+      api_key: os.environ/LOCAL_INFERENCE_API_KEY
+
+  - model_name: fast
+    litellm_params:
+      model: os.environ/LOCAL_FAST_MODEL
+      api_base: os.environ/LOCAL_FAST_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 
   - model_name: embeddings
     litellm_params:
-      model: openai/local-embeddings
+      model: os.environ/LOCAL_EMBEDDINGS_MODEL
       api_base: os.environ/LOCAL_EMBEDDINGS_BASE_URL
       api_key: os.environ/LOCAL_INFERENCE_API_KEY
 

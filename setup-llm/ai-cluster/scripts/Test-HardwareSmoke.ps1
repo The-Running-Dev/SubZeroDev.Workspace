@@ -1,5 +1,9 @@
 [CmdletBinding()]
 param(
+    [string]$BaseUrl,
+    [string]$Model,
+    [int]$Runs,
+    [int]$ContextTokens,
     [switch]$Force
 )
 
@@ -15,6 +19,11 @@ if (-not $Force -and $isCi -and $runFlag -ne '1') {
     exit 0
 }
 
-Write-Host '[INFO] Hardware smoke placeholder: run host-native SYCL checks and benchmark capture here.' -ForegroundColor Cyan
-Write-Host '[INFO] Current implementation is intentionally non-blocking until hardware runners are configured.' -ForegroundColor Cyan
-exit 0
+# The Ollama runtime check is the only hardware probe implemented; the llama.cpp
+# SYCL path still has none.
+$forward = @{}
+foreach ($name in 'BaseUrl', 'Model', 'Runs', 'ContextTokens') {
+    if ($PSBoundParameters.ContainsKey($name)) { $forward[$name] = $PSBoundParameters[$name] }
+}
+& (Join-Path $PSScriptRoot 'Test-OllamaRuntime.ps1') -Force @forward
+exit $LASTEXITCODE
