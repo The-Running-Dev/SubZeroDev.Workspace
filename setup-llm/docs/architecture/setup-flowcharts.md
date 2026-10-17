@@ -20,24 +20,15 @@ graph TD
     Phase1 -->|Already Done| P1B["Skip to Phase 2"]
     
     P1A --> P1Check{"Validation:<br/>MCP tools<br/>available?"}
-    P1Check -->|No| P1Fail["❌ Troubleshoot<br/>(see Section 8)"]
+    P1Check -->|No| P1Fail["❌ Troubleshoot<br/>(see Section 5)"]
     P1Check -->|Yes| P1Success["✓ Phase 1 Complete"]
     
     P1B --> P1Success
     P1Fail --> P1A
     
-    P1Success --> Phase2["📁 Phase 2:<br/>Project Creation"]
+    P1Success --> Phase2["📁 Phase 2:<br/>Project Creation<br/>(SubZeroDev.GitHub<br/>New-Project.ps1)"]
     
-    Phase2 --> P2A["Create directory<br/>Initialize Git"]
-    P2A --> P2B["Run setup-project.ps1<br/>- Create structure<br/>- Generate files"]
-    P2B --> P2C["Review & customize:<br/>README.md<br/>CLAUDE.md<br/>AGENTS.md"]
-    
-    P2C --> P2Check{"Validation:<br/>Project builds<br/>& tests pass?"}
-    P2Check -->|No| P2Fix["Fix issues"]
-    P2Fix --> P2B
-    P2Check -->|Yes| P2Success["✓ Phase 2 Complete"]
-    
-    P2Success --> Phase3["🎯 Phase 3:<br/>First Run"]
+    Phase2 --> Phase3["🎯 Phase 3:<br/>First Run"]
     
     Phase3 --> ClientChoice{Choose Client}
     
@@ -58,7 +49,6 @@ graph TD
     style Phase3 fill:#87CEEB
     style P1Fail fill:#FFB6C6
     style P1Success fill:#98FB98
-    style P2Success fill:#98FB98
     style P3Success fill:#98FB98
 ```
 
@@ -130,96 +120,9 @@ graph TD
 
 ---
 
-## 3. Phase 2: Project Creation Detailed Flow
+## 3. Phase 3: First Run Workflows
 
-```mermaid
-graph TD
-    P2Start["Phase 2: Project Creation"] --> ValidatePath["Validate ProjectPath"]
-    
-    ValidatePath --> CheckFSRoot["Is path under<br/>Filesystem MCP root?"]
-    CheckFSRoot -->|No| PathError["❌ Move to allowed root<br/>or re-run setup"]
-    PathError --> ValidatePath
-    
-    CheckFSRoot -->|Yes| CheckExists["Project already<br/>exists?"]
-    CheckExists -->|Yes| ExistsError["❌ Choose different path"]
-    ExistsError --> ValidatePath
-    
-    CheckExists -->|No| CreateDirs["Create Directory Structure"]
-    
-    CreateDirs --> CreateRoot["mkdir ProjectPath"]
-    CreateRoot --> CreateSrc["mkdir src/"]
-    CreateSrc --> CreateTests["mkdir tests/"]
-    CreateTests --> CreateDocs["mkdir docs/decisions/"]
-    CreateDocs --> CreateGithub["mkdir .github/"]
-    
-    CreateGithub --> GenFiles["Generate Project Files"]
-    
-    GenFiles --> GenGitignore[".gitignore<br/>(secrets, build, IDE)"]
-    GenGitignore --> GenEnvExample[".env.example<br/>(template with placeholders)"]
-    GenEnvExample --> GenReadme["README.md<br/>(scaffolded with language cmds)"]
-    GenReadme --> GenArch["docs/architecture.md<br/>(template)"]
-    GenArch --> GenADR["docs/decisions/0001-*.md<br/>(ADR template)"]
-    
-    GenADR --> GenInstructions["Generate Client Instructions"]
-    
-    GenInstructions --> ClientCheck{Clients<br/>enabled?}
-    
-    ClientCheck -->|Code| GenClaude["Generate CLAUDE.md<br/>- Commands for language<br/>- Architecture principles<br/>- Workflow rules<br/>- MCP tools list"]
-    ClientCheck -->|Codex| GenAgents["Generate AGENTS.md<br/>- Commands for language<br/>- Architecture principles<br/>- Workflow rules<br/>- MCP tools list"]
-    
-    GenClaude --> GenAgents
-    GenAgents --> GitInit["Initialize Git Repository"]
-    
-    GitInit --> GitCheck{-SkipGit flag?}
-    GitCheck -->|Yes| SkipGit["Skip Git init"]
-    GitCheck -->|No| DoGitInit["git init"]
-    
-    DoGitInit --> GitConfig["Configure Git<br/>user.name & user.email"]
-    GitConfig --> GitKeep["Create .gitkeep<br/>in src/ and tests/"]
-    
-    GitKeep --> Customize["User: Review & Customize"]
-    
-    Customize --> EditReadme["✏️ Edit README.md<br/>- Add prerequisites<br/>- Add setup steps<br/>- Document build/test/run"]
-    EditReadme --> EditInstructions["✏️ Edit CLAUDE.md/AGENTS.md<br/>- Refine commands<br/>- Add architecture notes<br/>- Adjust rules for project"]
-    EditInstructions --> EditArch["✏️ Edit docs/architecture.md<br/>- Document components<br/>- Add data flow"]
-    
-    EditArch --> CreateLangFiles["Create Language-Specific Files<br/>(package.json, requirements.txt, etc.)"]
-    
-    CreateLangFiles --> BuildTest["Build & Test Project"]
-    
-    BuildTest --> Build["Run: [build command]"]
-    Build --> BuildPass{Build<br/>succeeds?}
-    
-    BuildPass -->|No| BuildFix["❌ Fix build errors"]
-    BuildFix --> Build
-    
-    BuildPass -->|Yes| Test["Run: [test command]"]
-    Test --> TestPass{Tests<br/>pass?}
-    
-    TestPass -->|No| TestFix["❌ Fix test failures"]
-    TestFix --> Test
-    
-    TestPass -->|Yes| Commit["Initial Git Commit"]
-    
-    Commit --> GitAdd["git add ."]
-    GitAdd --> GitCommit['git commit -m<br/>"Initial project scaffold"']
-    
-    GitCommit --> P2Done["✓ Phase 2 Complete"]
-    
-    style P2Start fill:#87CEEB
-    style P2Done fill:#98FB98
-    style Customize fill:#FFFACD
-    style BuildFix fill:#FFD700
-    style TestFix fill:#FFD700
-    style PathError fill:#FFB6C6
-    style ExistsError fill:#FFB6C6
-```
-
----
-
-## 4. Phase 3: First Run Workflows
-
-### 4.1 Claude Code First Run
+### 3.1 Claude Code First Run
 
 ```mermaid
 graph TD
@@ -254,7 +157,7 @@ graph TD
     style C1GenInit fill:#FFD700
 ```
 
-### 4.2 Codex First Run
+### 3.2 Codex First Run
 
 ```mermaid
 graph TD
@@ -286,7 +189,7 @@ graph TD
     style X1Restart fill:#FFD700
 ```
 
-### 4.3 Claude Desktop (Cowork) First Run
+### 3.3 Claude Desktop (Cowork) First Run
 
 ```mermaid
 graph TD
@@ -316,7 +219,7 @@ graph TD
 
 ---
 
-## 5. Dependency & Component Graph
+## 4. Dependency & Component Graph
 
 ```mermaid
 graph TB
@@ -338,16 +241,10 @@ graph TB
     Clients --> Codex["Codex"]
     Clients --> Desktop["Claude Desktop"]
     
-    GitHub --> ProjectCreation["Phase 2<br/>Project Creation"]
+    GitHub --> ProjectCreation["Phase 2<br/>Project Creation<br/>(SubZeroDev.GitHub)"]
     Filesystem --> ProjectCreation
     
-    ProjectCreation --> Structure["Directory Structure<br/>src/, tests/,<br/>docs/decisions/"]
-    ProjectCreation --> Files["Project Files<br/>README.md,<br/>CLAUDE.md,<br/>AGENTS.md"]
-    ProjectCreation --> Git["Git Repository<br/>.gitignore,<br/>Initial commit"]
-    
-    Files --> FirstRun["Phase 3<br/>First Run"]
-    Structure --> FirstRun
-    Git --> FirstRun
+    ProjectCreation --> FirstRun["Phase 3<br/>First Run"]
     
     Claude --> FirstRun
     Codex --> FirstRun
@@ -367,14 +264,14 @@ graph TB
 
 ---
 
-## 6. Troubleshooting Decision Tree
+## 5. Troubleshooting Decision Tree
 
 ```mermaid
 graph TD
     Issue["❌ Something Failed"] --> Phase{Which Phase?}
     
     Phase -->|Phase 1| P1Issue["Workstation Setup"]
-    Phase -->|Phase 2| P2Issue["Project Creation"]
+    Phase -->|Phase 2| P2Issue["Project Creation<br/>(see SubZeroDev.GitHub)"]
     Phase -->|Phase 3| P3Issue["First Run"]
     
     P1Issue --> P1Q1{"MCP tools<br/>missing?"}
@@ -390,19 +287,6 @@ graph TD
     P1Q4 -->|Yes| P1A4["✓ Move project to allowed root<br/>✓ Re-run setup.ps1"]
     P1Q4 -->|No| P1End["Contact support"]
     
-    P2Issue --> P2Q1{"Path doesn't<br/>exist?"}
-    P2Q1 -->|Yes| P2A1["✓ Check ProjectPath parameter<br/>✓ Verify under Filesystem root"]
-    P2Q1 -->|No| P2Q2{"Build fails?"}
-    
-    P2Q2 -->|Yes| P2A2["✓ Install language tools<br/>✓ Check dependencies<br/>✓ Review error output"]
-    P2Q2 -->|No| P2Q3{"Tests fail?"}
-    
-    P2Q3 -->|Yes| P2A3["✓ Implement test stubs<br/>✓ Fix test configuration"]
-    P2Q3 -->|No| P2Q4{"Secret in<br/>Git?"}
-    
-    P2Q4 -->|Yes| P2A4["✓ Remove from Git history<br/>✓ Rotate secret<br/>✓ Verify .gitignore"]
-    P2Q4 -->|No| P2End["Contact support"]
-    
     P3Issue --> P3Q1{"Instructions<br/>not loaded?"}
     P3Q1 -->|Yes| P3A1["✓ Verify exact filename<br/>(AGENTS.md, CLAUDE.md)<br/>✓ Opened at repo root"]
     P3Q1 -->|No| P3Q2{"MCP list<br/>incomplete?"}
@@ -415,16 +299,11 @@ graph TD
     
     style Issue fill:#FFB6C6
     style P1End fill:#FFB6C6
-    style P2End fill:#FFB6C6
     style P3End fill:#FFB6C6
     style P1A1 fill:#98FB98
     style P1A2 fill:#98FB98
     style P1A3 fill:#98FB98
     style P1A4 fill:#98FB98
-    style P2A1 fill:#98FB98
-    style P2A2 fill:#98FB98
-    style P2A3 fill:#98FB98
-    style P2A4 fill:#98FB98
     style P3A1 fill:#98FB98
     style P3A2 fill:#98FB98
     style P3A3 fill:#98FB98
@@ -432,13 +311,13 @@ graph TD
 
 ---
 
-## 7. File Lifecycle
+## 6. File Lifecycle
 
 ```mermaid
 sequenceDiagram
     participant User
     participant setup
-    participant setup-project
+    participant NewProject as New-Project (SubZeroDev.GitHub)
     participant Git
     participant Client
     
@@ -446,22 +325,8 @@ sequenceDiagram
     setup->>setup: Install MCP servers
     setup->>setup: Register with clients
     
-    User->>setup-project: Run (Phase 2)
-    setup-project->>setup-project: Create directories
-    setup-project->>setup-project: Generate .gitignore
-    setup-project->>setup-project: Generate README.md
-    setup-project->>setup-project: Generate CLAUDE.md/AGENTS.md
-    setup-project->>Git: git init
-    setup-project->>Git: git config
-    
-    User->>User: Edit README.md<br/>Edit CLAUDE.md/AGENTS.md<br/>Create language files
-    
-    User->>setup-project: Build & test
-    setup-project->>setup-project: npm run build (example)
-    setup-project->>setup-project: npm test (example)
-    
-    User->>Git: git add .
-    User->>Git: git commit<br/>"Initial scaffold"
+    User->>NewProject: Run (Phase 2)
+    NewProject->>Git: Scaffold, commit, create repository, push
     
     User->>Client: claude / codex / Cowork
     Client->>Client: Load CLAUDE.md / AGENTS.md
@@ -472,7 +337,7 @@ sequenceDiagram
 
 ---
 
-## 8. Success Criteria Checklist
+## 7. Success Criteria Checklist
 
 ```mermaid
 mindmap
@@ -483,12 +348,7 @@ mindmap
       Clients registered
       /mcp shows tools
     Phase 2: Project
-      Structure created
-      Files generated
-      Git initialized
-      Builds succeed
-      Tests pass
-      Initial commit made
+      Created by SubZeroDev.GitHub
     Phase 3: First Run
       Instructions loaded
       /context verified
@@ -504,6 +364,6 @@ mindmap
 
 - [Setup specification](./setup-specification.md) — Complete specification document
 - **setup.ps1** — Phase 1 workstation setup script
-- **setup-project.ps1** — Phase 2 & 3 project creation script
+- **scripts/New-Project.ps1** in [SubZeroDev.GitHub](https://github.com/The-Running-Dev/SubZeroDev.GitHub) — Phase 2 project creation
 - `config/setup-schema.json` — Configuration schema
 - `config/setup-config.example.yaml` — Example configuration

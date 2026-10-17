@@ -1,6 +1,6 @@
 # Setup Configuration Example
 # Conforms to setup-schema.json
-# Customize these values for your workstation/project
+# Customize these values for your workstation
 
 setup:
   version: "1.0"
@@ -87,117 +87,6 @@ setup:
         - "github"
       config_path: "~/.claude/claude.json"
 
-project:
-  script_name: "setup-project.ps1"
-  
-  parameters:
-    ProjectPath: "/path/to/projects/MyProject"
-    ProjectName: "MyProject"
-    Language: "node"
-    Client: "Both"
-    SkipGit: false
-  
-  directory_structure:
-    - "src"
-    - "tests"
-    - "docs/decisions"
-    - ".github"
-  
-  required_files:
-    - name: ".gitignore"
-      path: ".gitignore"
-      required: true
-      category: "configuration"
-      version_controlled: true
-    
-    - name: ".env.example"
-      path: ".env.example"
-      required: true
-      category: "configuration"
-      version_controlled: true
-    
-    - name: "README.md"
-      path: "README.md"
-      required: true
-      category: "documentation"
-      version_controlled: true
-    
-    - name: "CLAUDE.md"
-      path: "CLAUDE.md"
-      required: true
-      category: "instruction"
-      version_controlled: true
-    
-    - name: "AGENTS.md"
-      path: "AGENTS.md"
-      required: true
-      category: "instruction"
-      version_controlled: true
-    
-    - name: "Architecture Documentation"
-      path: "docs/architecture.md"
-      required: true
-      category: "documentation"
-      version_controlled: true
-    
-    - name: "ADR Template"
-      path: "docs/decisions/0001-project-setup.md"
-      required: true
-      category: "documentation"
-      version_controlled: true
-    
-    - name: ".gitkeep (src)"
-      path: "src/.gitkeep"
-      required: true
-      category: "source"
-      version_controlled: true
-    
-    - name: ".gitkeep (tests)"
-      path: "tests/.gitkeep"
-      required: true
-      category: "test"
-      version_controlled: true
-  
-  languages:
-    - name: "node"
-      install_command: "npm install"
-      build_command: "npm run build"
-      test_command: "npm test"
-      lint_command: "npm run lint"
-      run_command: "npm start"
-    
-    - name: "python"
-      install_command: "pip install -r requirements.txt"
-      build_command: "python setup.py build"
-      test_command: "pytest"
-      lint_command: "pylint src/"
-      run_command: "python -m src.main"
-    
-    - name: "csharp"
-      install_command: "dotnet restore"
-      build_command: "dotnet build"
-      test_command: "dotnet test"
-      lint_command: "dotnet format --verify-no-changes"
-      run_command: "dotnet run"
-    
-    - name: "rust"
-      install_command: "cargo fetch"
-      build_command: "cargo build --release"
-      test_command: "cargo test"
-      lint_command: "cargo clippy"
-      run_command: "cargo run --release"
-    
-    - name: "java"
-      install_command: "mvn install"
-      build_command: "mvn clean package"
-      test_command: "mvn test"
-      lint_command: "mvn checkstyle:check"
-      run_command: "java -jar target/app.jar"
-  
-  git_config:
-    user.name: "Your Name"
-    user.email: "your@email.com"
-
 validation:
   phase1_checks:
     - name: "Verify Git"
@@ -216,31 +105,6 @@ validation:
       command: "/mcp"
       expected_output: "github"
   
-  phase2_checks:
-    - name: "Project directory exists"
-      check_type: "directory_exists"
-      path: "${ProjectPath}"
-    
-    - name: "README.md exists"
-      check_type: "file_exists"
-      path: "${ProjectPath}/README.md"
-    
-    - name: "CLAUDE.md exists"
-      check_type: "file_exists"
-      path: "${ProjectPath}/CLAUDE.md"
-    
-    - name: "Git initialized"
-      check_type: "git_initialized"
-      path: "${ProjectPath}"
-    
-    - name: "src/ directory exists"
-      check_type: "directory_exists"
-      path: "${ProjectPath}/src"
-    
-    - name: "tests/ directory exists"
-      check_type: "directory_exists"
-      path: "${ProjectPath}/tests"
-  
   phase3_checks:
     - name: "Claude Code context loads"
       client: "Claude Code"
@@ -249,14 +113,6 @@ validation:
     - name: "Codex MCP available"
       client: "Codex"
       command: "/mcp"
-    
-    - name: "Project builds"
-      client: "Both"
-      command: "npm run build"
-    
-    - name: "Tests pass"
-      client: "Both"
-      command: "npm test"
 
 troubleshooting:
   setup_script_fails:

@@ -1,6 +1,6 @@
 # SubZeroDev Workspace
 
-This repository contains reusable PowerShell tooling for preparing AI-assisted development workstations and scaffolding new projects for Codex and Claude Code.
+This repository contains reusable PowerShell tooling for preparing AI-assisted development workstations for Codex and Claude Code. Creating a project and its GitHub repository is owned by [SubZeroDev.GitHub](https://github.com/The-Running-Dev/SubZeroDev.GitHub).
 
 ## Documentation
 
@@ -8,23 +8,19 @@ The complete setup documentation is published at **[workspace.subzerodev.com](ht
 
 ### Getting Started
 
-- [Quick Start](setup-llm/docs/getting-started/quickstart.md) — create and open a new AI-assisted project with the shortest supported workflow.
-- [Start a New Project](setup-llm/docs/getting-started/new-project.md) — follow the complete Claude Desktop, Claude Code, and Codex workflow.
 - [Setup Overview](setup-llm/docs/index.md) — understand the combined setup, authentication, integrations, and platform prerequisites. On the published site, this page is available at [the documentation root](https://workspace.subzerodev.com/docs/).
 - [AI Cluster Operations](setup-llm/docs/getting-started/ai-cluster-operations.md) — run opt-in setup, doctor checks, startup/smoke/shutdown, and troubleshooting for the Local AI Compute Cluster.
 
 ### Architecture and Setup Design
 
-- [Modular Architecture](setup-llm/docs/architecture/modular-architecture.md) — understand the workstation and project setup modules.
-- [Setup Flowcharts](setup-llm/docs/architecture/setup-flowcharts.md) — review the installation and project-creation flows visually.
-- [Setup Specification](setup-llm/docs/architecture/setup-specification.md) — review inputs, outputs, validation, and required project files.
+- [Setup Flowcharts](setup-llm/docs/architecture/setup-flowcharts.md) — review the installation and first-run flows visually.
+- [Setup Specification](setup-llm/docs/architecture/setup-specification.md) — review inputs, outputs, and validation.
 - [Local AI Compute Cluster](setup-llm/docs/architecture/local-ai-compute-cluster.md) — review the Issue #16 T3 AI-cluster skeleton, compose profiles, and validation flow.
 - [Memory and RAG Retention Contract](setup-llm/docs/architecture/memory-rag-contract.md) — review retrieval boundaries, index lifecycle, deletion guarantees, and smoke-test expectations for durable memory layers.
 - [Workspace Blueprint](setup-llm/docs/architecture/workspace-blueprint.md) — review the recommended AI development workspace and rollout plan.
 
 ### Reference
 
-- [Language Starters](setup-llm/docs/reference/language-starters.md) — use or extend the language-specific project starters.
 - [Reflection Mode](setup-llm/docs/reference/reflection-mode.md) — use the guided inquiry prompt for deliberate analysis.
 
 The root README is the canonical documentation index. The remaining documentation source lives in [`setup-llm/docs/`](setup-llm/docs/). Run `setup-llm/scripts/docs-local.ps1` to synchronize both into the pinned Docusaurus template and serve them locally with live reload enabled.
@@ -52,7 +48,7 @@ Container setup changes the container environment. Mount `/root/.config` and `/w
 
 | Path                                                                       | Purpose                                                                            |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [`setup-llm/`](setup-llm/)                                                 | Cross-platform workstation provisioning, MCP registration, and project scaffolding |
+| [`setup-llm/`](setup-llm/)                                                 | Cross-platform workstation provisioning and MCP registration                       |
 | [`setup-llm/docs/`](setup-llm/docs/)                                       | Getting-started guides, architecture, reference material, and setup specifications |
 | [`docs-template/`](docs-template/)                                         | Pinned Docusaurus template submodule used to build the documentation site          |
 | `SubZeroDev.Workspace.code-workspace`                                      | VS Code workspace definition                                                       |
@@ -231,25 +227,13 @@ The root workspace task file is available at `.vscode/tasks.json` and includes:
 
 ## Create a Project
 
-After workstation setup, scaffold a new project with:
+Projects are created by `scripts/New-Project.ps1` in [SubZeroDev.GitHub](https://github.com/The-Running-Dev/SubZeroDev.GitHub). It scaffolds the project, commits it, creates the GitHub repository with the standard settings and branch ruleset, and pushes it:
 
 ```powershell
-./setup-llm/scripts/setup-project.ps1 `
-  -ProjectPath '/path/to/MyProject' `
-  -ProjectName 'MyProject' `
-  -Language 'node'
+./scripts/New-Project.ps1 -Name MyProject -Language node -Description 'Does a thing'
 ```
 
-Supported command profiles include Node.js, Python, C#, Rust, Java, and Go. Node.js and Python currently include generated language starters.
-
-Useful generator switches include:
-
-- `-Client Both|Code|Codex`
-- `-SkipGit`
-- `-SkipLanguageStarter`
-- `-SkipValidation`
-- `-AutoCommit`
-- `-WhatIf`
+See that repository's README for the full option list.
 
 ## Troubleshooting
 

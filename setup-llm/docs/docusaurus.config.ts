@@ -49,7 +49,7 @@ const config: Config = {
       items: [
         {
           type: 'doc',
-          docId: 'getting-started/quickstart',
+          docId: 'template-overview',
           position: 'left',
           label: 'Docs'
         },
