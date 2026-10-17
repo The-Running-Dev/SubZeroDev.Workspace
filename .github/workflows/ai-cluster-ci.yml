@@ -24,7 +24,7 @@ permissions: {}
 jobs:
   validate:
     name: Validate AI cluster contracts
-    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v0
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
     permissions:
       contents: read
     with:
