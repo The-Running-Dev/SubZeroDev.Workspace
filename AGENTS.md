@@ -5,11 +5,11 @@
 
 ## Project identity
 
-This repository — **SubZeroDev.Workspace** — owns reusable PowerShell tooling that prepares AI-assisted development workstations (Windows, macOS, Ubuntu/Debian) and scaffolds new projects for Codex and Claude Code. It also owns the documentation pipeline that publishes that tooling: source pages under `setup-llm/docs/`, synchronized into the pinned `docs-template` Docusaurus submodule and built into a container published to `ghcr.io/the-running-dev/subzerodev-workspace`. An opt-in Local AI Compute Cluster (`setup-llm/scripts/setup-ai-cluster.ps1`, `setup-llm/scripts/doctor-ai-cluster.ps1`) lives here too.
+This repository — **SubZeroDev.Workspace** — owns reusable PowerShell tooling that prepares AI-assisted development workstations (Windows, macOS, Ubuntu/Debian) for Codex and Claude Code. It also owns the documentation pipeline that publishes that tooling: source pages under `setup-llm/docs/`, synchronized into the pinned `docs-template` Docusaurus submodule and built into a container published to `ghcr.io/the-running-dev/subzerodev-workspace`. An opt-in Local AI Compute Cluster (`setup-llm/scripts/setup-ai-cluster.ps1`, `setup-llm/scripts/doctor-ai-cluster.ps1`) lives here too.
 
-It does not own the `docs-template` submodule's own implementation — that is a pinned, vendored template; the generated working tree is not edited directly (see `README.md`, *Build and Serve the Documentation*). It does not host project code for the languages it scaffolds (`node`, `python`, and the unimplemented `csharp`/`rust`/`java`/`go` profiles) — it generates starters, not applications.
+It does not own the `docs-template` submodule's own implementation — that is a pinned, vendored template; the generated working tree is not edited directly (see `README.md`, *Build and Serve the Documentation*). It does not own project creation: scaffolding a project, its language starters, and its GitHub repository belong to `The-Running-Dev/SubZeroDev.GitHub` (`scripts/New-Project.ps1`).
 
-Companions: the `docs-template` submodule (`The-Running-Dev/Docusaurus-Template`), the published container image, and the sibling `SubZeroDev.*` repositories this kit is installed into by `/install` / `/install-all`.
+Companions: the `docs-template` submodule (`The-Running-Dev/Docusaurus-Template`), the published container image, `The-Running-Dev/SubZeroDev.GitHub` (project creation and repository settings), and the sibling `SubZeroDev.*` repositories this kit is installed into by `/install` / `/install-all`.
 
 This file is binding for every agent session in this repo, regardless of tool or model.
 

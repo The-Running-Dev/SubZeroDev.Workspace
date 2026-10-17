@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "AI-Assisted Project Setup Configuration Schema",
-  "description": "Configuration schema for workstation and project setup based on docs/architecture/setup-specification.md",
+  "title": "AI-Assisted Workstation Setup Configuration Schema",
+  "description": "Configuration schema for workstation setup based on docs/architecture/setup-specification.md",
   "type": "object",
   "version": "1.0",
   "definitions": {
@@ -61,60 +61,6 @@
         }
       },
       "required": ["name", "enabled"]
-    },
-    "language_config": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "enum": ["node", "python", "csharp", "rust", "java", "go", "other"]
-        },
-        "install_command": {
-          "type": "string",
-          "description": "Command to install project dependencies"
-        },
-        "build_command": {
-          "type": "string",
-          "description": "Command to build the project"
-        },
-        "test_command": {
-          "type": "string",
-          "description": "Command to run tests"
-        },
-        "lint_command": {
-          "type": "string",
-          "description": "Command to lint/format code"
-        },
-        "run_command": {
-          "type": "string",
-          "description": "Command to run the application"
-        }
-      },
-      "required": ["name", "install_command", "build_command", "test_command"]
-    },
-    "project_file": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string",
-          "description": "Relative path from project root"
-        },
-        "required": {
-          "type": "boolean"
-        },
-        "category": {
-          "type": "string",
-          "enum": ["configuration", "documentation", "instruction", "source", "test"]
-        },
-        "version_controlled": {
-          "type": "boolean",
-          "description": "Whether this file should be committed to Git"
-        }
-      },
-      "required": ["name", "path", "required"]
     }
   },
   "properties": {
@@ -200,83 +146,6 @@
       },
       "required": ["version", "prerequisites", "parameters", "components"]
     },
-    "project": {
-      "type": "object",
-      "title": "Project Setup Configuration",
-      "description": "Phase 2 & 3: New project structure and instructions",
-      "properties": {
-        "script_name": {
-          "type": "string",
-          "default": "setup-project.ps1"
-        },
-        "parameters": {
-          "type": "object",
-          "description": "setup-project.ps1 input parameters",
-          "properties": {
-            "ProjectPath": {
-              "type": "string",
-              "description": "Absolute path for the new project (must be under Filesystem MCP allowed root)"
-            },
-            "ProjectName": {
-              "type": "string",
-              "description": "Display name of the project"
-            },
-            "Language": {
-              "type": "string",
-              "enum": ["node", "python", "csharp", "rust", "java", "go", "other"],
-              "description": "Primary programming language/framework"
-            },
-            "Client": {
-              "type": "string",
-              "enum": ["Both", "Code", "Codex"],
-              "default": "Both",
-              "description": "Generate instructions for which client(s)"
-            },
-            "SkipGit": {
-              "type": "boolean",
-              "default": false,
-              "description": "Skip Git initialization"
-            }
-          },
-          "required": ["ProjectPath", "ProjectName", "Language"]
-        },
-        "directory_structure": {
-          "type": "array",
-          "description": "Required directory structure",
-          "items": {
-            "type": "string"
-          },
-          "default": ["src", "tests", "docs/decisions", ".github"]
-        },
-        "required_files": {
-          "type": "array",
-          "description": "Files that must exist in every project",
-          "items": {
-            "$ref": "#/definitions/project_file"
-          }
-        },
-        "languages": {
-          "type": "array",
-          "description": "Supported languages and their default commands",
-          "items": {
-            "$ref": "#/definitions/language_config"
-          }
-        },
-        "git_config": {
-          "type": "object",
-          "description": "Default Git configuration",
-          "properties": {
-            "user.name": {
-              "type": "string"
-            },
-            "user.email": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "required": ["parameters", "directory_structure", "required_files"]
-    },
     "validation": {
       "type": "object",
       "title": "Validation & Verification Rules",
@@ -295,25 +164,6 @@
                 "type": "string"
               },
               "expected_output": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "phase2_checks": {
-          "type": "array",
-          "description": "Validation checks for Phase 2 (project creation)",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "check_type": {
-                "type": "string",
-                "enum": ["file_exists", "directory_exists", "git_initialized"]
-              },
-              "path": {
                 "type": "string"
               }
             }
@@ -361,5 +211,5 @@
       }
     }
   },
-  "required": ["setup", "project", "validation"]
+  "required": ["setup", "validation"]
 }
