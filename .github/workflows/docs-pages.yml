@@ -14,6 +14,7 @@ on:
       - 'setup-llm/README.md'
       - 'setup-llm/docs/**'
       - 'setup-llm/scripts/docs-workflow-local.ps1'
+      - 'setup-llm/scripts/expand-docs-artifact.ps1'
       - 'setup-llm/scripts/setup-docs.ps1'
   pull_request:
     branches:
@@ -28,6 +29,7 @@ on:
       - 'setup-llm/README.md'
       - 'setup-llm/docs/**'
       - 'setup-llm/scripts/docs-workflow-local.ps1'
+      - 'setup-llm/scripts/expand-docs-artifact.ps1'
       - 'setup-llm/scripts/setup-docs.ps1'
   workflow_dispatch:
 
@@ -35,142 +37,43 @@ concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
+  # Synchronizes setup-llm/docs into docs-template, builds the Docusaurus site and
+  # deploys it to GitHub Pages from main. Pull requests only build.
   build:
-    name: Build documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository and template
-        uses: actions/checkout@v6
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4.4.0
-        with:
-          version: 9.0.0
-          run_install: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: docs-template/pnpm-lock.yaml
-
-      - name: Synchronize documentation
-        shell: pwsh
-        run: ./setup-llm/scripts/setup-docs.ps1
-
-      - name: Install template dependencies
-        working-directory: docs-template
-        env:
-          HUSKY: 0
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Docusaurus site
-        working-directory: docs-template
-        env:
-          NODE_ENV: production
-          HUSKY: 0
-        run: pnpm run build:prod
-
-      - name: Upload documentation build
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation-site
-          path: docs-template/artifacts
-
-      - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: docs-template/artifacts
-
-  deploy:
-    name: Deploy documentation
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
+    name: Documentation
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/docs.yml@v0
     permissions:
+      contents: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    with:
+      source: docs-template
+      builder: node
+      build-command: build:prod
+      output: docs-template/artifacts
+      pre-build: setup-llm/scripts/setup-docs.ps1
 
+  # Builds the runtime-prebuilt image around that site, serves it on 8080 as a smoke
+  # test and publishes ghcr.io/the-running-dev/subzerodev-workspace from main.
+  # GitHub checks the publish job's permissions before the run starts, so pull
+  # requests grant them too.
   container:
-    name: Build container
+    name: Container
     needs: build
-    runs-on: ubuntu-latest
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/container.yml@v0
     permissions:
       contents: read
       packages: write
-    steps:
-      - name: Checkout repository and template
-        uses: actions/checkout@v6
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Download documentation build
-        uses: actions/download-artifact@v4
-        with:
-          name: documentation-site
-          path: docs-template/artifacts
-
-      - name: Log in to GitHub Container Registry
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate container metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/the-running-dev/subzerodev-workspace
-          tags: |
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      # verification: true
-      - name: Build OCI artifact
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: setup-llm/Dockerfile
-          target: runtime-prebuilt
-          push: false
-          outputs: type=oci,dest=/tmp/subzerodev-workspace.tar
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Upload OCI artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: subzerodev-workspace-oci
-          path: /tmp/subzerodev-workspace.tar
-
-      - name: Publish container to GHCR
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: setup-llm/Dockerfile
-          target: runtime-prebuilt
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
+      id-token: write
+      attestations: write
+    with:
+      dockerfile: setup-llm/Dockerfile
+      target: runtime-prebuilt
+      image-name: subzerodev-workspace
+      artifact: github-pages
+      artifact-path: docs-template/pages-artifact
+      pre-build: setup-llm/scripts/expand-docs-artifact.ps1
+      smoke-port: '8080'
