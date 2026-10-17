@@ -44,7 +44,7 @@ jobs:
   # deploys it to GitHub Pages from main. Pull requests only build.
   build:
     name: Documentation
-    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/docs.yml@v0
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/docs.yml@v1
     permissions:
       contents: read
       pages: write
@@ -63,7 +63,7 @@ jobs:
   container:
     name: Container
     needs: build
-    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/container.yml@v0
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/container.yml@v1
     permissions:
       contents: read
       packages: write
