@@ -1,0 +1,25 @@
+name: MCP Dependency Audit CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  audit:
+    name: MCP dependency audit
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
+    permissions:
+      contents: read
+    with:
+      os: '["windows-latest", "ubuntu-latest", "macos-latest"]'
+      paths: |
+        setup-llm/scripts/Test-McpDependencies.ps1
+        setup-llm/scripts/modules/McpDependencyAudit.psm1
+        setup-llm/ai-cluster/tests/mcp-dependencies.Tests.ps1
+      tests: setup-llm/ai-cluster/tests/mcp-dependencies.Tests.ps1
+      artifact-name: mcp-audit
