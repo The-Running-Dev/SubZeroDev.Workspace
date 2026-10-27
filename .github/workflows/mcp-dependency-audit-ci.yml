@@ -20,6 +20,7 @@ jobs:
       paths: |
         setup-llm/scripts/Test-McpDependencies.ps1
         setup-llm/scripts/modules/McpDependencyAudit.psm1
+        setup-llm/scripts/modules/McpAuditToml.ps1
         setup-llm/ai-cluster/tests/mcp-dependencies.Tests.ps1
       tests: setup-llm/ai-cluster/tests/mcp-dependencies.Tests.ps1
       artifact-name: mcp-audit

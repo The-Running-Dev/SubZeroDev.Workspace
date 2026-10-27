@@ -1,14 +1,14 @@
 #Requires -Version 7.4
 <#
 .SYNOPSIS
-Statically audit direct MCP launch dependency selectors in explicit local JSON/JSONC files.
+Statically audit direct MCP launch dependency selectors in explicit local JSON/JSONC or Codex TOML files.
 .DESCRIPTION
-Reads mcpServers objects as data. Never runs discovered commands, fetches URLs, resolves
+Reads mcpServers objects or Codex mcp_servers tables as data. Never runs discovered commands, fetches URLs, resolves
 packages, installs tools or changes registration. See docs/security/mcp-dependency-audit.md.
 Exit codes: 0 = all direct selectors exact; 1 = mutable/unverified; 2 = invocation error.
 An exact direct pin proves neither trusted provenance nor transitive reproducibility.
 .PARAMETER LiteralPath
-One or more local UTF-8 .json/.jsonc files containing an mcpServers object.
+One or more local UTF-8 .json/.jsonc files containing mcpServers, or .toml files containing mcp_servers.
 .PARAMETER AsJson
 Write only the versioned JSON report to the success stream.
 .EXAMPLE
@@ -24,7 +24,7 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'modules/McpDependencyAudit.psm1') -Force
 if (!$LiteralPath.Count) {
     if ($AsJson) { '{"schemaVersion":1,"classification":"unverified","reasonCode":"missing-input","configurations":[]}' }
-    else { 'MCP audit: unverified (missing-input). Supply explicit local JSON/JSONC files.' }
+    else { 'MCP audit: unverified (missing-input). Supply explicit local JSON/JSONC or Codex TOML files.' }
     exit 2
 }
 $report = Invoke-McpDependencyAudit -LiteralPath $LiteralPath
