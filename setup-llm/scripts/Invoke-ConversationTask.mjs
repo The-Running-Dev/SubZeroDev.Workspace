@@ -89,7 +89,7 @@ export function runTask(argv, env = process.env) {
     if (typeof result?.Packet === 'string') console.log('Open packet.md there for branch/parent links and the portable handoff; archived-source links resolve from the canonical Note.');
     if (state === 'NotConfigured') console.log('Memory is off. No configuration was enabled; review the private result for guidance.');
     if (state === 'Proposed') console.log('Review individual proposals privately. Storage requires a separate request selecting IDs; acceptance remains /memory show|accept.');
-    if (state === 'Stored') console.log('Selected writes are candidates, not accepted context. Inspect each private result.');
+    if (state === 'Stored') console.log('Storage does not accept memories. Inspect private per-item results for current state, including replays.');
     if (state === 'Returned') console.log('Portable handoff only: navigate to the parent and copy the selected outcome manually.');
     if (v.operation === 'host') console.log('Native outbox only: inspect the private Call/receipt and use the canonical host workflow. No host tool was invoked by this task.');
     if (status !== 0 || state === 'Unconfirmed') console.log('Inspect private output/receipts; preserve request and IDs. A failure may follow writes; do not refresh revisions or create a new identity to retry.');

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,8 +46,10 @@ test('tasks are manual process entry points, with private explicit selections an
 
 test('real process argv preserves spaces, Unicode and shell metacharacters, without logging helper data', t => {
   const base = mkdtempSync(join(tmpdir(), 'workspace-58-argv-')); t.after(() => rmSync(base, { recursive: true, force: true }));
+  const real = join(base, 'real'), linked = join(base, 'linked'); mkdirSync(real);
+  symlinkSync(real, linked, process.platform === 'win32' ? 'junction' : 'dir');
   const special = process.platform === 'win32' ? 'кириллица & %PATH% ^ $ (x) !' : 'кириллица & $(); `touch INJECTED` "quote"';
-  const dir = join(base, special); mkdirSync(dir);
+  const dir = join(linked, special); mkdirSync(dir);
   const archive = join(dir, 'archive'); mkdirSync(archive);
   const kit = join(dir, 'kit'); mkdirSync(join(kit, 'tools'), { recursive: true });
   const body = 'DO_NOT_LOG_BODY';
@@ -56,8 +58,8 @@ test('real process argv preserves spaces, Unicode and shell metacharacters, with
   const r = invoke(['--operation', 'fork', '--archive-root', archive, '--request-file', request], { AGENTKIT_HOME: kit }, dir);
   assert.equal(r.status, 0, r.stderr + r.stdout);
   const output = outputDir(request, r), value = JSON.parse(readFileSync(join(output, 'result.json'), 'utf8'));
-  assert.deepEqual(value.argv, ['--archive-root', archive, '--request-file', request]);
-  assert.equal(value.cwd, dir); assert.equal(existsSync(join(dir, 'INJECTED')), false);
+  assert.deepEqual(value.argv, ['--archive-root', realpathSync(archive), '--request-file', realpathSync(request)]);
+  assert.equal(value.cwd, realpathSync(dir)); assert.equal(existsSync(join(dir, 'INJECTED')), false);
   for (const text of [body, 'PRIVATE_ERROR_BODY', dir]) assert.ok(!(r.stdout + r.stderr).includes(text));
   assert.match(readFileSync(join(output, 'stderr.txt'), 'utf8'), /PRIVATE_ERROR_BODY/);
   assert.match(readFileSync(join(output, 'packet.md'), 'utf8'), /DO_NOT_LOG_BODY/);
@@ -98,7 +100,8 @@ test('project and explicit namespace stay separate arguments; fallback kit disco
   const r = invoke(selected(f, 'review', f.requests.review, extras), { AGENTKIT_HOME: '', HOME: base, USERPROFILE: base });
   assert.equal(r.status, 0, r.stdout + r.stderr); privacy(r, f);
   const value = JSON.parse(readFileSync(join(outputDir(f.requests.review, r), 'result.json'), 'utf8'));
-  assert.deepEqual(value.argv, ['--archive-root', f.archive, '--request-file', f.requests.review, ...extras]);
+  assert.deepEqual(value.argv, ['--archive-root', realpathSync(f.archive), '--request-file', realpathSync(f.requests.review),
+    '--project', realpathSync(f.project), '--namespace', 'project/example/synthetic']);
 });
 
 test('helper failure and malformed output never become success or disclose diagnostics', t => {
@@ -160,6 +163,17 @@ test('installed AgentKit: task argv exercises fork/attach/return, retries, memor
   const db = JSON.parse(readFileSync(join(f.store, 'synthetic.json'), 'utf8'));
   assert.equal(db.records.length, 1); assert.equal(db.records[0].metadata.status, 'candidate');
   for (const secret of ['UNSELECTED_SYNTHETIC_BODY', 'SYNTHETIC_PRIVATE_BOOKMARK', 'The later result is available.', 'Earlier turns']) assert.ok(!JSON.stringify(db).includes(secret));
+  // Simulate a separate acceptance in the test adapter's current record. The
+  // original operation receipt remains revision 1. A task retry must report the
+  // actual accepted replay without itself performing or denying acceptance.
+  db.records[0].metadata.status = 'accepted'; db.records[0].revision = 2;
+  writeFileSync(join(f.store, 'synthetic.json'), JSON.stringify(db));
+  const acceptedReplay = taskRun('store', f.requests.store, configured);
+  assert.equal(acceptedReplay.status, 0);
+  assert.equal(acceptedReplay.value.Results.decision.State, 'Replayed');
+  assert.equal(acceptedReplay.value.Results.decision.Memory.status, 'accepted');
+  assert.match(acceptedReplay.stdout, /Storage does not accept memories/);
+  assert.ok(!acceptedReplay.stdout.includes('are candidates'));
   const host = taskRun('host'); assert.equal(host.status, 0); assert.equal(host.value.State, 'unsupported');
   assert.equal(host.value.Call, null); assert.match(host.value.Packet, /Selected outcome/);
   // Synthetic capability selection exercises the same outbox as a real host.

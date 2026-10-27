@@ -75,6 +75,8 @@ unparseable result may follow writes: inspect private diagnostics and canonical
 receipts before retrying. Never refresh revisions, delete locks/receipts or invent
 a new identity to hide uncertainty. Replayed revisions can describe an original
 receipt rather than the branch's current revision.
+New memory writes are candidates; a replay can return a memory accepted elsewhere.
+Storage itself never accepts one. Inspect the private per-item current state.
 
 ## Native capability selection
 
