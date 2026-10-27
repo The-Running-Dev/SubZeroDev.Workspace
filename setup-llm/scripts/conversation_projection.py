@@ -58,9 +58,12 @@ def no_links(path):
         require(not part.is_symlink() and not (hasattr(part, "is_junction") and part.is_junction()), "unsafe-path")
 
 
-def read_json(path):
+def read_json(path, max_bytes=None):
     no_links(path)
-    require(path.is_file() and path.stat().st_size <= 2 * 1024 * 1024, "input-unreadable")
+    # Only the external selection has a 2 MiB cap. Owned state includes an
+    # accumulating exclusion/high-water ledger; graph provenance also expands the
+    # input. Never publish owned output that this reader would subsequently reject.
+    require(path.is_file() and (max_bytes is None or path.stat().st_size <= max_bytes), "input-unreadable")
     def pairs(items):
         result = {}
         for key, value in items:
@@ -271,7 +274,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         # Fixed errors only: never print paths, input values, source text or tracebacks.
-        selected = read_json(Path(os.path.abspath(args.selection))) if args.selection else None
+        selected = read_json(Path(os.path.abspath(args.selection)), max_bytes=2 * 1024 * 1024) if args.selection else None
         result = run(args.state_root, selected)
         print(canonical(result), end="")
         return 0 if result["status"] == "supported" else 3

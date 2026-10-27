@@ -60,7 +60,7 @@ From the repository root, with an operator-selected interpreter:
 
 ```powershell
 $python = '/absolute/path/to/graphifyy/bin/python'
-$state = Join-Path ([IO.Path]::GetTempPath()) 'synthetic-conversation-projection'
+$state = Join-Path $HOME 'synthetic-conversation-projection'
 ./setup-llm/scripts/Project-ConversationContext.ps1 -PythonPath $python -StateRoot $state -SelectionPath ./setup-llm/ai-cluster/tests/fixtures/conversation-selection.json
 graphify path 'branch:child' 'branch:parent' --graph (Join-Path $state 'graph.json') --directed
 
@@ -116,9 +116,11 @@ reference. Its reader must be given reviewed metadata, not an archive dump.
 
 Unknown fields (including raw/prompt/path payloads), duplicate JSON keys, duplicate
 IDs, cycles, unapproved text and non-summary kinds are rejected before Graphify runs.
-Input is bounded to 2 MiB, 500 branches, 100 sources/summaries per branch and 2,000
+External selection input is bounded to 2 MiB, 500 branches, 100 sources/summaries per branch and 2,000
 characters per summary. Common secret-shaped summaries are rejected with a fixed
-error. This is a defense in depth check; approval requires a real human/content review,
+error. Owned state/graph readers allow their expanded representation and accumulating
+exclusion ledger to grow beyond the selection input cap, so accepted selections remain
+rebuildable/removable. This is a defense in depth check; approval requires a real human/content review,
 and cannot automatically identify every secret or private detail concealed in prose.
 
 | Graph entity | Identity / relation | Provenance |
@@ -154,7 +156,9 @@ The directory must be dedicated and empty on first use. Thereafter only this ada
 named files are accepted: `state.json`, `extraction.json`, `graph.json`, `receipt.json`,
 their fixed `.tmp` files, the exclusive `lock` and Graphify's verified
 `cache/last_query_stamp`. Unknown files, symlinks and junctions
-cause a refusal; unrelated files/directories are never recursively deleted. Concurrent
+cause a refusal; unrelated files/directories are never recursively deleted. Use
+canonical directory paths (for example macOS `/private/var`, rather
+than its `/var` system symlink). Concurrent
 updates are refused. If a process is killed, remove an orphan `lock` only after verifying
 no adapter is still running, then rebuild to reconcile any interrupted publication.
 

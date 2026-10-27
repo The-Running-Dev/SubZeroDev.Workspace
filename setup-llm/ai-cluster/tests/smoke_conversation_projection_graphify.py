@@ -19,7 +19,7 @@ class InstalledGraphifySmoke(unittest.TestCase):
     def test_real_build_retrieval_replay_correction_removal(self):
         selected = json.loads((Path(__file__).parent / "fixtures" / "conversation-selection.json").read_text())
         with tempfile.TemporaryDirectory(prefix="conversation-graphify-smoke-") as directory:
-            root = Path(directory) / "projection"
+            root = Path(directory).resolve() / "projection"
             result = p.run(root, selected)
             self.assertEqual(result["status"], "supported")
             version = subprocess.run(["graphify", "--version"], capture_output=True, text=True, check=True, timeout=30)

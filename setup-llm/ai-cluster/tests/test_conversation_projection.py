@@ -33,7 +33,10 @@ class ProjectionTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name) / "projection"
+        # macOS /var is an OS symlink. Use its canonical temp directory so the
+        # production symlink/junction refusal remains exercised, not weakened.
+        self.base = Path(self.temp.name).resolve()
+        self.root = self.base / "projection"
 
     def run_projection(self, selected=None, builder=fake_builder):
         return p.run(self.root, selected, builder)
@@ -70,6 +73,30 @@ class ProjectionTests(unittest.TestCase):
         text = (self.root / "graph.json").read_text(encoding="utf-8")
         self.assertNotIn("Use the existing tools.", text)
         self.assertIn("Use the corrected tools.", text)
+
+    def test_large_accepted_selection_can_rebuild_and_remove_expanded_state(self):
+        value = {"schemaVersion": 1, "corpusId": "large-synthetic", "revision": 1, "branches": [
+            {"branchId": f"branch-{i}", "sourceRevision": 1, "sources": [], "summaries": [
+                {"summaryId": "first", "role": "assistant", "kind": "summary", "approved": True, "text": "x" * 2000},
+                {"summaryId": "second", "role": "assistant", "kind": "summary", "approved": True, "text": "y" * 1880}]} for i in range(500)]}
+        selected = self.base / "selected.json"
+        selected.write_text(p.canonical(value), encoding="utf-8")
+        self.assertLessEqual(selected.stat().st_size, 2 * 1024 * 1024)
+        self.assertEqual(self.run_projection(p.read_json(selected, max_bytes=2 * 1024 * 1024))["status"], "supported")
+        self.assertGreater((self.root / "state.json").stat().st_size, 2 * 1024 * 1024)
+        self.assertGreater((self.root / "graph.json").stat().st_size, 2 * 1024 * 1024)
+        self.assertEqual(self.run_projection()["status"], "supported")
+        value.update(revision=2, branches=[])
+        self.assertEqual(self.run_projection(value)["status"], "supported")
+        self.assertEqual(self.graph()["nodes"], [])
+        self.assertEqual(self.run_projection()["status"], "supported")
+        self.assertEqual(len(p.read_json(self.root / "state.json")["tombstones"]), 500)
+
+    def test_external_selection_remains_size_limited(self):
+        selected = self.base / "oversized.json"
+        selected.write_text("x" * (2 * 1024 * 1024 + 1))
+        with self.assertRaisesRegex(p.ProjectionError, "input-unreadable"):
+            p.read_json(selected, max_bytes=2 * 1024 * 1024)
 
     def test_correction_requires_source_revision_and_rejects_regression(self):
         value = fixture()
@@ -167,7 +194,7 @@ class ProjectionTests(unittest.TestCase):
             self.run_projection(value)
 
     def test_unrelated_archive_is_never_read_or_changed(self):
-        archive = Path(self.temp.name) / "private-archive"
+        archive = self.base / "private-archive"
         archive.mkdir()
         raw = archive / "branch.json"
         raw.write_text("PRIVATE-RAW-SENTINEL")
@@ -217,7 +244,7 @@ class ProjectionTests(unittest.TestCase):
 
     def test_symlink_is_rejected_without_touching_target(self):
         self.run_projection(fixture())
-        target = Path(self.temp.name) / "target.json"
+        target = self.base / "target.json"
         target.write_text("keep")
         graph = self.root / "graph.json"
         graph.unlink()
@@ -244,7 +271,7 @@ class ProjectionTests(unittest.TestCase):
             self.run_projection(value)
 
     def test_cli_errors_do_not_log_input_or_traceback(self):
-        selected = Path(self.temp.name) / "selection.json"
+        selected = self.base / "selection.json"
         selected.write_text('{"raw":"PRIVATE-RAW-SENTINEL"}')
         capture = io.StringIO()
         with contextlib.redirect_stdout(capture), contextlib.redirect_stderr(capture):
