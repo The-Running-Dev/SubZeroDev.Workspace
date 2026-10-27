@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "synthetic-example",
+  "revision": 1,
+  "branches": [
+    {
+      "branchId": "parent",
+      "sourceRevision": 1,
+      "sources": [],
+      "summaries": []
+    },
+    {
+      "branchId": "child",
+      "sourceRevision": 1,
+      "parentBranchId": "parent",
+      "sources": [
+        { "refId": "synthetic-source", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+      ],
+      "summaries": [
+        {
+          "summaryId": "decision",
+          "role": "assistant",
+          "kind": "summary",
+          "approved": true,
+          "text": "Use the existing tools for the synthetic example."
+        }
+      ]
+    }
+  ]
+}
