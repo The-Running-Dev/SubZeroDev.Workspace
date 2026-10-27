@@ -150,9 +150,9 @@ session exposure before using it. It creates no host operation, memory write or 
 
 ## Workstation verification, 2026-10-27
 
-The [recorded report](./evidence/conversation-capabilities-2026-10-27.json) was produced
+The [recorded report](https://github.com/The-Running-Dev/SubZeroDev.Workspace/blob/b17dd7bb45b86d8be8e615609a019a4eb282842c/setup-llm/docs/reference/evidence/conversation-capabilities-2026-10-27.json) was produced
 by the standalone entry point on Windows with the installed Graphify package directory
-and [operator host evidence](./evidence/conversation-host-2026-10-27.json).
+and [operator host evidence](https://github.com/The-Running-Dev/SubZeroDev.Workspace/blob/b17dd7bb45b86d8be8e615609a019a4eb282842c/setup-llm/docs/reference/evidence/conversation-host-2026-10-27.json).
 The evidence cites [AgentKit's authorized synthetic smoke test](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/blob/5c0dbca50da5d8fac05b1e9d8a957bd63717896a/docs/conversation-host-smoke.md):
 create, full-history fork and parent navigation succeeded; test chats were archived.
 Current tool contracts were also exposed. `read_thread` records contract exposure only.
