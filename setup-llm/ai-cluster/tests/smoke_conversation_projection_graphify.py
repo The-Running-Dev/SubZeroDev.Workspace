@@ -22,6 +22,8 @@ class InstalledGraphifySmoke(unittest.TestCase):
             root = Path(directory).resolve() / "projection"
             result = p.run(root, selected)
             self.assertEqual(result["status"], "supported")
+            self.assertEqual(result["contextGraph"], "graphify")
+            self.assertEqual(json.loads((root / "receipt.json").read_text())["contextGraph"], "graphify")
             version = subprocess.run(["graphify", "--version"], capture_output=True, text=True, check=True, timeout=30)
             self.assertEqual(version.stdout.strip(), "graphify " + result["graphifyVersion"])
             graph_path = root / "graph.json"

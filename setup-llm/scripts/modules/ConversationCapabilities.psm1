@@ -197,7 +197,7 @@ function Get-ManualCapabilities {
         }
         catch { $graphCode = 'live-contract-unverified' }
     }
-    New-Capability 'context-graph.live' $state $graphCode 'Locate the live owner and current read/write contract before Workspace #57; historical AgentKit design state is not an API.' $details
+    New-Capability 'context-graph.live' $state $graphCode 'Graphify is the selected context-graph tool. Supply current operator evidence for its projection contract and run the installed Graphify smoke; historical design state is not runtime evidence.' $details
 }
 
 function Get-ConversationCapabilityReport {
@@ -229,7 +229,7 @@ function Get-ConversationCapabilityReport {
             @{ operation = 'full-history fork'; adapter = 'AgentKit #497 fork_thread'; status = $hostStates['host.fork_thread']; requires = @('host.fork_thread'); evidence = 'Explicit full-history authorization required; no selective native clone' }
             @{ operation = 'native return'; adapter = 'AgentKit #497 navigation'; status = $hostStates['host.navigate_to_codex_page']; requires = @('host.navigate_to_codex_page'); evidence = 'Navigate to saved parent; portable attach retains selected outcome; no automatic messaging' }
             @{ operation = 'memory extraction'; adapter = 'AgentKit #496 MemoryKit'; status = 'unknown'; requires = @('memorykit.configuration', 'memorykit.namespace'); evidence = 'Review and select candidates; configuration is not namespace access' }
-            @{ operation = 'graph projection'; adapter = 'Workspace #57 follow-on'; status = 'unknown'; requires = @('context-graph.live', 'graphify.relationships', 'graphify.exclusions'); evidence = 'No graph adapter or new database created by this report' }
+            @{ operation = 'graph projection'; adapter = 'Workspace #57 Graphify projection'; status = 'unknown'; requires = @('context-graph.live', 'graphify.relationships', 'graphify.exclusions'); evidence = 'Existing Project-ConversationContext.ps1; run the installed Graphify lifecycle smoke separately. This read-only report never builds a graph.' }
         )
     }
 }
