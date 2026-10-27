@@ -9,6 +9,12 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 ---
 
+### 2026-10-27 — Bound the MCP dependency audit to static direct selectors
+Context: issue #54 needs visibility into mutable launch dependencies without changing registration, executing a server or claiming vulnerability coverage. Workspace's Windows memory launcher uses a tokenized cmd wrapper, so blanket shell rejection would obscure the known mutable selector.
+Chosen: recognize that wrapper and a bounded argv grammar, parse explicit local JSON/JSONC as data, project only dependency identity, and leave ambiguity unverified. Keep the audit opt-in and separate from doctor/provisioning; the security guide owns invocation and interpretation.
+Rejected: execute client exports or package resolution, because the review must not run untrusted configuration or contact a registry; accept arbitrary shell syntax, because static token guesses could create a false exact result; install an external scanner or ECC, because this pilot needs no runtime dependency; silently pin memory, because choosing a dependency version is a separate operator decision. Unsupported formats remain unverified rather than being inferred from another client's contract.
+Reversibility: remove the optional entry point and its dedicated tests/workflow; no existing host or retention configuration is changed.
+
 ### 2026-10-08 — Serve Gemma 4 through Ollama behind the existing gateway
 Context: the Local Inference Infrastructure plan targets Gemma 4 on Ollama, starting on an Intel Arc B580 workstation. ADR 0001 (`setup-llm/docs/decisions/0001-ai-cluster-mvp-architecture.md`) chose host-native llama.cpp SYCL behind a loopback LiteLLM gateway. Ollama's OpenAI-compatible endpoint routes on the model id, which llama-server ignores, and the versioned routes hard-coded llama.cpp ids.
 Chosen:

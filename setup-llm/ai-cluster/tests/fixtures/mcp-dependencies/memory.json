@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "memory": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"] },
+    "memoryWindows": { "command": "cmd", "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"] },
+    "pinned": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory@1.2.3"] },
+    "pinnedWindows": { "command": "C:\\Windows\\System32\\cmd.exe", "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory@1.2.3"] },
+    "pathWithSpaces": { "command": "C:\\Program Files\\nodejs\\npx.cmd", "args": ["-y", "@modelcontextprotocol/server-memory@1.2.3"] }
+  }
+}
