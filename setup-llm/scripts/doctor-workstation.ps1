@@ -2,7 +2,10 @@
 param(
     [ValidateSet('Codex', 'ClaudeCode', 'Both')]
     [string]$Client = 'Both',
-    [switch]$AsJson
+    [switch]$AsJson,
+    [switch]$ConversationCapabilities,
+    [string]$CapabilityEvidencePath,
+    [string]$GraphifyPackagePath
 )
 
 Set-StrictMode -Version Latest
@@ -66,8 +69,15 @@ foreach ($clientName in $clients) {
 
 $unhealthyRequiredProfiles = @($results | Where-Object { $_.status -ne 'healthy' -and -not $_.optional }).Count
 
+$capabilityReport = $null
+if ($ConversationCapabilities) {
+    Import-Module (Join-Path $PSScriptRoot 'modules/ConversationCapabilities.psm1') -Force
+    $capabilityReport = Get-ConversationCapabilityReport -EvidencePath $CapabilityEvidencePath -GraphifyPackagePath $GraphifyPackagePath
+}
+
 if ($AsJson) {
-    $results | ConvertTo-Json -Depth 6
+    if ($ConversationCapabilities) { [ordered]@{ profiles = $results; conversationCapabilities = $capabilityReport } | ConvertTo-Json -Depth 18 }
+    else { $results | ConvertTo-Json -Depth 6 }
 }
 else {
     Write-Host 'Workstation MCP profile doctor:' -ForegroundColor Cyan
@@ -80,6 +90,9 @@ else {
         }
 
         Write-Host ("- {0}/{1}: {2} ({3})" -f $entry.client, $entry.profile, $entry.status, $entry.description) -ForegroundColor $color
+    }
+    if ($ConversationCapabilities) {
+        foreach ($entry in $capabilityReport.capabilities) { Write-Host ("- {0}: {1} [{2}]" -f $entry.id, $entry.status, $entry.evidence.code) }
     }
 }
 

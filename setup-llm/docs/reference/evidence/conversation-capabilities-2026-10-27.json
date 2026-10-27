@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-27T14:52:49Z",
+  "readOnly": true,
+  "capabilities": [
+    {
+      "id": "graphify.cli",
+      "status": "supported",
+      "evidence": {
+        "code": "version-probed",
+        "details": {
+          "version": "0.9.91",
+          "functionalGraph": "not-probed"
+        }
+      },
+      "nextStep": "Supply -GraphifyPackagePath from the installed graphifyy environment to inspect its mechanisms."
+    },
+    {
+      "id": "graphify.inputs",
+      "status": "supported",
+      "evidence": {
+        "code": "supplied-source-declaration",
+        "details": {
+          "mechanism": "document extensions include .md and .txt",
+          "sourceSha256": "c6d924496c78f301156d679effe74f1d012575c2e5f21087567ca0ee5bbac033"
+        }
+      },
+      "nextStep": "Review the installed source and Graphify skill; a declaration is not a tested conversation adapter."
+    },
+    {
+      "id": "graphify.relationships",
+      "status": "supported",
+      "evidence": {
+        "code": "supplied-source-declaration",
+        "details": {
+          "mechanism": "extraction nodes/edges with attributed relationships; conversation semantics unverified",
+          "sourceSha256": "be068c6b2ff4e514f31663e0155a9d63f35096d154b98ab6c9c467a23febd6f7"
+        }
+      },
+      "nextStep": "Review the installed source and Graphify skill; a declaration is not a tested conversation adapter."
+    },
+    {
+      "id": "graphify.exclusions",
+      "status": "supported",
+      "evidence": {
+        "code": "supplied-source-declaration",
+        "details": {
+          "mechanism": "extra_excludes and gitignore discovery rules; validate scope before indexing private material",
+          "sourceSha256": "c6d924496c78f301156d679effe74f1d012575c2e5f21087567ca0ee5bbac033"
+        }
+      },
+      "nextStep": "Review the installed source and Graphify skill; a declaration is not a tested conversation adapter."
+    },
+    {
+      "id": "memorykit.configuration",
+      "status": "unconfigured",
+      "evidence": {
+        "code": "configuration-absent",
+        "details": {
+          "namespaceSelected": false,
+          "storePresent": false,
+          "contextEnabled": false,
+          "cliAvailable": false,
+          "captureEnabled": false,
+          "configurationPresent": false
+        }
+      },
+      "nextStep": "Use the existing AgentKit /memory configuration workflow if desired; this report never enables it or opens the store."
+    },
+    {
+      "id": "memorykit.namespace",
+      "status": "unconfigured",
+      "evidence": {
+        "code": "namespace-not-selected",
+        "details": {
+          "storeOpened": false,
+          "selected": false
+        }
+      },
+      "nextStep": "Supply -Namespace for the intended scope and record read-only namespace/access evidence; do not infer access from configuration."
+    },
+    {
+      "id": "memory-mcp.codex",
+      "status": "unconfigured",
+      "evidence": {
+        "code": "registration-absent",
+        "details": {
+          "registered": false,
+          "functional": "not-probed"
+        }
+      },
+      "nextStep": "Registration is not functional success or a MemoryKit store; inspect active session tools separately. Claude Code registration remains in the baseline doctor."
+    },
+    {
+      "id": "vscode.memory",
+      "status": "unconfigured",
+      "evidence": {
+        "code": "memory-extension-not-found",
+        "details": {
+          "functional": "not-probed",
+          "scope": "supplied local extension directory only",
+          "extensions": []
+        }
+      },
+      "nextStep": "Inspect the active VS Code profile and extension documentation; verify declared commands manually. CLI inventory cannot prove editor activation."
+    },
+    {
+      "id": "host.create_thread",
+      "status": "supported",
+      "evidence": {
+        "code": "operator-evidence",
+        "details": {
+          "evidenceSha256": "d32492dab80f44f9acd648e7852be728009aadb2e1a1e0b3b048652e9be6858f",
+          "hostVersion": "26.1021.3705.0",
+          "verification": "smoke"
+        }
+      },
+      "nextStep": "Inspect current session tool contracts; record exact tool exposure and separately any authorized synthetic smoke result in the evidence file."
+    },
+    {
+      "id": "host.fork_thread",
+      "status": "supported",
+      "evidence": {
+        "code": "operator-evidence",
+        "details": {
+          "evidenceSha256": "d32492dab80f44f9acd648e7852be728009aadb2e1a1e0b3b048652e9be6858f",
+          "hostVersion": "26.1021.3705.0",
+          "verification": "smoke"
+        }
+      },
+      "nextStep": "Inspect current session tool contracts; record exact tool exposure and separately any authorized synthetic smoke result in the evidence file."
+    },
+    {
+      "id": "host.navigate_to_codex_page",
+      "status": "supported",
+      "evidence": {
+        "code": "operator-evidence",
+        "details": {
+          "evidenceSha256": "d32492dab80f44f9acd648e7852be728009aadb2e1a1e0b3b048652e9be6858f",
+          "hostVersion": "26.1021.3705.0",
+          "verification": "smoke"
+        }
+      },
+      "nextStep": "Inspect current session tool contracts; record exact tool exposure and separately any authorized synthetic smoke result in the evidence file."
+    },
+    {
+      "id": "host.read_thread",
+      "status": "supported",
+      "evidence": {
+        "code": "operator-evidence",
+        "details": {
+          "evidenceSha256": "d32492dab80f44f9acd648e7852be728009aadb2e1a1e0b3b048652e9be6858f",
+          "hostVersion": "26.1021.3705.0",
+          "verification": "contract"
+        }
+      },
+      "nextStep": "Inspect current session tool contracts; record exact tool exposure and separately any authorized synthetic smoke result in the evidence file."
+    },
+    {
+      "id": "context-graph.live",
+      "status": "unknown",
+      "evidence": {
+        "code": "live-owner-not-verified",
+        "details": {
+          "ownerIdentified": false,
+          "contractSha256": null,
+          "verification": "none"
+        }
+      },
+      "nextStep": "Locate the live owner and current read/write contract before Workspace #57; historical AgentKit design state is not an API."
+    }
+  ],
+  "agentKitHost": {
+    "tools": [
+      "mcp__codex_app__create_thread",
+      "mcp__codex_app__fork_thread",
+      "mcp__codex_app__navigate_to_codex_page",
+      "mcp__codex_app__read_thread"
+    ],
+    "evidence": "Workspace report: operator evidence, recheck active session contracts; no action authorized.",
+    "host": "codex"
+  },
+  "adapters": [
+    {
+      "evidence": "AgentKit #495; works without optional integrations",
+      "adapter": "AgentKit portable package",
+      "requires": [],
+      "operation": "fork/attach/return",
+      "status": "supported"
+    },
+    {
+      "evidence": "Selected attributed prompt; explicit new-chat authorization required",
+      "adapter": "AgentKit #497 create_thread",
+      "requires": [
+        "host.create_thread"
+      ],
+      "operation": "selected handoff",
+      "status": "supported"
+    },
+    {
+      "evidence": "Explicit full-history authorization required; no selective native clone",
+      "adapter": "AgentKit #497 fork_thread",
+      "requires": [
+        "host.fork_thread"
+      ],
+      "operation": "full-history fork",
+      "status": "supported"
+    },
+    {
+      "evidence": "Navigate to saved parent; portable attach retains selected outcome; no automatic messaging",
+      "adapter": "AgentKit #497 navigation",
+      "requires": [
+        "host.navigate_to_codex_page"
+      ],
+      "operation": "native return",
+      "status": "supported"
+    },
+    {
+      "evidence": "Review and select candidates; configuration is not namespace access",
+      "adapter": "AgentKit #496 MemoryKit",
+      "requires": [
+        "memorykit.configuration",
+        "memorykit.namespace"
+      ],
+      "operation": "memory extraction",
+      "status": "unknown"
+    },
+    {
+      "evidence": "No graph adapter or new database created by this report",
+      "adapter": "Workspace #57 follow-on",
+      "requires": [
+        "context-graph.live",
+        "graphify.relationships",
+        "graphify.exclusions"
+      ],
+      "operation": "graph projection",
+      "status": "unknown"
+    }
+  ]
+}

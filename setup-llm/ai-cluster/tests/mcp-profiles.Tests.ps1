@@ -64,4 +64,37 @@ Write-Output 'filesystem'
         @($parsed).Count | Should -Be 6
         @($parsed | Where-Object { $_.status -eq 'missing' }).Count | Should -Be 6
     }
+
+    It 'keeps required-profile exit behavior with the capability report enabled (<RequiredHealthy>)' -ForEach @(
+        @{ RequiredHealthy = $true; ExpectedExit = 0 }, @{ RequiredHealthy = $false; ExpectedExit = 1 }
+    ) {
+        $doctorScript = Join-Path $PSScriptRoot '../../scripts/doctor-workstation.ps1'
+        $fakeBin = New-Item -ItemType Directory (Join-Path $TestDrive 'capability-bin') -Force
+        $list = if ($RequiredHealthy) { 'github playwright filesystem' } else { 'No servers' }
+        Set-Content (Join-Path $fakeBin 'codex.ps1') "if (`$args -contains '--json') { '[]' } else { '$list' }"
+        Set-Content (Join-Path $fakeBin 'docker.ps1') 'exit 0'
+        Set-Content (Join-Path $fakeBin 'graphify.ps1') 'exit 3'
+        $command = "`$env:PATH = '$($fakeBin.FullName.Replace("'", "''"))' + [IO.Path]::PathSeparator + `$env:PATH; & '$($doctorScript.Replace("'", "''"))' -Client Codex -AsJson -ConversationCapabilities"
+        $output = & (Get-Command pwsh).Source -NoLogo -NoProfile -Command $command
+        $LASTEXITCODE | Should -Be $ExpectedExit
+        $parsed = ($output -join [Environment]::NewLine) | ConvertFrom-Json
+        @($parsed.profiles).Count | Should -Be 6
+        $parsed.conversationCapabilities.readOnly | Should -BeTrue
+        $parsed.conversationCapabilities.adapters[0].status | Should -Be supported
+        ($parsed.conversationCapabilities.capabilities | Where-Object id -EQ 'graphify.cli').status | Should -Be unknown
+    }
+
+    It 'does not run capability probes in the default doctor' {
+        $doctorScript = Join-Path $PSScriptRoot '../../scripts/doctor-workstation.ps1'
+        $fakeBin = New-Item -ItemType Directory (Join-Path $TestDrive 'default-bin') -Force
+        $marker = Join-Path $TestDrive 'unexpected-probe'
+        Set-Content (Join-Path $fakeBin 'codex.ps1') "if (`$args -contains '--json') { Set-Content '$($marker.Replace("'", "''"))' 'unexpected' }; 'github playwright filesystem'"
+        Set-Content (Join-Path $fakeBin 'docker.ps1') 'exit 0'
+        Set-Content (Join-Path $fakeBin 'graphify.ps1') "Set-Content '$($marker.Replace("'", "''"))' 'unexpected'"
+        $command = "`$env:PATH = '$($fakeBin.FullName.Replace("'", "''"))' + [IO.Path]::PathSeparator + `$env:PATH; & '$($doctorScript.Replace("'", "''"))' -Client Codex -AsJson"
+        $output = & (Get-Command pwsh).Source -NoLogo -NoProfile -Command $command
+        $LASTEXITCODE | Should -Be 0
+        @((($output -join [Environment]::NewLine) | ConvertFrom-Json)).Count | Should -Be 6
+        Test-Path $marker | Should -BeFalse
+    }
 }
