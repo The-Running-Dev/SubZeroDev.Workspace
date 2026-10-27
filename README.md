@@ -22,6 +22,7 @@ The complete setup documentation is published at **[workspace.subzerodev.com](ht
 ### Reference
 
 - [Reflection Mode](setup-llm/docs/reference/reflection-mode.md) — use the guided inquiry prompt for deliberate analysis.
+- [Conversation Capabilities](setup-llm/docs/reference/conversation-capabilities.md) — report existing host, Graphify, MemoryKit and editor support without changing integrations.
 
 The root README is the canonical documentation index. The remaining documentation source lives in [`setup-llm/docs/`](setup-llm/docs/). Run `setup-llm/scripts/docs-local.ps1` to synchronize both into the pinned Docusaurus template and serve them locally with live reload enabled.
 

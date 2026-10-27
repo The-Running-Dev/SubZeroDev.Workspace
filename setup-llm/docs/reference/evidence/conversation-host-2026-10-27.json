@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-27T14:50:00Z",
+  "host": {
+    "name": "codex",
+    "version": "26.1021.3705.0",
+    "tools": [
+      { "name": "create_thread", "status": "supported", "verification": "smoke" },
+      { "name": "fork_thread", "status": "supported", "verification": "smoke" },
+      { "name": "navigate_to_codex_page", "status": "supported", "verification": "smoke" },
+      { "name": "read_thread", "status": "supported", "verification": "contract" }
+    ]
+  },
+  "sources": [
+    "https://github.com/The-Running-Dev/SubZeroDev.AgentKit/blob/5c0dbca50da5d8fac05b1e9d8a957bd63717896a/docs/conversation-host-smoke.md",
+    "Current session Codex tool contracts; installed OpenAI.Codex package metadata"
+  ]
+}

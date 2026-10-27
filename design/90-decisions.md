@@ -7,6 +7,24 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-27 — Opt-in conversation capability evidence (#56)
+
+Context: AgentKit #495–#497 provide portable branching, reviewed MemoryKit extraction
+and native host dispatch. Installers and registration do not establish runtime access.
+
+Chosen: an opt-in read-only report alongside the workstation doctor, preserving default
+JSON and required-profile exits. Execute only fixed version/registration probes; inspect
+supplied Graphify source and extension declarations with hashes. Record host exposure
+and smoke results as dated operator evidence. Keep live graph ownership and MemoryKit
+namespace access unknown without evidence. Project host names into the existing #497
+contract. Keep personal material in private Notes and graph adaptation in #57.
+
+Rejected: opening MemoryKit merely to inspect status (can initialize history/sidecars),
+assuming installer settings prove functional support, reviving historical AgentKit design
+state as a graph API, or adding a database, dependency, installer or automatic capture.
+
+Reversibility: remove the opt-in entry point/switch; default doctor behavior is unchanged.
+
 ---
 
 ### 2026-10-27 — Bound the MCP dependency audit to static direct selectors

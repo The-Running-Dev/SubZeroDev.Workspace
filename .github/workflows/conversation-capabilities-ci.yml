@@ -1,0 +1,29 @@
+name: Conversation Capabilities CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  capabilities:
+    name: Conversation capabilities
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
+    permissions:
+      contents: read
+    with:
+      os: '["windows-latest", "ubuntu-latest", "macos-latest"]'
+      paths: |
+        setup-llm/scripts/Report-ConversationCapabilities.ps1
+        setup-llm/scripts/modules/ConversationCapabilities.psm1
+        setup-llm/scripts/doctor-workstation.ps1
+        setup-llm/ai-cluster/tests/conversation-capabilities.Tests.ps1
+        setup-llm/ai-cluster/tests/mcp-profiles.Tests.ps1
+      tests: |
+        setup-llm/ai-cluster/tests/conversation-capabilities.Tests.ps1
+        setup-llm/ai-cluster/tests/mcp-profiles.Tests.ps1
+      artifact-name: conversation-capabilities
