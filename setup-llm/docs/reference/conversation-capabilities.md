@@ -10,8 +10,9 @@ Run this opt-in report before choosing integrations for the portable conversatio
 workflow in [AgentKit #495](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/issues/495),
 reviewed extraction in [#496](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/issues/496),
 and host outbox in [#497](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/issues/497).
-It inventories existing capabilities. Graph projection belongs to
-[Workspace #57](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/57).
+It inventories existing capabilities. The opt-in [selected conversation projection](./conversation-projection.md)
+implements [Workspace #57](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/57)
+with the installed Graphify build API; its live context-graph owner remains unverified.
 
 ## Run the report
 

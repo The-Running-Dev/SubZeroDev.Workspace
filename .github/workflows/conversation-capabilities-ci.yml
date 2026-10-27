@@ -27,3 +27,27 @@ jobs:
         setup-llm/ai-cluster/tests/conversation-capabilities.Tests.ps1
         setup-llm/ai-cluster/tests/mcp-profiles.Tests.ps1
       artifact-name: conversation-capabilities
+
+  projection:
+    name: Selected context projection (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic lifecycle tests (no graph or memory service required)
+        run: python -I setup-llm/ai-cluster/tests/test_conversation_projection.py
+      - name: PowerShell entry point and optional adapter absence
+        shell: pwsh
+        run: |
+          $state = Join-Path $env:RUNNER_TEMP 'conversation-projection-smoke'
+          & ./setup-llm/scripts/Project-ConversationContext.ps1 -PythonPath (Get-Command python).Source -StateRoot $state -SelectionPath ./setup-llm/ai-cluster/tests/fixtures/conversation-selection.json
+          if ($LASTEXITCODE -ne 3) { throw 'Expected optional Graphify absence in the clean CI environment.' }
+          if (!(Test-Path (Join-Path $state 'state.json')) -or (Test-Path (Join-Path $state 'graph.json'))) { throw 'Optional adapter failure must preserve selection and leave no retrieval output.' }
+          exit 0
