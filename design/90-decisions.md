@@ -7,6 +7,16 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-28 — Bounded native Codex TOML input for the read-only MCP auditor
+
+Context: the existing MCP dependency audit accepts JSON/JSONC, leaving native Codex configuration unverified even when it describes the same direct launch selectors.
+
+Chosen: parse an explicit, bounded TOML 1.0 subset locally in PowerShell and normalize `mcp_servers` into the existing classifier. Unsupported syntax anywhere rejects the whole input. Keep the existing report schema, exit codes, redaction and no-execution/no-network boundary; no parser or runtime dependency is installed.
+
+Rejected: regex extraction of MCP sections, which can overlook later conflicting definitions or malformed unrelated content; invoking Codex exports, which crosses the read-only data boundary; requiring Python or downloading a general TOML library, which adds a runtime or supply-chain dependency to the optional standalone audit. Full TOML coverage can be considered separately if real configurations require it.
+
+Reversibility: cheap — the adapter is isolated from the existing JSON parser and selector classification.
+
 ### 2026-10-27 — Selected Graphify projection, with persistent exclusions (#57)
 
 Context: AgentKit #495–#497 own portable branch capture, reviewed memory extraction
