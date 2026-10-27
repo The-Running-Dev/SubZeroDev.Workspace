@@ -47,9 +47,11 @@ rebuild unchanged; rebuilding refreshes an older receipt's owner label and graph
 namespace and store as authority. Optional summary `memoryRef` values are opaque
 references to already reviewed records, not new memory writes or proof of existence.
 This adapter never opens a memory store, switches stores, registers MCP tools or
-enables infrastructure. This workstation has no verified configured MemoryKit/VS Code
-memory tool, as recorded by #56. Their absence does not block portable Notes capture
-or this local graph projection. There is no automatic graph-to-memory synchronization.
+enables infrastructure. The [subsequent verification](./conversation-tools-verification.md)
+records configured private storage, successful AgentKit recall and a tested MemoryKit
+MCP server. Codex host activation and VS Code memory commands remain unverified.
+Optional memory integration does not block portable Notes capture or this local graph
+projection. There is no automatic graph-to-memory synchronization.
 
 ## Run with existing tools
 
