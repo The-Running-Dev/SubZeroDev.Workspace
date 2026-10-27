@@ -7,6 +7,26 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-27 — Selected Graphify projection, with persistent exclusions (#57)
+
+Context: AgentKit #495–#497 own portable branch capture, reviewed memory extraction
+and host dispatch. Workspace #56 verified Graphify 0.9.91, but tracked files bypass
+gitignore discovery filtering and a live context-graph owner remains unknown.
+
+Decision: use the installed Graphify Python validator/build/export APIs through an
+opt-in PowerShell entry point. Read only an explicit strict selection, never a branch
+archive. Carry stable IDs, source revisions, attribution and corpus/schema provenance.
+Persist selected state, revision high-water hashes and exclusion tombstones separately
+from disposable graph output. Invalidate owned derivatives on correction/removal or
+failed rebuild; intentional restoration needs a higher selection revision and explicit
+restore IDs. Use synthetic fixtures and an actual installed Graphify path smoke.
+
+Rejected: broad Notes ingestion protected only by gitignore; automatic extraction of
+branch manifests containing prompt material; a new graph database; using historical
+design state as a live graph API; automatic memory synchronization or enabling an
+unconfigured store. MemoryKit remains AgentKit #496's configured reviewed authority.
+No live context-graph adapter is claimed until its owner/schema is verified.
+
 ### 2026-10-27 — Opt-in conversation capability evidence (#56)
 
 Context: AgentKit #495–#497 provide portable branching, reviewed MemoryKit extraction

@@ -283,6 +283,9 @@ The first run downloads the runner image and can take several minutes. On Apple 
 
 ## Security
 
+Conversation tooling: [capability inventory](setup-llm/docs/reference/conversation-capabilities.md)
+and [selected Graphify projection](setup-llm/docs/reference/conversation-projection.md).
+
 - Review scripts before running them.
 - Keep tokens and credentials out of source control.
 - GitHub MCP is configured through the git-ignored `setup-llm/docker/.env` file and defaults to read-only access.
