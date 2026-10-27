@@ -20,6 +20,8 @@ portable archive and host outbox as their authority.
 | Reviewed extraction and memory | AgentKit main `20822b5` with MemoryKit `5834c49`: 50 tests passed, two intentionally skipped large-volume real-CLI cases. Real candidate/accept/correction/extraction entry points ran. | Isolated synthetic stores and branch archives; test fixtures include project scope and untrusted text checks. |
 | Memory MCP | Built MemoryKit 0.1.0, protocol 2026-07-28: discovery, create, operation replay, namespace filtering, read, correction and tombstone passed. | Existing SDK client connected to the existing stdio server; disposable synthetic store removed after close. Namespace filtering is not an authorization test. |
 | Local memory configuration | CLI built; private local store initialized under private Notes; AgentKit recall succeeded with an empty project scope. Codex server named `memory` registered. | `capture: false`, `context: false`; no automatic hooks installed. Store excluded locally from Notes Git. |
+| Desktop host smoke | An authorized fresh Codex chat exposed no MemoryKit or memory-named MCP tools. No MCP handshake or record operation could run; protocol/version remain unknown at this boundary. | Synthetic-only prompt; no records created or cleanup needed. Temporary chat archived afterward. Creating a fresh chat alone did not activate the registration. |
+| Codex CLI app-server diagnostic | Installed CLI 0.158.0 timed out at its own `initialize` request in a separate diagnostic process (20-second bound). | No chat created or record read/written; the MCP handshake was not reached. This is not evidence of a MemoryKit protocol failure. |
 
 These are separate from the read-only capability inventory, which deliberately never
 opens a store or executes configured code. A configured store/registered server remains
@@ -98,10 +100,21 @@ host or publish local config/store paths. Registration is reversible with
 
 ## Remaining host limits
 
-The current chat's active tool inventory contains no memory MCP tools. Start a new host
-session or reload its MCP configuration, inspect actual tools, and perform an authorized
-synthetic test before claiming host activation. The standalone SDK smoke does not prove
-Codex's own protocol negotiation or tool routing. The direct AgentKit CLI works now.
+Neither the current chat nor the authorized fresh-chat check exposed memory MCP tools.
+Registration and a fresh chat are insufficient evidence of activation. The standalone
+SDK smoke does not prove Codex's own protocol negotiation or tool routing, and the separate
+CLI app-server diagnostic timed out before its initialization completed. The direct
+AgentKit CLI works now.
+
+The [official MCP setup documentation](https://developers.openai.com/codex/mcp)
+includes **Settings → MCP servers → Restart** after configuring a desktop server.
+The [app-server API](https://developers.openai.com/codex/app-server) also documents
+`config/mcpServer/reload` and `mcpServerStatus/list`. The local daemon control socket
+refused a connection during this verification, so that route could not refresh the
+running desktop host. A desktop MCP restart and actual tool discovery remain the next
+diagnostic steps; they are not a verified fix. Repeat an authorized synthetic record
+lifecycle only after tools are exposed. Do not infer a protocol incompatibility from
+the absence of tools.
 
 No memory extension or memory command declaration was found in the inspected local
 VS Code extension directory. Use the existing CLI/MCP workflow; no invented VS Code
