@@ -7,6 +7,26 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-27 — Thin opt-in VS Code conversation entry points (#58)
+
+Context: merged AgentKit branching, reviewed memory and native outbox helpers own
+conversation semantics; Workspace capability evidence does not establish an editor API.
+
+Chosen: manual process tasks with explicit private selections in the task environment,
+installed helper argv dispatch, and private result/packet files beside each request.
+Review, selected candidate storage and acceptance stay separate. Native selection uses
+AgentKit's existing capability contract and outbox; Workspace adds no host transport.
+Node is already required by the installed helpers; no package dependency is added.
+
+Rejected: shell interpolation or private paths in editor command lines/terminal output;
+copying source, revision or memory rules into Workspace; inferred extension commands;
+automatic configuration, graph ingestion or another memory store.
+
+Reversibility: remove the additive tasks/wrapper/tests; existing provisioning and the
+canonical private archive remain independent.
+
+---
+
 ### 2026-10-27 — Opt-in conversation capability evidence (#56)
 
 Context: AgentKit #495–#497 provide portable branching, reviewed MemoryKit extraction
