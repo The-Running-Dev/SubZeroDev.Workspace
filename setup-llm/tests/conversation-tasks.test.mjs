@@ -59,7 +59,9 @@ test('real process argv preserves spaces, Unicode and shell metacharacters, with
   assert.equal(r.status, 0, r.stderr + r.stdout);
   const output = outputDir(request, r), value = JSON.parse(readFileSync(join(output, 'result.json'), 'utf8'));
   assert.deepEqual(value.argv, ['--archive-root', realpathSync(archive), '--request-file', realpathSync(request)]);
-  assert.equal(value.cwd, realpathSync(dir)); assert.equal(existsSync(join(dir, 'INJECTED')), false);
+  // Windows can retain the junction spelling in process.cwd(); POSIX resolves
+  // it. Both must still identify the caller's directory, never the kit/request.
+  assert.equal(realpathSync(value.cwd), realpathSync(dir)); assert.equal(existsSync(join(dir, 'INJECTED')), false);
   for (const text of [body, 'PRIVATE_ERROR_BODY', dir]) assert.ok(!(r.stdout + r.stderr).includes(text));
   assert.match(readFileSync(join(output, 'stderr.txt'), 'utf8'), /PRIVATE_ERROR_BODY/);
   assert.match(readFileSync(join(output, 'packet.md'), 'utf8'), /DO_NOT_LOG_BODY/);
