@@ -58,8 +58,10 @@ remain AgentKit's responsibility. Reusing a request preserves its operation ID.
    Run **Store reviewed candidates**. With memory off it returns `NotConfigured`
    (exit `2`) and preserves the review. No store is created or configured by tasks.
 6. With an explicitly configured existing MemoryKit adapter, rerun that store
-   request. Items remain unverified candidates. Acceptance is a separate explicit
+   request. New items are unverified candidates. Acceptance is a separate explicit
    action in AgentKit's existing `memorykit.ts` workflow; tasks never accept them.
+   An identical storage retry can return an item accepted in the meantime. Open the
+   private `Result` file for each selection's status; storage does not imply acceptance.
 
 See the installed AgentKit [portable workflow](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/blob/main/skills/conversation/SKILL.md),
 and its tools' schemas/tests for complete request contracts. The local
@@ -87,8 +89,10 @@ dispatch; a registration or manifest declaration is insufficient evidence.
 ## Verification
 
 Run `node --test setup-llm/scripts/conversation-task.test.mjs` from the repository
-root. CI checks literal arguments, private output and failure redaction on Windows,
-Linux and macOS. Set `AGENTKIT_TEST_HOME` to the existing AgentKit checkout to
+root. CI checks literal arguments, private output, failure redaction and a synthetic
+candidate → separate acceptance → identical storage retry on Windows, Linux and
+macOS. That replay fixture exercises the wrapper CLI without a MemoryKit installation.
+Set `AGENTKIT_TEST_HOME` to the existing AgentKit checkout to
 include its real portable entry points. Set `MEMORYKIT_CLI` to its existing built
 CLI to include isolated candidate storage. Tests create disposable synthetic data;
 they do not read the personal store or register/install any adapter.

@@ -27,6 +27,77 @@ test('literal arguments, private output and failure redaction', () => {
  } finally {rmSync(base,{recursive:true,force:true});}
 });
 
+test('store preserves an accepted replay without describing it as a candidate', () => {
+ const base=mkdtempSync(join(tmpdir(),'conversation store replay ü & '));
+ try {
+  writeFileSync(join(base,'INDEX.md'),'# Synthetic\n<!-- notes -->\n');
+  const kit=join(base,'kit'); mkdirSync(join(kit,'tools'),{recursive:true});
+  const store=join(base,'synthetic-store.json');
+  // Synthetic adapter only, adapted from #61's accepted-replay regression.
+  // Storage keeps the original receipt while replay reads the current record.
+  // Acceptance is deliberately a separate fixture edit below, never a store action.
+  writeFileSync(join(kit,'tools/conversation-memory.ts'), `
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+const args=process.argv.slice(2);
+const request=JSON.parse(readFileSync(args[args.indexOf('--request-file')+1],'utf8'));
+const file=process.env.SYNTHETIC_STORE;
+const identity=JSON.stringify([request.branchId,request.reviewId,request.selected]);
+let db, state;
+if (existsSync(file)) {
+ db=JSON.parse(readFileSync(file,'utf8'));
+ if (db.receipt.operationId!==identity) throw Error('Unexpected operation identity');
+ state='Replayed';
+} else {
+ const memory={id:'PRIVATE_MEMORY_ID',status:'candidate',verification:'unverified',revision:1,content:'PRIVATE_MEMORY_BODY'};
+ db={records:[memory],receipt:{operationId:identity,memory:{...memory},history:'persisted'}};
+ writeFileSync(file,JSON.stringify(db));
+ state='Stored';
+}
+console.log(JSON.stringify({State:'Stored',Results:{decision:{State:state,Memory:db.records[0],Receipt:db.receipt}},args}));
+`);
+  const request=join(base,'store.json');
+  writeFileSync(request,JSON.stringify({schemaVersion:1,action:'store',branchId:'synthetic',reviewId:'review-one',selected:['decision']}));
+  const requestBytes=readFileSync(request,'utf8');
+  const wrapper=fileURLToPath(new URL('./conversation-task.mjs',import.meta.url));
+  const invoke=()=>{
+   const child=spawnSync(process.execPath,[wrapper,'--operation','store','--archive-root',base,'--request-file',request],{
+    env:{...process.env,AGENTKIT_HOME:kit,SYNTHETIC_STORE:store},shell:false,encoding:'utf8',
+   });
+   assert.equal(child.status,0,child.stdout+child.stderr);
+   const report=JSON.parse(child.stdout);
+   assert.equal(report.State,'Stored');
+   for (const secret of ['PRIVATE_MEMORY_ID','PRIVATE_MEMORY_BODY','review-one','Replayed']) assert.ok(!(child.stdout+child.stderr).includes(secret));
+   return {stdout:child.stdout,report,value:JSON.parse(readFileSync(fileURLToPath(report.Result),'utf8'))};
+  };
+  const initial=invoke();
+  assert.equal(initial.value.Results.decision.State,'Stored');
+  assert.equal(initial.value.Results.decision.Memory.status,'candidate');
+  assert.equal(initial.value.Results.decision.Memory.verification,'unverified');
+  assert.deepEqual(initial.value.args,['--archive-root',base,'--request-file',request,'--project',base]);
+  const receipt=initial.value.Results.decision.Receipt;
+  const candidateRetry=invoke();
+  assert.equal(candidateRetry.value.Results.decision.State,'Replayed');
+  assert.equal(candidateRetry.value.Results.decision.Memory.status,'candidate');
+  assert.deepEqual(candidateRetry.value.Results.decision.Receipt,receipt);
+  // Explicit acceptance between the write and identical retry, as in #61.
+  const db=JSON.parse(readFileSync(store,'utf8'));
+  db.records[0].status='accepted'; db.records[0].revision=2;
+  writeFileSync(store,JSON.stringify(db));
+  const acceptedStore=readFileSync(store,'utf8');
+  const replay=invoke();
+  assert.equal(replay.value.Results.decision.State,'Replayed');
+  assert.equal(replay.value.Results.decision.Memory.status,'accepted');
+  assert.equal(replay.value.Results.decision.Memory.revision,2);
+  assert.deepEqual(replay.value.Results.decision.Receipt,receipt);
+  assert.match(replay.stdout,/Storage does not accept memories/);
+  assert.doesNotMatch(replay.stdout,/candidate/i);
+  assert.equal(readFileSync(store,'utf8'),acceptedStore); // no new record, demotion or receipt rewrite
+  assert.equal(readFileSync(request,'utf8'),requestBytes);
+  assert.equal(invoke().report.Result,replay.report.Result); // identical replay transport is stable
+  assert.equal(JSON.parse(readFileSync(fileURLToPath(initial.report.Result),'utf8')).Results.decision.Memory.status,'candidate');
+ } finally {rmSync(base,{recursive:true,force:true});}
+});
+
 test('real AgentKit fork, attach, return, review and memory-off entrypoints', {skip:!process.env.AGENTKIT_TEST_HOME},()=>{
  const base=mkdtempSync(join(tmpdir(),'editor synthetic ü & '));
  try {
