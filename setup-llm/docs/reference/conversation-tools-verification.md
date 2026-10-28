@@ -114,7 +114,13 @@ refused a connection during this verification, so that route could not refresh t
 running desktop host. On 2026-10-28 the desktop memory server was toggled off/on and
 Restart was selected; the desktop reopened. This chat still exposed no memory MCP
 tools afterward. The existing isolated SDK lifecycle passed again, but desktop
-discovery and routing remain unverified. Repeat an authorized synthetic record
+discovery and routing remain unverified. A further explicitly authorized synthetic
+chat after the restart exposed neither MemoryKit nor Graphify tools in its native
+tool inventory. It stopped without accessing any store and was archived afterward.
+This rules out a stale inventory in this chat as the sole explanation; it does not
+identify the host's routing failure. Follow-up evidence is tracked in
+[Workspace #64](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/64).
+Repeat an authorized synthetic record
 lifecycle only after tools are exposed. Do not infer a protocol incompatibility from
 the absence of tools.
 
