@@ -98,31 +98,55 @@ it is not a namespace authorization boundary. Do not reuse the registration in a
 host or publish local config/store paths. Registration is reversible with
 `codex mcp remove memory`; removing registration does not delete the store or AgentKit config.
 
-## Remaining host limits
+## Native desktop verification on 2026-10-28
 
-Neither the current chat nor the authorized fresh-chat check exposed memory MCP tools.
-Registration and a fresh chat are insufficient evidence of activation. The standalone
-SDK smoke does not prove Codex's own protocol negotiation or tool routing, and the separate
-CLI app-server diagnostic timed out before its initialization completed. The direct
-AgentKit CLI works now.
+The earlier unavailable desktop results above are historical. The cause is now proven
+by native `codex_mcp::rmcp_client` startup logs from ChatGPT/Codex desktop
+**26.1023.6123.0**: the host requested MCP **2025-06-18**, and MemoryKit rejected
+initialization with `-32022`, `requested: "2025-06-18"` and
+`supported: ["2026-07-28"]`. This is direct handshake evidence, not an inference
+from an absent tool inventory. Graphify is used through its existing CLI/API;
+its absence from the native MCP catalog is not a startup failure.
 
-The [official MCP setup documentation](https://developers.openai.com/codex/mcp)
-includes **Settings → MCP servers → Restart** after configuring a desktop server.
-The [app-server API](https://developers.openai.com/codex/app-server) also documents
-`config/mcpServer/reload` and `mcpServerStatus/list`. The local daemon control socket
-refused a connection during this verification, so that route could not refresh the
-running desktop host. On 2026-10-28 the desktop memory server was toggled off/on and
-Restart was selected; the desktop reopened. This chat still exposed no memory MCP
-tools afterward. The existing isolated SDK lifecycle passed again, but desktop
-discovery and routing remain unverified. A further explicitly authorized synthetic
-chat after the restart exposed neither MemoryKit nor Graphify tools in its native
-tool inventory. It stopped without accessing any store and was archived afterward.
-This rules out a stale inventory in this chat as the sole explanation; it does not
-identify the host's routing failure. Follow-up evidence is tracked in
+MemoryKit now uses the existing SDK v2 `serveStdio` compatibility option
+`legacy: 'serve'`. Both protocol eras use the same tool factory, embedded principal,
+service validation and persistence. HTTP remains modern-only with its existing
+authenticator. The isolated subprocess regression reproduced the original rejection
+before the fix and passed afterward. The existing modern CLI/SDK smoke also passed.
+
+For native verification, a separately named temporary registration,
+`memory_synthetic_64`, pointed to a newly initialized disposable synthetic store.
+An explicitly authorized fresh chat discovered these native tools (each prefixed
+`mcp__memory_synthetic_64__`):
+
+- `memory_archive`, `memory_create`, `memory_get`, `memory_history`
+- `memory_operation`, `memory_restore`, `memory_retrieve`, `memory_revision`
+- `memory_search`, `memory_supersede`, `memory_tombstone`, `memory_update`
+
+Through those native tools only, the chat created a synthetic record with an operation
+ID, found it with a namespace-filtered search, confirmed another namespace was empty,
+read it, corrected it with `expectedRevision: 1`, and tombstoned revision 2. A final
+active search was empty and a get returned tombstoned revision 3. No shell or SDK
+substitution was used for this host check. No personal memory tools were called;
+the smoke server opened only its dedicated synthetic store. The pre-existing personal
+server configuration remained unchanged. The temporary registration was removed and
+the temporary chat archived afterward.
+
+To repeat: build the existing MemoryKit checkout containing the stdio fix, initialize
+a disposable store, register that store under a distinct temporary MCP name, and use
+an explicitly authorized fresh chat. Confirm that exact server's native catalog before
+performing synthetic operations; remove the temporary registration and archive the
+chat afterward. This run picked up the registration in the fresh chat without another
+restart. If refresh is needed, the [official MCP setup documentation](https://developers.openai.com/codex/mcp)
+documents **Settings → MCP servers → Restart**; the
+[app-server API](https://developers.openai.com/codex/app-server) documents
+`config/mcpServer/reload` and `mcpServerStatus/list`.
+
+This verifies the tested desktop version and configuration, not every future session
+or host. Candidate review and explicit acceptance remain required; capture/context
+defaults remain off. The CLI/SDK fallback remains available. Evidence and the upstream
+compatibility fix are linked from
 [Workspace #64](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/64).
-Repeat an authorized synthetic record
-lifecycle only after tools are exposed. Do not infer a protocol incompatibility from
-the absence of tools.
 
 No memory extension or memory command declaration was found in the inspected local
 VS Code extension directory. Use the existing CLI/MCP workflow; no invented VS Code
