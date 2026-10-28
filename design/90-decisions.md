@@ -7,6 +7,16 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-28 — Validate Codex metadata without filtering disabled dependencies
+
+Context: ordinary enablement and timeout metadata currently obscures otherwise recognizable direct dependency selectors in the optional MCP audit.
+
+Chosen: validate a bounded set of metadata in the shared classifier, independently of enablement. Reject malformed metadata and conflicting startup aliases without copying their values into reports. Keep unknown launch options unverified and preserve the report schema and read-only boundary.
+
+Rejected: skipping disabled entries, which hides mutable dependencies that can later be enabled; ignoring every extra field, which could promote an unsupported launch shape to exact; inferring precedence between startup aliases, which would bind the static auditor to a client-specific resolution rule.
+
+Reversibility: cheap — remove the metadata allowance; launch parsing and host configuration remain independent.
+
 ### 2026-10-28 — Bounded native Codex TOML input for the read-only MCP auditor
 
 Context: the existing MCP dependency audit accepts JSON/JSONC, leaving native Codex configuration unverified even when it describes the same direct launch selectors.
