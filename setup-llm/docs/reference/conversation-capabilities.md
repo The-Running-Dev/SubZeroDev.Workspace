@@ -12,7 +12,8 @@ reviewed extraction in [#496](https://github.com/The-Running-Dev/SubZeroDev.Agen
 and host outbox in [#497](https://github.com/The-Running-Dev/SubZeroDev.AgentKit/issues/497).
 It inventories existing capabilities. The opt-in [selected conversation projection](./conversation-projection.md)
 implements [Workspace #57](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/57)
-with the installed Graphify build API; its live context-graph owner remains unverified.
+with the installed Graphify build API. Graphify is the selected context-graph tool;
+see the [functional verification and local setup](./conversation-tools-verification.md).
 
 ## Run the report
 
@@ -68,14 +69,17 @@ source/version remains `unknown`. In Graphify 0.9.91, tracked files bypass gitig
 discovery filtering: `.gitignore` alone is insufficient to protect private material.
 Validate explicit exclusions and corpus boundaries before any future indexing operation.
 
-No live context-graph tool is assumed from Graphify installation or historical AgentKit
-design state. Default `context-graph.live` is `unknown`. To record a live owner manually,
+Graphify owns the selected conversation graph through the existing #57 projection and
+`graphify path` retrieval. No separate context-graph service is required. Installation
+alone is not runtime evidence: default `context-graph.live` is `unknown` in this read-only
+inventory. To record the selected owner manually,
 add `contextGraph` to an evidence document with `status`, `live: true`, `owner`, and
 `contractPath` pointing to the current owner's contract. Supported evidence requires a
 readable hashed contract outside a `design/` directory. This is operator evidence; the
 script cannot authenticate ownership or test that API. The report retains the hash and
-an owner-identified boolean, not the owner/path. Locate and verify this contract before
-#57; do not resurrect the retired AgentKit design graph or create a database.
+an owner-identified boolean, not the owner/path. For Graphify, use this repository's
+`conversation-projection.md` as the adapter contract and run the installed lifecycle
+smoke separately. Do not resurrect the retired AgentKit design graph or create a database.
 
 ## MemoryKit, memory MCP and VS Code
 
@@ -147,7 +151,7 @@ session exposure before using it. It creates no host operation, memory write or 
 | Full-history fork | #497 `fork_thread`, explicit consent to the complete inherited history. No selective native clone. |
 | Native return | #497 navigation to the saved parent. Portable attach retains the selected outcome; no automatic message or history rewrite. |
 | Memory extraction | #496 reviewed selection using existing MemoryKit; verify store and namespace access separately. |
-| Graph projection | Deferred to #57 after live owner, relationship mapping and private exclusion scope are verified. |
+| Graph projection | #57 `Project-ConversationContext.ps1` and existing Graphify build/path tools; reviewed selection only. Verify its lifecycle separately. |
 
 ## Workstation verification, 2026-10-27
 
@@ -163,7 +167,9 @@ Observed: Graphify 0.9.91 with the declarations above; no default MemoryKit conf
 no Codex memory MCP registration, and no memory-related declaration in the inspected
 local VS Code extension directory. No live context-graph owner/API was exposed to this
 session. Namespace access and functional editor memory use were not probed. This is a
-dated inventory, not a guarantee for another profile or future installation.
+dated inventory, not a guarantee for another profile or future installation. The
+[subsequent verification](./conversation-tools-verification.md) records the resolved
+Graphify ownership and configured MemoryKit integration; it does not rewrite this snapshot.
 
 Pester fixtures cover absent tools, failures, partial hosts, supported declarations,
 invalid/stale evidence, subprocess failure/timeouts, secret redaction, store immutability
