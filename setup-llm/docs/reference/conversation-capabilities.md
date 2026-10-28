@@ -14,6 +14,8 @@ It inventories existing capabilities. The opt-in [selected conversation projecti
 implements [Workspace #57](https://github.com/The-Running-Dev/SubZeroDev.Workspace/issues/57)
 with the installed Graphify build API. Graphify is the selected context-graph tool;
 see the [functional verification and local setup](./conversation-tools-verification.md).
+The opt-in [VS Code conversation tasks](./conversation-editor-tasks.md) reuse these
+same AgentKit portable and host workflows without requiring a memory extension.
 
 ## Run the report
 

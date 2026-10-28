@@ -303,6 +303,156 @@
         "focus": false
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Fork",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "fork",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Attach",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "attach",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Return",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "return",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Review memory",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "review",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Store reviewed candidates",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "store",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Host adapter request",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "host",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "conversationArchive",
+      "type": "promptString",
+      "description": "Absolute private archive path (existing AgentKit archive)"
+    },
+    {
+      "id": "conversationRequest",
+      "type": "promptString",
+      "description": "Absolute private AgentKit request JSON path (matching task action)"
     }
   ]
 }
