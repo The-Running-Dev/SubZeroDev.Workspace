@@ -7,6 +7,24 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-28 — Explicit, read-only hook registration audit
+
+Context: the ECC reassessment identified value in spotting repeated registrations
+without importing its hook runtime or duplicating AgentKit and SkyNetHR ownership.
+
+Chosen: an opt-in local data reader with an explicit host and a conservative command
+subset. Compare exact supported registrations, including optional-field presence;
+never infer shell equivalence or effective host loading. Unknown fields remain
+unverified. Redact commands, matchers, paths and descriptive strings without
+publishing reversible fingerprints. See the linked contract in `20-contract.md`.
+
+Rejected: installing ECC; executing candidate hooks; scanning user profiles;
+automatically rewriting registrations; claiming identical presence proves double
+execution; adding runtime monitoring or permission-policy enforcement here.
+
+Reversibility: cheap — remove the optional auditor and its CI; no host configuration
+or existing setup/doctor path is changed.
+
 ### 2026-10-28 — Validate Codex metadata without filtering disabled dependencies
 
 Context: ordinary enablement and timeout metadata currently obscures otherwise recognizable direct dependency selectors in the optional MCP audit.
