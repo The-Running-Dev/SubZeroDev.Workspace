@@ -67,6 +67,15 @@ Describe 'AI settings temporary-profile entry point' {
         $status.attention.Count | Should -Be 1
     }
 
+    It 'reports a specific error for WhatIf outside restore' {
+        foreach ($command in 'capture', 'status') {
+            $result = Invoke-FixtureCommand @($command, '-WhatIf')
+            $script:ResultCode | Should -Be 1
+            $result.error | Should -BeExactly 'what-if-requires-restore'
+            Test-Path (Join-Path $script:FixtureRoot 'repo') | Should -BeFalse
+        }
+    }
+
     It 'refuses an outside profile without opening it' {
         $outside = Join-Path ([IO.Path]::GetTempPath()) 'not-authorized-profile'
         $result = Invoke-FixtureCommand @('capture', '-CodexHome', $outside)

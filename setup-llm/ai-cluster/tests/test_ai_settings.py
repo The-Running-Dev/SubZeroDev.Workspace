@@ -261,6 +261,49 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(attempts, [0, 1, 2])
         self.assertEqual(json.loads(self.manager().data.read_bytes()), {"external": True})
 
+    def test_change_during_read_is_retried_then_refused_after_three_reads(self):
+        original = Path.read_bytes
+        reads = []
+
+        def racing(limit):
+            def read(path):
+                raw = original(path)
+                if path == self.codex:
+                    reads.append(path)
+                    if len(reads) <= limit:
+                        stat = path.stat()
+                        os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1_000_000_000))
+                return raw
+            return read
+
+        with patch.object(Path, "read_bytes", racing(2)):
+            _, raw = ai.fingerprint(self.codex)
+        self.assertEqual((len(reads), raw), (3, self.codex.read_bytes()))
+        reads.clear()
+        with patch.object(Path, "read_bytes", racing(99)), \
+                self.assertRaisesRegex(ai.SettingsError, "concurrent-modification"):
+            ai.fingerprint(self.codex)
+        self.assertEqual(len(reads), 3)
+
+    def test_non_finite_json_numbers_are_refused_as_invalid(self):
+        self.capture()
+        baseline = self.manager().data.read_bytes()
+        for raw in (b'{"autoCompactWindow": 1e400}', b'{"x": -1e400}', b'{"x": NaN}', b'{"x": Infinity}'):
+            with self.subTest(raw=raw):
+                self.claude.write_bytes(raw)
+                run, result = self.cli("capture")
+                self.assertEqual(run.returncode, 1)
+                self.assertEqual(result["error"], "invalid-json-number")
+                self.assertEqual(self.manager().data.read_bytes(), baseline)
+
+    def test_toml_insertion_precedes_comments_attached_to_first_header(self):
+        self.capture()
+        self.codex.write_bytes(b'model = "fixture-model"\n\n# Profile notes\n[profiles.a]\nmodel = "nested"\n')
+        self.manager().restore()
+        self.assertEqual(self.codex.read_bytes(),
+                         b'model = "fixture-model"\n"model_verbosity" = "low"\n'
+                         b'\n# Profile notes\n[profiles.a]\nmodel = "nested"\n')
+
     def test_snapshot_version_actions_and_missing_destination_rejected(self):
         self.capture()
         baseline = self.manager().data.read_bytes()

@@ -39,9 +39,7 @@ if ($Force) { $arguments += '--force' }
 if ($WhatIfPreference) { $arguments += '--what-if' }
 
 try {
-    if ($Command -ne 'restore' -and $WhatIfPreference) {
-        throw 'WhatIf is supported only for restore.'
-    }
+    # WhatIf outside restore is passed through; the engine refuses it before any read.
     if ($Command -eq 'restore' -and -not $WhatIfPreference -and
         -not $PSCmdlet.ShouldProcess('temporary fixture profiles', 'Restore reviewed preferences')) {
         if ($AsJson) { '{"changed":false,"items":[],"attention":[],"declined":true}' }

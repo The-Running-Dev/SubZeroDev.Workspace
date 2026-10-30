@@ -43,8 +43,15 @@ def json_load(raw):
             result[key] = value
         return result
 
+    def finite(text):
+        # Overflowing literals such as 1e400 become inf without reaching parse_constant.
+        value = float(text)
+        if not math.isfinite(value):
+            fail("invalid-json-number")
+        return value
+
     try:
-        return json.loads(raw, object_pairs_hook=pairs,
+        return json.loads(raw, object_pairs_hook=pairs, parse_float=finite,
                           parse_constant=lambda _: fail("invalid-json-number"))
     except (ValueError, UnicodeError):
         fail("malformed-json")
@@ -246,13 +253,16 @@ def toml_spans(text, rules):
     names = {r["path"][0] for r in rules}
     spans = {}
     prelude_end = len(text)
+    # Comments and blank lines directly above a header belong to that table.
+    last_statement_end = 0
     for start, end, statement in statements(text):
         trimmed = statement.lstrip()
         if not trimmed or trimmed.startswith("#"):
             continue
         if trimmed.startswith("["):
-            prelude_end = start
+            prelude_end = last_statement_end
             break
+        last_statement_end = end
         equals = outside_index(statement, "=")
         if equals < 0:
             fail("unsupported-toml-statement")
@@ -353,15 +363,17 @@ def plan(raw, target, rules, actions):
 
 
 def fingerprint(path):
-    try:
-        before = path.stat()
-        raw = path.read_bytes()
-        after = path.stat()
-    except FileNotFoundError:
-        return None, None
-    if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
-        fail("concurrent-modification")
-    return (after.st_size, after.st_mtime_ns, hashlib.sha256(raw).digest()), raw
+    # A writer active during the read gets the same three attempts as a check conflict.
+    for _ in range(3):
+        try:
+            before = path.stat()
+            raw = path.read_bytes()
+            after = path.stat()
+        except FileNotFoundError:
+            return None, None
+        if (before.st_size, before.st_mtime_ns) == (after.st_size, after.st_mtime_ns):
+            return (after.st_size, after.st_mtime_ns, hashlib.sha256(raw).digest()), raw
+    fail("concurrent-modification")
 
 
 def temp_absolute(path):
