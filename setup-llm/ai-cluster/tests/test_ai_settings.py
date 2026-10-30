@@ -413,6 +413,31 @@ class SettingsTests(unittest.TestCase):
         with self.assertRaises(ai.SettingsError):
             self.manager(claude_home=link)
 
+    def assert_overlap_refused(self, command, *args):
+        before = self.tree()
+        directories = {p.relative_to(self.root) for p in self.root.rglob("*") if p.is_dir()}
+        run, result = self.cli(command, *args)
+        self.assertEqual(run.returncode, 1)
+        self.assertEqual(result["error"], "overlapping-sandbox-paths")
+        self.assertFalse(result["changed"])
+        self.assertEqual(self.tree(), before)
+        self.assertEqual({p.relative_to(self.root) for p in self.root.rglob("*") if p.is_dir()}, directories)
+
+    def test_data_file_inside_codex_home_is_refused_without_writes(self):
+        self.assert_overlap_refused("capture", "--data-path", str(self.codex.parent / "preferences.json"))
+
+    def test_backup_directory_inside_claude_home_is_refused_without_writes(self):
+        self.capture()
+        self.mutate()
+        self.assert_overlap_refused("restore", "--backup-root", str(self.claude.parent / "bk"))
+
+    def test_shared_profile_home_is_refused_without_writes(self):
+        (self.claude.parent / "config.toml").write_bytes(self.codex.read_bytes())
+        self.assert_overlap_refused("capture", "--codex-home", str(self.claude.parent))
+
+    def test_nested_data_file_inside_claude_home_is_refused_without_writes(self):
+        self.assert_overlap_refused("capture", "--data-path", str(self.claude.parent / "repo" / "preferences.json"))
+
     def test_no_profile_reads_outside_sandbox_even_with_hostile_environment(self):
         visited = []
         original = Path.read_bytes

@@ -437,7 +437,7 @@ class Manager:
                         "codex": self.bound(codex_home or self.root / "codex") / TARGETS["codex"]}
         self.data = self.bound(data_path or self.root / "repo" / "preferences.json")
         self.backups = self.bound(backup_root or self.root / "private-backups")
-        paths = [*self.targets.values(), self.data, self.backups]
+        paths = [*(path.parent for path in self.targets.values()), self.data, self.backups]
         if any(a == b or a in b.parents or b in a.parents for i, a in enumerate(paths) for b in paths[i + 1:]):
             fail("overlapping-sandbox-paths")
         if self.backups.is_relative_to(self.data.parent):
