@@ -285,6 +285,152 @@ class SettingsTests(unittest.TestCase):
             ai.fingerprint(self.codex)
         self.assertEqual(len(reads), 3)
 
+    def test_fingerprint_permission_errors_are_retried_and_bounded(self):
+        for operation in ("stat", "read_bytes"):
+            original = getattr(Path, operation)
+            for failures in (2, 99):
+                calls = 0
+
+                def locked(path, *args, **kwargs):
+                    nonlocal calls
+                    if path == self.codex:
+                        calls += 1
+                        if calls <= failures:
+                            raise PermissionError(CANARY)
+                    return original(path, *args, **kwargs)
+
+                with self.subTest(operation=operation, failures=failures), patch.object(Path, operation, locked):
+                    if failures == 2:
+                        _, raw = ai.fingerprint(self.codex)
+                        self.assertEqual(raw, b'model = "fixture-model"\nmodel_verbosity = "low"\n')
+                    else:
+                        with self.assertRaises(PermissionError):
+                            ai.fingerprint(self.codex)
+                # Successful reads stat twice; failed attempts only stat once.
+                self.assertEqual(calls, 4 if operation == "stat" and failures == 2 else 3)
+
+    def test_transient_read_failures_during_restore_are_retried(self):
+        self.capture()
+        original = Path.read_bytes
+        for stage in ("after-write", "before-check", "after-check"):
+            self.mutate()
+            remaining = 0
+            failures = 0
+
+            def hook(event, attempt, path):
+                nonlocal remaining
+                if event == stage and path == (self.claude if stage == "after-write" else self.codex):
+                    remaining = 2
+
+            def locked(path):
+                nonlocal remaining, failures
+                if path == self.codex and remaining:
+                    remaining -= 1
+                    failures += 1
+                    raise PermissionError(CANARY)
+                return original(path)
+
+            with self.subTest(stage=stage), patch.object(Path, "read_bytes", locked):
+                result = self.manager(hook=hook).restore()
+            self.assertEqual(failures, 2)
+            self.assertEqual(sum(i["outcome"] == "applied" for i in result["items"]), 2)
+            self.assertEqual(json.loads(self.claude.read_bytes())["model"], "opus")
+            self.assertEqual(ai.tomllib.loads(self.codex.read_text())["model"], "fixture-model")
+
+    def test_exhausted_read_failures_roll_back_earlier_file(self):
+        self.capture()
+        self.mutate()
+        before = self.claude.read_bytes()
+        original = Path.read_bytes
+        armed = False
+        failures = 0
+
+        def hook(event, attempt, path):
+            nonlocal armed
+            if event == "after-write" and path == self.claude:
+                armed = True
+
+        def locked(path):
+            nonlocal failures
+            if armed and path == self.codex:
+                failures += 1
+                raise PermissionError(CANARY)
+            return original(path)
+
+        manager = self.manager(hook=hook)
+        with patch.object(Path, "read_bytes", locked), self.assertRaises(PermissionError):
+            manager.restore()
+        self.assertEqual(failures, 3)
+        self.assertEqual(self.claude.read_bytes(), before)
+        self.assertIn("rolled-back", [i["outcome"] for i in manager.result["items"]])
+        self.assertTrue(list(manager.backups.glob("*/settings.json")))
+        self.assertFalse(list(manager.backups.glob("*/complete.json")))
+
+    @unittest.skipUnless(os.name == "nt", "Windows ACL semantics")
+    def test_windows_target_dacl_survives_restore_and_rollback(self):
+        self.capture()
+        subprocess.run(["icacls", str(self.claude.parent), "/grant", "*S-1-1-0:(OI)(CI)R"],
+                       capture_output=True, check=True)
+        # Compare access rules and protection, not the historical auto-inheritance flag.
+        inspect = ('$a=Get-Acl -LiteralPath $env:AI_SETTINGS_FIXTURE_ACL; '
+                   '$s=$a.GetSecurityDescriptorSddlForm([System.Security.AccessControl.AccessControlSections]::Access); '
+                   '[pscustomobject]@{Protected=$a.AreAccessRulesProtected; Rules=($s -replace "^D:[^(]*", "D:")} '
+                   '| ConvertTo-Json -Compress')
+        restrict = ('$a=[System.Security.AccessControl.FileSecurity]::new(); '
+                    '$a.SetAccessRuleProtection($true,$false); '
+                    '$sid=[System.Security.Principal.WindowsIdentity]::GetCurrent().User; '
+                    '$a.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new($sid,"FullControl","Allow")); '
+                    'Set-Acl -LiteralPath $env:AI_SETTINGS_FIXTURE_ACL -AclObject $a; '
+                    'if ($env:AI_SETTINGS_FIXTURE_PROTECTED -ne "True") {'
+                    '& icacls $env:AI_SETTINGS_FIXTURE_ACL /inheritance:e | Out-Null; '
+                    'if ($LASTEXITCODE -ne 0) {exit 1}}; ')
+
+        def acl(command, protected):
+            result = subprocess.run(["pwsh", "-NoProfile", "-Command", command], capture_output=True, text=True,
+                                    env={**os.environ, "AI_SETTINGS_FIXTURE_ACL": str(self.claude),
+                                         "AI_SETTINGS_FIXTURE_PROTECTED": str(protected)}, check=True)
+            return json.loads(result.stdout)
+
+        for protected in (True, False):
+            for rollback in (False, True):
+                with self.subTest(protected=protected, rollback=rollback):
+                    self.mutate()
+                    before_bytes = self.claude.read_bytes()
+                    before_acl = acl(restrict + inspect, protected)
+                    self.assertEqual(before_acl["Protected"], protected)
+                    self.assertEqual(";;;WD)" in before_acl["Rules"], not protected)
+
+                    def hook(event, attempt, path):
+                        if rollback and event == "before-check" and path == self.codex:
+                            raise PermissionError(CANARY)
+
+                    manager = self.manager(hook=hook)
+                    if rollback:
+                        with self.assertRaises(PermissionError):
+                            manager.restore()
+                        self.assertEqual(self.claude.read_bytes(), before_bytes)
+                        self.assertIn("rolled-back", [i["outcome"] for i in manager.result["items"]])
+                    else:
+                        manager.restore()
+                        self.assertEqual(json.loads(self.claude.read_bytes())["model"], "opus")
+                    self.assertEqual(acl(inspect, protected), before_acl)
+                    self.assertEqual(list(self.claude.parent.glob(".ai-settings-*")), [])
+
+    @unittest.skipUnless(os.name == "nt", "Windows ACL semantics")
+    def test_windows_dacl_failure_stages_no_content_and_preserves_target(self):
+        before = self.claude.read_bytes()
+        inspected = []
+
+        def refused(source, destination):
+            inspected.append(destination.read_bytes())
+            raise PermissionError(CANARY)
+
+        with patch.object(ai, "copy_windows_dacl", refused), self.assertRaises(PermissionError):
+            ai.replace(self.claude, CANARY.encode())
+        self.assertEqual(inspected, [b""])
+        self.assertEqual(self.claude.read_bytes(), before)
+        self.assertEqual(list(self.claude.parent.glob(".ai-settings-*")), [])
+
     def test_non_finite_json_numbers_are_refused_as_invalid(self):
         self.capture()
         baseline = self.manager().data.read_bytes()

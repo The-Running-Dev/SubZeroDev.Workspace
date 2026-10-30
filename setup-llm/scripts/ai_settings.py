@@ -363,14 +363,18 @@ def plan(raw, target, rules, actions):
 
 
 def fingerprint(path):
-    # A writer active during the read gets the same three attempts as a check conflict.
-    for _ in range(3):
+    # Read locks and writers active during a read get the same bounded attempts.
+    for attempt in range(3):
         try:
             before = path.stat()
             raw = path.read_bytes()
             after = path.stat()
         except FileNotFoundError:
             return None, None
+        except PermissionError:
+            if attempt == 2:
+                raise
+            continue
         if (before.st_size, before.st_mtime_ns) == (after.st_size, after.st_mtime_ns):
             return (after.st_size, after.st_mtime_ns, hashlib.sha256(raw).digest()), raw
     fail("concurrent-modification")
@@ -419,12 +423,49 @@ def private_dir(path):
         path.chmod(0o700)
 
 
+def copy_windows_dacl(source, destination):
+    """Copy access rules and their inheritance protection before staging content."""
+    import ctypes
+    from ctypes import wintypes
+    security = ctypes.WinDLL("advapi32", use_last_error=True)
+    security.GetFileSecurityW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, ctypes.c_void_p,
+                                         wintypes.DWORD, ctypes.POINTER(wintypes.DWORD)]
+    security.GetFileSecurityW.restype = wintypes.BOOL
+    security.GetSecurityDescriptorControl.argtypes = [ctypes.c_void_p, ctypes.POINTER(wintypes.WORD),
+                                                     ctypes.POINTER(wintypes.DWORD)]
+    security.GetSecurityDescriptorControl.restype = wintypes.BOOL
+    security.SetFileSecurityW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, ctypes.c_void_p]
+    security.SetFileSecurityW.restype = wintypes.BOOL
+    needed = wintypes.DWORD()
+    # DACL_SECURITY_INFORMATION; the first call determines the descriptor buffer size.
+    if not security.GetFileSecurityW(str(source), 4, None, 0, ctypes.byref(needed)):
+        if ctypes.get_last_error() != 122:  # ERROR_INSUFFICIENT_BUFFER
+            raise ctypes.WinError(ctypes.get_last_error())
+    descriptor = ctypes.create_string_buffer(needed.value)
+    if not security.GetFileSecurityW(str(source), 4, descriptor, len(descriptor), ctypes.byref(needed)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    control, revision = wintypes.WORD(), wintypes.DWORD()
+    if not security.GetSecurityDescriptorControl(descriptor, ctypes.byref(control), ctypes.byref(revision)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    # SE_DACL_PROTECTED selects PROTECTED/UNPROTECTED_DACL_SECURITY_INFORMATION.
+    information = 4 | (0x80000000 if control.value & 0x1000 else 0x20000000)
+    if not security.SetFileSecurityW(str(destination), information, descriptor):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+
 def replace(path, raw):
-    """Same-directory temporary file; replacement preserves mode, not a CAS lock."""
+    """Same-directory staging preserves permissions; rename is not a CAS lock."""
     descriptor, name = tempfile.mkstemp(prefix=".ai-settings-", dir=path.parent)
     temporary = Path(name)
     try:
         with os.fdopen(descriptor, "wb") as stream:
+            if os.name == "nt":
+                try:
+                    path.stat()
+                except FileNotFoundError:
+                    pass
+                else:
+                    copy_windows_dacl(path, temporary)
             stream.write(raw)
             stream.flush()
             os.fsync(stream.fileno())
