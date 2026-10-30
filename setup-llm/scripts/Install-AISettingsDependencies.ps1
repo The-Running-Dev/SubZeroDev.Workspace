@@ -7,5 +7,8 @@ Installs the AI settings engine's locked dependencies for development and CI.
 param()
 
 $ErrorActionPreference = 'Stop'
-& npm ci --prefix (Join-Path $PSScriptRoot '..') --ignore-scripts --no-audit --no-fund
+$packageRoot = Join-Path $PSScriptRoot '..'
+# npm.ps1 reparses PowerShell source; invoke the native shim with evaluated arguments.
+$npmExecutable = if ($IsWindows) { 'npm.cmd' } else { 'npm' }
+& $npmExecutable ci --prefix $packageRoot --ignore-scripts --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) { throw 'AI settings dependency installation failed.' }
