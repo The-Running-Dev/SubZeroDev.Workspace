@@ -7,6 +7,27 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-30 — Node/TypeScript AI settings engine
+
+Context: Ben explicitly requested removal of the AI settings Python dependency
+and implementation in Node/TypeScript, following the repository's Node tooling.
+This supersedes the runtime choice in the earlier S1 decision below.
+
+Chosen: Node 22.18 or later runs erasable TypeScript directly, with `node:test`
+acceptance tests and a separate TypeScript typecheck. Pin `@ltd/j-toml` for full
+TOML 1.0 validation and `lossless-json` for duplicate rejection and unowned number
+precision. Keep the PowerShell entry point, lexical TOML edits, before/after
+semantic verification, bounded retries, sandbox and rollback semantics. Use a
+small PowerShell/.NET Windows ACL adapter before writing staging contents.
+Install the lockfile with npm ci; no package lifecycle scripts are needed.
+
+Rejected: retaining the Python engine or tests; a PowerShell engine rewrite
+(superseded by Ben's Node/TypeScript instruction); a bounded TOML subset or whole
+file TOML serialization; ordinary JSON.parse for unowned numbers (can round them).
+
+Reversibility: cheap — the optional engine and its dependencies remain isolated
+under setup-llm; no app profile or machine installation is changed.
+
 ### 2026-10-30 — Fixture-only AI preferences and full TOML validation
 
 Context: Ben accepted S1 after reviewing preference ownership, removal semantics,

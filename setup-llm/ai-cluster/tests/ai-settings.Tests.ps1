@@ -2,10 +2,10 @@
 BeforeAll {
     $script:Entry = Join-Path $PSScriptRoot '../../scripts/Manage-AISettings.ps1'
     $script:Pwsh = (Get-Process -Id $PID).Path
-    $script:Python = (Get-Command python -ErrorAction Stop).Source
+    $script:Node = (Get-Command node -ErrorAction Stop).Source
     function Invoke-FixtureCommand {
         param([string[]]$Options)
-        $text = & $script:Pwsh -NoProfile -File $script:Entry @Options -SandboxRoot $script:FixtureRoot -PythonPath $script:Python -AsJson
+        $text = & $script:Pwsh -NoProfile -File $script:Entry @Options -SandboxRoot $script:FixtureRoot -NodePath $script:Node -AsJson
         $script:ResultCode = $LASTEXITCODE
         return ($text -join "`n" | ConvertFrom-Json -AsHashtable)
     }
