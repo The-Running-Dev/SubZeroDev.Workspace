@@ -1,0 +1,26 @@
+name: Hook Configuration Audit CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  audit:
+    name: Hook configuration audit
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
+    permissions:
+      contents: read
+    with:
+      os: '["windows-latest", "ubuntu-latest", "macos-latest"]'
+      paths: |
+        setup-llm/scripts/Test-HookConfiguration.ps1
+        setup-llm/scripts/modules/HookConfigurationAudit.psm1
+        setup-llm/ai-cluster/tests/hook-configuration.Tests.ps1
+      analyzer: true
+      tests: setup-llm/ai-cluster/tests/hook-configuration.Tests.ps1
+      artifact-name: hook-audit

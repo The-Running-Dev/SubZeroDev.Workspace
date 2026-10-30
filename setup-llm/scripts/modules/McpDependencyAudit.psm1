@@ -132,6 +132,23 @@ function Get-DockerAudit {
     New-AuditDependency 'docker' $image 'mutable' 'docker-tag-or-implicit-latest'
 }
 
+function Test-McpAuditServerMetadata {
+    param([System.Collections.IDictionary]$Server)
+    if ($Server.Contains('enabled') -and $Server.enabled -isnot [bool]) { return $false }
+    # Codex accepts the millisecond name as an alias. Do not infer precedence when
+    # both spellings occur, even when their values appear equivalent.
+    if ($Server.Contains('startup_timeout_sec') -and $Server.Contains('startup_timeout_ms')) { return $false }
+    foreach ($field in @('startup_timeout_sec', 'startup_timeout_ms', 'tool_timeout_sec')) {
+        if (!$Server.Contains($field)) { continue }
+        $value = $Server[$field]
+        # Only numeric types emitted by the JSON/TOML readers qualify. PowerShell
+        # coercion would otherwise accept strings, booleans and null as numbers.
+        if (($value -isnot [long] -and $value -isnot [int] -and $value -isnot [double]) -or
+            ![double]::IsFinite([double]$value) -or $value -lt 0) { return $false }
+    }
+    return $true
+}
+
 function Get-McpServerAudit {
     param([string]$Name, [object]$Server, [int]$Index)
     $label = if ($Name -cmatch '^[A-Za-z][A-Za-z0-9_.-]{0,63}$') { $Name } else { "server-$Index" }
@@ -143,8 +160,12 @@ function Get-McpServerAudit {
         $Server.Contains('command') -and $Server.command -is [string] -and $Server.command.Length -gt 0 -and
         (!$Server.Contains('type') -or $Server.type -ceq 'stdio') -and !$Server.Contains('url') -and
         (!$Server.Contains('env') -or ($Server.env -is [System.Collections.IDictionary] -and @($Server.env.Values | Where-Object { $_ -isnot [string] }).Count -eq 0)) -and
-        @($Server.Keys | Where-Object { $_ -cnotmatch '\A(command|args|type|env)\z' }).Count -eq 0 -and
+        @($Server.Keys | Where-Object { $_ -cnotmatch '\A(command|args|type|env|enabled|startup_timeout_sec|startup_timeout_ms|tool_timeout_sec)\z' }).Count -eq 0 -and
         (!$Server.Contains('args') -or ($Server.args -is [array] -and $Server.args.Count -le 256 -and @($Server.args | Where-Object { $_ -isnot [string] }).Count -eq 0))
+    if ($valid -and !(Test-McpAuditServerMetadata $Server)) {
+        $valid = $false
+        $reason = 'invalid-server-metadata'
+    }
     if ($valid) {
         $command = $Server.command
         [string[]]$arguments = @()

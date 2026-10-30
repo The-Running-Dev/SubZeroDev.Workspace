@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "targets": {
+    "claude": {
+      "inspect": [
+        []
+      ],
+      "ignored": [
+        {
+          "path": [
+            "hooks"
+          ],
+          "reason": "Installer-owned configuration; never captured."
+        },
+        {
+          "path": [
+            "enabledPlugins"
+          ],
+          "reason": "Installer-owned configuration; never captured."
+        },
+        {
+          "path": [
+            "extraKnownMarketplaces"
+          ],
+          "reason": "Installer-owned configuration; never captured."
+        },
+        {
+          "path": [
+            "mcpServers"
+          ],
+          "reason": "Installer-owned configuration; never captured."
+        }
+      ],
+      "owned": [
+        {
+          "path": [
+            "model"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[A-Za-z0-9][A-Za-z0-9._:/@+\\[\\]-]{0,127}"
+        },
+        {
+          "path": [
+            "effortLevel"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "low",
+            "medium",
+            "high",
+            "xhigh"
+          ]
+        },
+        {
+          "path": [
+            "outputStyle"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[A-Za-z0-9][A-Za-z0-9 _.-]{0,127}"
+        },
+        {
+          "path": [
+            "autoCompactEnabled"
+          ],
+          "type": "boolean",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference"
+        },
+        {
+          "path": [
+            "autoCompactWindow"
+          ],
+          "type": "integer",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "min": 100000,
+          "max": 1000000
+        },
+        {
+          "path": [
+            "showThinkingSummaries"
+          ],
+          "type": "boolean",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference"
+        },
+        {
+          "path": [
+            "spinnerTipsEnabled"
+          ],
+          "type": "boolean",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference"
+        },
+        {
+          "path": [
+            "cleanupPeriodDays"
+          ],
+          "type": "integer",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "min": 1,
+          "max": 2147483647
+        },
+        {
+          "path": [
+            "env",
+            "BASH_MAX_OUTPUT_LENGTH"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[1-9][0-9]{0,8}"
+        },
+        {
+          "path": [
+            "env",
+            "MAX_MCP_OUTPUT_TOKENS"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[1-9][0-9]{0,8}"
+        },
+        {
+          "path": [
+            "env",
+            "MCP_TOOL_TIMEOUT"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[1-9][0-9]{0,8}"
+        },
+        {
+          "path": [
+            "env",
+            "CLAUDE_CODE_SUBAGENT_MODEL"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[A-Za-z0-9][A-Za-z0-9._:/@+\\[\\]-]{0,127}"
+        }
+      ]
+    },
+    "codex": {
+      "inspect": [
+        []
+      ],
+      "ignored": [
+        {
+          "path": [
+            "projects"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "hooks",
+            "state"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "desktop"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "tui"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "plugins"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "marketplaces"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "mcp_servers"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "shell_environment_policy"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "windows"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "features"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "agents"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "skills"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "notify"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        },
+        {
+          "path": [
+            "profiles"
+          ],
+          "reason": "Machine, installer or runtime state; outside S1 ownership."
+        }
+      ],
+      "owned": [
+        {
+          "path": [
+            "model"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}"
+        },
+        {
+          "path": [
+            "model_reasoning_effort"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[a-z][a-z0-9_-]{0,31}"
+        },
+        {
+          "path": [
+            "plan_mode_reasoning_effort"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[a-z][a-z0-9_-]{0,31}"
+        },
+        {
+          "path": [
+            "model_verbosity"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        {
+          "path": [
+            "model_reasoning_summary"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "auto",
+            "concise",
+            "detailed",
+            "none"
+          ]
+        },
+        {
+          "path": [
+            "service_tier"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "pattern": "[a-z][a-z0-9_-]{0,31}"
+        },
+        {
+          "path": [
+            "tool_output_token_limit"
+          ],
+          "type": "integer",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "min": 1,
+          "max": 2147483647
+        },
+        {
+          "path": [
+            "model_auto_compact_token_limit"
+          ],
+          "type": "integer",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "min": 1,
+          "max": 2147483647
+        },
+        {
+          "path": [
+            "model_auto_compact_token_limit_scope"
+          ],
+          "type": "string",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "total",
+            "body_after_prefix"
+          ]
+        },
+        {
+          "path": [
+            "sandbox_mode"
+          ],
+          "type": "string",
+          "securityRelevant": true,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "read-only",
+            "workspace-write",
+            "danger-full-access"
+          ]
+        },
+        {
+          "path": [
+            "approval_policy"
+          ],
+          "type": "string",
+          "securityRelevant": true,
+          "sensitivity": "reviewed-preference",
+          "maxLength": 128,
+          "values": [
+            "on-request",
+            "never"
+          ]
+        },
+        {
+          "path": [
+            "allow_login_shell"
+          ],
+          "type": "boolean",
+          "securityRelevant": false,
+          "sensitivity": "reviewed-preference"
+        }
+      ]
+    }
+  }
+}
