@@ -7,6 +7,32 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-30 — Fixture-only AI preferences and full TOML validation
+
+Context: Ben accepted S1 after reviewing preference ownership, removal semantics,
+concurrent writes and recovery limitations, and restricted implementation to
+temporary profiles. The original design files contain no AI settings contract.
+
+Chosen: add the accepted S1 contract linked from 20-contract.md. Require an
+explicit sandbox for both the PowerShell wrapper and Python engine. Use Python
+3.11–3.14 standard-library json and tomllib, with a lexical span scanner for
+TOML edits and full before/after semantic verification. Python 3.15 expands
+tomllib to TOML 1.1 and is refused until that contract is reconsidered.
+Python JSON object parsing replaces the proposed ConvertFrom-Json implementation
+detail while retaining case-sensitive unowned values and rejecting duplicates.
+No third-party package installation. Existing Python sidecars provide a repo
+precedent. The small skill stays in this repository, uninstalled.
+
+Rejected: reusing the MCP auditor's bounded TOML subset for writes (not a full
+validator); first-bracket-line scanning (strings can contain fake headers);
+rewriting whole TOML files (destroys unrelated formatting); adding TOMLKit
+(unneeded third-party dependency); live root defaults or silently enabling a
+schedule (outside current authorization); claiming fingerprint checks are a
+transaction (rename has no compare-and-swap precondition).
+
+Reversibility: remove this optional command, fixtures, skill and workflow.
+No existing setup path, app profile or chezmoi configuration changes.
+
 ### 2026-10-28 — Explicit, read-only hook registration audit
 
 Context: the ECC reassessment identified value in spotting repeated registrations
