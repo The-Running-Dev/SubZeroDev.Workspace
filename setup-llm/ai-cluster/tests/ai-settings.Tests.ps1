@@ -2,10 +2,10 @@
 BeforeAll {
     $script:Entry = Join-Path $PSScriptRoot '../../scripts/Manage-AISettings.ps1'
     $script:Pwsh = (Get-Process -Id $PID).Path
-    $script:Python = (Get-Command python -ErrorAction Stop).Source
+    $script:Node = (Get-Command node -ErrorAction Stop).Source
     function Invoke-FixtureCommand {
         param([string[]]$Options)
-        $text = & $script:Pwsh -NoProfile -File $script:Entry @Options -SandboxRoot $script:FixtureRoot -PythonPath $script:Python -AsJson
+        $text = & $script:Pwsh -NoProfile -File $script:Entry @Options -SandboxRoot $script:FixtureRoot -NodePath $script:Node -AsJson
         $script:ResultCode = $LASTEXITCODE
         return ($text -join "`n" | ConvertFrom-Json -AsHashtable)
     }
@@ -65,6 +65,15 @@ Describe 'AI settings temporary-profile entry point' {
         $status = Invoke-FixtureCommand @('status', '-DataPath', $data, '-FailOnAttention')
         $script:ResultCode | Should -Be 2
         $status.attention.Count | Should -Be 1
+    }
+
+    It 'reports a specific error for WhatIf outside restore' {
+        foreach ($command in 'capture', 'status') {
+            $result = Invoke-FixtureCommand @($command, '-WhatIf')
+            $script:ResultCode | Should -Be 1
+            $result.error | Should -BeExactly 'what-if-requires-restore'
+            Test-Path (Join-Path $script:FixtureRoot 'repo') | Should -BeFalse
+        }
     }
 
     It 'refuses an outside profile without opening it' {

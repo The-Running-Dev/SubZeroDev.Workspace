@@ -2,3 +2,4 @@ docker/.env
 memory/
 rag-index/
 rag-cache/
+node_modules/

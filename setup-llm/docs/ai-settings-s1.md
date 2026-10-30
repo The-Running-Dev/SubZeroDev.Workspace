@@ -2,7 +2,18 @@
 
 S1 implements the [accepted contract](../../design/ai-settings-s1.md) using
 **synthetic temporary profiles only**. It does not yet back up a real machine.
-Requires PowerShell 7 and Python 3.11 through 3.14. No pip dependencies.
+Requires PowerShell 7 and Node.js 22.18 or later. The TypeScript engine runs
+directly in Node, with no build step. Install its locked dependencies once from
+the repository root (also repeat after a lockfile change):
+
+```powershell
+npm ci --prefix setup-llm --ignore-scripts
+```
+
+The runtime dependencies are `@ltd/j-toml` (full TOML 1.0 validation) and
+`lossless-json` (duplicate detection and preservation of unowned number precision).
+The Windows-only permission adapter uses the entry point's PowerShell host to
+apply .NET access rules before staging file contents.
 
 From the repository root, create a new sandbox and synthetic data:
 
@@ -33,7 +44,7 @@ file bytes and mtimes. `status` is read-only. All commands return success as 0;
 
 Override fixture paths with `-ClaudeHome`, `-CodexHome`, `-DataPath`, `-BackupRoot`.
 All remain below SandboxRoot; linked paths and overlaps are rejected. Profiles
-must already exist. `-PythonPath` selects a compatible interpreter. The bundled
+must already exist. `-NodePath` selects a compatible Node executable. The bundled
 manifest is the default; `-ManifestPath` supports fixture manifests. A changed
 manifest requires a fresh complete capture, not editing version numbers by hand.
 
@@ -50,22 +61,30 @@ user-only `private-backups` directory, outside the simulated repo. Five complete
 runs are retained; failed/conflicted runs remain until explicit investigation.
 A rollback-conflict preserves external bytes. Consult the contract before any
 future real use: check/replace and rollback have a documented race window.
+Restore and rollback preserve the target's Windows access rules and inheritance
+protection, or Unix permission bits. On Windows, replacement content is staged
+only after access-rule setup succeeds. Fingerprint reads retry transient access failures up
+to three attempts, including checks between target writes. Capture and restore
+also retry transient replacement failures up to three attempts; an exhausted
+capture leaves the previous snapshot intact.
 
 ## Verification
 
 ```powershell
-python -I setup-llm/ai-cluster/tests/test_ai_settings.py
+npm run typecheck --prefix setup-llm
+npm test --prefix setup-llm
 Import-Module Pester -RequiredVersion 5.5.0
 Invoke-Pester setup-llm/ai-cluster/tests/ai-settings.Tests.ps1 -Output Detailed
 Invoke-ScriptAnalyzer setup-llm/scripts/Manage-AISettings.ps1 -Severity Warning,Error
+Invoke-ScriptAnalyzer setup-llm/scripts/Set-AISettingsPermissions.ps1 -Severity Warning,Error
 ```
 
-The Python suite uses stdlib unittest and generated TemporaryDirectory profiles.
+The TypeScript suite uses `node:test` and generated temporary profiles.
 Pester launches the actual PowerShell wrapper in a separate process. No tests
 read the live Claude, Codex or chezmoi settings. The no-outside-read test guards
 profile reads; hostile app-home environment variables have no effect.
 CI uses the existing shared pwsh workflow plus a Windows/Linux/macOS engine
-matrix on Python 3.11 and 3.14. Windows additionally exercises an actual exclusive
+matrix on Node 22.18 and 24. Windows additionally exercises an actual exclusive
 file handle, not only injected exceptions.
 
 | Brief criterion | Verification |
@@ -76,15 +95,15 @@ file handle, not only injected exceptions.
 | S1.4 | Case-distinct unowned JSON values, preserved TOML statements and CRLF |
 | S1.5 | Fake headers in multiline strings/arrays, quoted and escaped keys, missing insertion, nested model, refused forms |
 | S1.6 | Second restore identical full tree and mtimes |
-| S1.7 | Three deterministic conflicts, successful rebase, explicit demonstration of undetectable rename race |
-| S1.8 | Injected failure, real Windows lock, rollback, external-write conflict, rollback I/O failure and retained backups |
+| S1.7 | Three deterministic conflicts, successful rebase, bounded read/stat and capture/restore replacement retries, explicit demonstration of undetectable rename race |
+| S1.8 | Injected failure, real Windows lock, rollback, external-write conflict, rollback I/O failure, retained backups, Windows ACL preservation and empty staging on ACL failure |
 | S1.9 | Malformed second target preflight, missing source/destination, invalid owned input and complete snapshot validation |
 | S1.10 | Canary values in env/MCP headers/unknown values/uninspected files/invalid owned values; zero runtime output and simulated-repo hits |
 | S1.11 | Sandbox enforcement and guarded profile reads; no live settings accessed |
 | S1.12 | Capture leaves a fixture Git index and branch refs unchanged |
 | S1.13 | Running-Codex stub refusal and Force override; actual live process/profile experiment deferred by user restriction |
 | S1.14 | Manifest counts: 24 owned, 18 ignored, two root spaces; twelve invalid-manifest cases |
-| S1.15 | Shared pwsh CI plus pinned-interpreter cross-platform matrix |
+| S1.15 | Shared pwsh CI plus pinned-Node cross-platform matrix and TypeScript checks |
 | S1.16 | Explicit unset round trip, invalid null/absence/missing file/incomplete snapshot distinction |
 | S1.17 | Explicit uninspected scope and local-working-tree versus independent recovery documentation |
 

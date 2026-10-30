@@ -9,7 +9,10 @@ implementation using temporary profiles and fixtures only.
 ## Scope and execution
 
 PowerShell 7 entry point: `setup-llm/scripts/Manage-AISettings.ps1`.
-Python 3.11–3.14 is required; no pip packages. The sidecar also enforces the sandbox.
+Node.js 22.18 or later runs the TypeScript engine directly; the engine also
+enforces the sandbox. Locked npm dependencies under `setup-llm/` provide full
+TOML 1.0 parsing and lossless JSON numbers with duplicate-key rejection.
+PowerShell's .NET APIs implement the Windows-only permission adapter.
 
 Commands: `capture`, `status`, `restore [-WhatIf] [-Force]`.
 All require `-SandboxRoot`: an existing child directory of the OS temp directory.
