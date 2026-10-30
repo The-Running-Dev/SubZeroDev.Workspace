@@ -36,7 +36,7 @@ export function run(args, env = process.env) {
     // Never copy Packet, proposals, errors, source bodies or untrusted identifiers to terminal output.
     if (Number.isSafeInteger(result.Revision)) report.Revision = result.Revision;
     if (['fork', 'attach', 'return'].includes(operation)) report.Handoff = 'Open the private Result file for the packet and parent link.';
-    if (operation === 'store') report.Memory = 'Stored selections remain candidates; acceptance uses the existing AgentKit memory workflow.';
+    if (operation === 'store') report.Memory = 'Storage does not accept memories; acceptance is a separate explicit action in the existing AgentKit memory workflow. Open the private Result file for each selection\'s status.';
     return { exitCode: child.status ?? 1, report };
   } catch { return { exitCode: 1, report: { State: 'Failed', Code: 'ConversationTaskUnavailable', Recovery: 'Select an existing private archive, matching request file, and AgentKit installation via AGENTKIT_HOME. Node >=22.18 is required.' } }; }
 }
