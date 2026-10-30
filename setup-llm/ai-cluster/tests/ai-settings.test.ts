@@ -218,6 +218,28 @@ test('capture destination conflicts stop after three checks and preserve the ext
   assert.deepEqual(attempts, [0, 1, 2]); assert.deepEqual(JSON.parse(fs.readFileSync(manager.data, 'utf8')), { external: true });
 });
 
+test('capture replacement retries transient failures and preserves the previous snapshot on exhaustion', t => {
+  const f = fixture(t); f.manager().capture();
+  const previous = fs.readFileSync(f.manager().data);
+  fs.writeFileSync(f.claude, '{"model":"sonnet"}');
+  for (const failures of [99, 2]) {
+    let calls = 0;
+    const manager = f.manager({ io: { replace: (path, raw) => {
+      if (++calls <= failures) throw permissionError();
+      replace(path, raw);
+    } } });
+    if (failures === 99) {
+      assert.throws(() => manager.capture(), /replace-failed/);
+      assert.equal(manager.result.changed, false);
+      assert.deepEqual(fs.readFileSync(manager.data), previous);
+    } else {
+      assert.equal(manager.capture().changed, true);
+      assert.equal((JSON.parse(fs.readFileSync(manager.data, 'utf8'))).targets.claude[0].value, 'sonnet');
+    }
+    assert.equal(calls, 3);
+  }
+});
+
 test('mid read metadata changes are retried and bounded at three reads', t => {
   const f = fixture(t);
   for (const limit of [2, 99]) {

@@ -64,7 +64,9 @@ future real use: check/replace and rollback have a documented race window.
 Restore and rollback preserve the target's Windows access rules and inheritance
 protection, or Unix permission bits. On Windows, replacement content is staged
 only after access-rule setup succeeds. Fingerprint reads retry transient access failures up
-to three attempts, including checks between target writes.
+to three attempts, including checks between target writes. Capture and restore
+also retry transient replacement failures up to three attempts; an exhausted
+capture leaves the previous snapshot intact.
 
 ## Verification
 
@@ -93,7 +95,7 @@ file handle, not only injected exceptions.
 | S1.4 | Case-distinct unowned JSON values, preserved TOML statements and CRLF |
 | S1.5 | Fake headers in multiline strings/arrays, quoted and escaped keys, missing insertion, nested model, refused forms |
 | S1.6 | Second restore identical full tree and mtimes |
-| S1.7 | Three deterministic conflicts, successful rebase, bounded read/stat access retries, explicit demonstration of undetectable rename race |
+| S1.7 | Three deterministic conflicts, successful rebase, bounded read/stat and capture/restore replacement retries, explicit demonstration of undetectable rename race |
 | S1.8 | Injected failure, real Windows lock, rollback, external-write conflict, rollback I/O failure, retained backups, Windows ACL preservation and empty staging on ACL failure |
 | S1.9 | Malformed second target preflight, missing source/destination, invalid owned input and complete snapshot validation |
 | S1.10 | Canary values in env/MCP headers/unknown values/uninspected files/invalid owned values; zero runtime output and simulated-repo hits |

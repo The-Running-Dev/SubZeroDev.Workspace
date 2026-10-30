@@ -567,7 +567,12 @@ export class Manager {
       this.hook('capture-before-check', attempt, this.data);
       if (fingerprint(this.bound(this.data), this.io).observed !== observed) continue;
       fs.mkdirSync(dirname(this.data), { recursive: true });
-      this.io.replace(this.data, output);
+      try { this.io.replace(this.bound(this.data), output); }
+      catch (error) {
+        if (!transient(error)) throw error;
+        if (attempt < 2) continue;
+        fail('replace-failed');
+      }
       this.result.changed = true;
       if (!fingerprint(this.bound(this.data), this.io).raw?.equals(output)) fail('overwritten-after-write');
       return this.result;
