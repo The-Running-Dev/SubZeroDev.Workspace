@@ -1,0 +1,50 @@
+name: AI Settings S1 CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  entrypoint:
+    name: AI settings PowerShell contract
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
+    permissions:
+      contents: read
+    with:
+      os: '["windows-latest", "ubuntu-latest", "macos-latest"]'
+      paths: |
+        setup-llm/scripts/Manage-AISettings.ps1
+        setup-llm/ai-cluster/tests/ai-settings.Tests.ps1
+      tests: |
+        setup-llm/ai-cluster/tests/ai-settings.Tests.ps1
+      analyzer: true
+      artifact-name: ai-settings-entrypoint
+
+  engine:
+    name: AI settings (${{ matrix.os }}, Python ${{ matrix.python }})
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python: ['3.11', '3.14']
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Synthetic acceptance suite
+        run: python -I setup-llm/ai-cluster/tests/test_ai_settings.py
+      - name: PowerShell entry point with pinned Python
+        shell: pwsh
+        run: |
+          Install-Module Pester -RequiredVersion 5.5.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Import-Module Pester -RequiredVersion 5.5.0
+          $result = Invoke-Pester -Path setup-llm/ai-cluster/tests/ai-settings.Tests.ps1 -PassThru
+          if ($result.FailedCount -gt 0) { exit 1 }
