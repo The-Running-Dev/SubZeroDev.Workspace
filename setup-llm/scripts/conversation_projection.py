@@ -253,15 +253,15 @@ def run(root, selected=None, builder=build_graph):
             graph = read_json(root / "graph.json.tmp")
             require(isinstance(graph, dict) and isinstance(graph.get("nodes"), list), "graphify-output-invalid")
             os.replace(root / "graph.json.tmp", root / "graph.json")
-            receipt = {"schemaVersion": VERSION, "status": "supported", "selectionDigest": digest(state["selection"]), "graphSha256": hashlib.sha256((root / "graph.json").read_bytes()).hexdigest(), "graphifyVersion": version, "contextGraph": "unknown-owner", "memory": "agentkit-reviewed-extraction-only", "embeddingIdentity": "none"}
+            receipt = {"schemaVersion": VERSION, "status": "supported", "selectionDigest": digest(state["selection"]), "graphSha256": hashlib.sha256((root / "graph.json").read_bytes()).hexdigest(), "graphifyVersion": version, "contextGraph": "graphify", "memory": "agentkit-reviewed-extraction-only", "embeddingIdentity": "none"}
             atomic(root / "receipt.json", receipt)
-            return {"status": "supported", "code": "projection-built", "graphifyVersion": version, "contextGraph": "unknown-owner"}
+            return {"status": "supported", "code": "projection-built", "graphifyVersion": version, "contextGraph": "graphify"}
         except (ImportError, importlib.metadata.PackageNotFoundError):
             invalidate(root)
-            return {"status": "unavailable", "code": "graphify-not-installed", "contextGraph": "unknown-owner"}
+            return {"status": "unavailable", "code": "graphify-not-installed", "contextGraph": "unavailable"}
         except Exception:
             invalidate(root)
-            return {"status": "unavailable", "code": "graphify-build-failed", "contextGraph": "unknown-owner"}
+            return {"status": "unavailable", "code": "graphify-build-failed", "contextGraph": "unavailable"}
     finally:
         os.close(lock)
         (root / "lock").unlink()

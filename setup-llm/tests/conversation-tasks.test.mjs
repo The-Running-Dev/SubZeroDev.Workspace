@@ -11,6 +11,7 @@ import { fixture } from './conversation-task-fixture.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const wrapper = join(root, 'setup-llm/scripts/Invoke-ConversationTask.mjs');
 const tasks = JSON.parse(readFileSync(join(root, '.vscode/tasks.json'), 'utf8'));
+const isOptInTask = task => task.args?.[0] === '${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs';
 const invoke = (args, env = {}, cwd = root) => spawnSync(process.execPath, [wrapper, ...args], {
   cwd, env: { ...process.env, ...env }, shell: false, encoding: 'utf8', maxBuffer: 1024 * 1024,
 });
@@ -27,18 +28,22 @@ function privacy(r, f) {
 }
 
 test('tasks are manual process entry points, with private explicit selections and preserved provisioning', () => {
-  const conversation = tasks.tasks.filter(t => t.label.startsWith('Conversation:'));
+  const conversation = tasks.tasks.filter(isOptInTask);
   assert.equal(conversation.length, 6);
   assert.deepEqual(conversation.map(t => t.args[t.args.indexOf('--operation') + 1]), ['fork', 'attach', 'return', 'review', 'store', 'host']);
   for (const task of conversation) {
     assert.equal(task.type, 'process'); assert.equal(task.command, 'node');
     assert.equal(task.presentation.echo, false); assert.equal(task.runOptions.runOn, undefined);
     assert.equal(task.dependsOn, undefined);
-    assert.equal(task.options.env.WORKSPACE_CONVERSATION_ARCHIVE, '${input:conversationArchive}');
-    assert.equal(task.options.env.WORKSPACE_CONVERSATION_REQUEST, '${input:conversationRequest}');
+    assert.equal(task.options.env.WORKSPACE_CONVERSATION_ARCHIVE, '${input:conversationTaskArchive}');
+    assert.equal(task.options.env.WORKSPACE_CONVERSATION_REQUEST, '${input:conversationTaskRequest}');
     assert.ok(!task.args.some(a => a.includes('${input:'))); // never in editor command/error echo
   }
-  for (const input of tasks.inputs) { assert.equal(input.default, undefined); assert.equal(input.password, true); }
+  for (const input of tasks.inputs.filter(i => i.id.startsWith('conversationTask'))) { assert.equal(input.default, undefined); assert.equal(input.password, true); }
+  assert.equal(new Set(tasks.tasks.map(t => t.label)).size, tasks.tasks.length);
+  assert.equal(new Set(tasks.inputs.map(i => i.id)).size, tasks.inputs.length);
+  const existing = tasks.tasks.filter(t => t.args?.[0] === '${workspaceFolder}/setup-llm/scripts/conversation-task.mjs');
+  assert.deepEqual(existing.map(t => t.args[t.args.indexOf('--operation') + 1]), ['fork', 'attach', 'return', 'review', 'store', 'host']);
   const baseline = tasks.tasks.filter(t => !t.label.startsWith('Conversation:'));
   // Frozen pre-#58 objects, not a count-only check: setup/MCP/doctor semantics stay intact.
   assert.equal(createHash('sha256').update(JSON.stringify(baseline)).digest('hex'), '629bc88642f1530e5b9f3efd2bae9ee1dedaff7634b76c093dfb7b4afee5cb22');
@@ -129,9 +134,9 @@ test('installed AgentKit: task argv exercises fork/attach/return, retries, memor
   // Resolve the actual committed VS Code task args. This tests the CLI entry point,
   // not a VS Code GUI or Windows editor walkthrough.
   const taskRun = (operation, request = f.requests[operation], overrides = {}) => {
-    const task = tasks.tasks.find(t => t.args?.includes(operation) && t.label.startsWith('Conversation:'));
-    const substitutions = { '${workspaceFolder}': root, '${input:conversationArchive}': f.archive,
-      '${input:conversationRequest}': request, '${input:conversationProject}': f.project };
+    const task = tasks.tasks.find(t => t.args?.includes(operation) && isOptInTask(t));
+    const substitutions = { '${workspaceFolder}': root, '${input:conversationTaskArchive}': f.archive,
+      '${input:conversationTaskRequest}': request, '${input:conversationTaskProject}': f.project };
     const args = task.args.map(a => Object.entries(substitutions).reduce((s, [key, v]) => s.replaceAll(key, v), a));
     const taskEnv = Object.fromEntries(Object.entries(task.options.env).map(([key, value]) => [key, substitutions[value] ?? value]));
     const r = spawnSync(process.execPath, args, { cwd: root, env: { ...process.env, ...env, ...taskEnv, ...overrides }, encoding: 'utf8', shell: false });

@@ -156,16 +156,328 @@ Describe 'MCP audit input failures' {
         @($report.configurations | Where-Object classification -NE unverified).Count | Should -Be 0
     }
 }
+Describe 'Native Codex TOML input' {
+    It 'matches JSON classification for <Command> <Selector>' -ForEach @(
+        @{ Command = 'npx'; Prefix = ''; Selector = 'server@1.2.3' }
+        @{ Command = 'npx'; Prefix = ''; Selector = '@scope/server@latest' }
+        @{ Command = 'npx'; Prefix = ''; Selector = 'github:owner/repo#0123456789abcdef0123456789abcdef01234567' }
+        @{ Command = 'npx'; Prefix = ''; Selector = 'github:owner/repo#main' }
+        @{ Command = 'docker'; Prefix = '"run", '; Selector = ('image@sha256:' + ('a' * 64)) }
+        @{ Command = 'docker'; Prefix = '"run", '; Selector = 'image:latest' }
+        @{ Command = 'local-server'; Prefix = ''; Selector = 'argument-secret' }
+    ) {
+        $toml = "[mcp_servers.fixture]`ncommand = `"$Command`"`nargs = [$Prefix`"$Selector`"]"
+        $jsonArgs = @(if ($Prefix) { 'run'; $Selector } else { $Selector })
+        $expected = Get-ServerReport @{ command = $Command; args = $jsonArgs }
+        $actual = (Get-ConfigReport $toml 'toml').configurations[0].servers[0]
+        ($actual | ConvertTo-Json -Depth 12 -Compress) | Should -Be ($expected | ConvertTo-Json -Depth 12 -Compress)
+    }
+    It 'parses quoted keys, literal Windows paths, escaped basic strings, comments and multiline arrays' {
+        $toml = @'
+model = "example"
+[features]
+example = true
+[mcp_servers."quoted.name"] # a dot inside a quoted key is not a path separator
+command = 'C:\Program Files\nodejs\npx.cmd'
+args = [
+  "-y", # preserve array order
+  "server\u00401.2.3",
+  "hash#value", "quote\"value", "back\\slash", "brackets[]{}", "",
+]
+[mcp_servers.'quoted.name'.env]
+TOKEN = "redaction-canary"
+[mcp_servers.escaped]
+command = "C:\\Program Files\\nodejs\\npx.cmd"
+args = ['server@1.2.3']
+'@
+        $report = Get-ConfigReport ([char]0xFEFF + $toml.Replace("`n", "`r`n")) 'toml'
+        $report.classification | Should -Be 'exact-pin'
+        $report.configurations[0].servers.server | Should -Be @('escaped', 'quoted.name')
+        ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'redaction-canary|Program Files|hash#value'
+    }
+    It 'accepts dotted assignments and inline tables without conflating case or quoted dots' {
+        $toml = @'
+mcp_servers.Fixture = { command = 'npx', args = ['server@1.2.3'], env = { TOKEN = 'secret-canary' } }
+mcp_servers.fixture.command = 'npx'
+mcp_servers.fixture.args = ['server@latest']
+mcp_servers."fixture.dot".command = 'npx'
+mcp_servers."fixture.dot".args = ['server@2.0.0']
+'@
+        $report = Get-ConfigReport $toml 'toml'
+        $report.classification | Should -Be 'mutable'
+        $report.configurations[0].servers.Count | Should -Be 3
+        @($report.configurations[0].servers | Where-Object classification -EQ 'exact-pin').Count | Should -Be 2
+        ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'secret-canary'
+    }
+    It 'requires exact server-field names, without cultural string aliases' {
+        foreach ($key in @('Command', ('env' + [char]0x00AD), "args`n")) {
+            $server = [ordered]@{ command = 'npx'; args = @('server@1.2.3') }
+            $server[$key] = 'secret-canary'
+            (Get-ServerReport $server).classification | Should -Be 'unverified'
+            $quotedKey = ConvertTo-Json -InputObject $key -Compress
+            $toml = "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n$quotedKey = 'secret-canary'"
+            (Get-ConfigReport $toml 'toml').classification | Should -Be 'unverified'
+        }
+    }
+    It 'enumerates every server, including HTTP, local, disabled and unknown options' {
+        $toml = @'
+[mcp_servers.pinned]
+command = 'npx'
+args = ['server@1.2.3']
+[mcp_servers.http]
+url = 'https://user:secret-canary@example.invalid?token=secret-canary'
+[mcp_servers.local]
+command = 'C:\server\server.exe'
+[mcp_servers.disabled]
+command = 'npx'
+args = ['server@1.2.3']
+enabled = false
+[mcp_servers.future]
+command = 'npx'
+args = ['server@1.2.3']
+future_option = true
+[mcp_servers.environment]
+command = 'npx'
+args = ['server@1.2.3', '${MCP_AUDIT_CANARY}']
+env = { TOKEN = 'secret-canary' }
+[mcp_servers.timeout]
+command = 'npx'
+args = ['server@1.2.3']
+startup_timeout_sec = 10.5
+'@
+        $report = Get-ConfigReport $toml 'toml'
+        $report.classification | Should -Be 'unverified'
+        $report.configurations[0].reasonCode | Should -Be 'parsed'
+        $report.configurations[0].servers.Count | Should -Be 7
+        @($report.configurations[0].servers | Where-Object classification -EQ 'unverified').Count | Should -Be 4
+        ($report.configurations[0].servers | Where-Object server -EQ 'disabled').classification | Should -Be 'exact-pin'
+        ($report.configurations[0].servers | Where-Object server -EQ 'timeout').classification | Should -Be 'exact-pin'
+        ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'secret-canary|server.exe'
+        ($report.configurations[0].servers | Where-Object server -EQ 'environment').environmentReferences | Should -Be @('MCP_AUDIT_CANARY')
+    }
+    It 'fails the whole input closed for <Label>' -ForEach @(
+        @{ Label = 'duplicate key'; Tail = "command = 'docker'" }
+        @{ Label = 'duplicate table'; Tail = '[mcp_servers.fixture]' }
+        @{ Label = 'duplicate quoted key'; Tail = '"command" = "docker"' }
+        @{ Label = 'duplicate Unicode key'; Tail = '"comm\u0061nd" = "docker"' }
+        @{ Label = 'inline table mutation'; Tail = "env = { TOKEN = 'secret-canary' }`nenv.OTHER = 'x'" }
+        @{ Label = 'inline table redefinition'; Tail = "env = { TOKEN = 'secret-canary' }`n[mcp_servers.fixture.env]" }
+        @{ Label = 'inline duplicate key'; Tail = "env = { TOKEN = 'secret-canary', TOKEN = 'x' }" }
+        @{ Label = 'inline trailing comma'; Tail = "env = { TOKEN = 'secret-canary', }" }
+        @{ Label = 'dotted inline key'; Tail = "env = { TOKEN.part = 'secret-canary' }" }
+        @{ Label = 'array of tables'; Tail = '[[mcp_servers.other]]' }
+        @{ Label = 'table versus scalar'; Tail = "[mcp_servers.fixture.command]" }
+        @{ Label = 'explicit namespace via dotted assignment'; Tail = "[other.child]`nx = 1`n[other]`nchild.y = 2" }
+        @{ Label = 'implicit namespace via dotted assignment'; Tail = "[other.child.leaf]`nx = 1`n[other]`nchild.y = 2" }
+        @{ Label = 'dotted namespace via header'; Tail = "other.child = 1`n[mcp_servers.fixture.other]" }
+        @{ Label = 'missing equals'; Tail = "secret-canary 'value'" }
+        @{ Label = 'unclosed array'; Tail = "other = ['secret-canary'" }
+        @{ Label = 'missing array separator'; Tail = "other = ['secret-canary' 'value']" }
+        @{ Label = 'invalid escape'; Tail = 'other = "secret-canary\q"' }
+        @{ Label = 'Unicode surrogate'; Tail = 'other = "\uD800"' }
+        @{ Label = 'Unicode overflow'; Tail = 'other = "\U00110000"' }
+        @{ Label = 'unterminated string'; Tail = 'other = "secret-canary' }
+        @{ Label = 'multiline string'; Tail = 'other = """secret-canary"""' }
+        @{ Label = 'bare string'; Tail = 'other = secret-canary' }
+        @{ Label = 'date'; Tail = 'other = 2026-10-28' }
+        @{ Label = 'hex integer'; Tail = 'other = 0xFF' }
+        @{ Label = 'leading zero'; Tail = 'other = 01' }
+        @{ Label = 'integer overflow'; Tail = 'other = 9223372036854775808' }
+        @{ Label = 'uppercase boolean'; Tail = 'other = True' }
+        @{ Label = 'trailing data'; Tail = "other = true secret-canary" }
+        @{ Label = 'unicode indentation'; Tail = ([char]0x3000 + 'other = 1') }
+        @{ Label = 'unicode array space'; Tail = ('other = [1,' + [char]0x3000 + '2]') }
+        @{ Label = 'ignorable boolean character'; Tail = ('other = t' + [char]0x00AD + 'rue') }
+        @{ Label = 'complexity'; Tail = ('other = ' + ('[' * 66) + '0' + (']' * 66)) }
+        @{ Label = 'combined table and value depth'; Tail = ('[' + ((1..60 | ForEach-Object { 'a' }) -join '.') + "]`nvalue = [[[[0]]]]") }
+    ) {
+        $toml = "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n$Tail"
+        $report = Get-ConfigReport $toml 'toml'
+        $report.classification | Should -Be 'unverified'
+        $report.configurations[0].servers.Count | Should -Be 0
+        ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'secret-canary'
+    }
+    It 'rejects malformed or unsupported data before and after otherwise pinned MCP entries' {
+        foreach ($bad in @('instructions = """secret-canary"""', 'bad = secret-canary')) {
+            foreach ($toml in @("$bad`n[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']", "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n[unrelated]`n$bad")) {
+                $report = Get-ConfigReport $toml 'toml'
+                $report.classification | Should -Be 'unverified'
+                $report.configurations[0].servers.Count | Should -Be 0
+            }
+        }
+    }
+    It 'enforces server, table-depth, UTF-8 and file-size limits for TOML too' {
+        $servers = (0..512 | ForEach-Object { "[mcp_servers.s$_]`ncommand = 'npx'`nargs = ['server@1.2.3']" }) -join "`n"
+        (Get-ConfigReport $servers 'toml').classification | Should -Be 'unverified'
+        (Get-ConfigReport ('[' + ((1..65 | ForEach-Object { 'a' }) -join '.') + ']') 'toml').classification | Should -Be 'unverified'
+        (Get-ConfigReport (' ' * (2MB + 1)) 'toml').classification | Should -Be 'unverified'
+        $bad = Join-Path $TestDrive 'invalid.toml'
+        [IO.File]::WriteAllBytes($bad, [byte[]]@(0xFF, 0xFF))
+        (Invoke-McpDependencyAudit -LiteralPath $bad).classification | Should -Be 'unverified'
+    }
+    It 'bounds the number of parsed values before returning any servers' {
+        $toml = "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n[unrelated]`nvalues = [" + (('0,' * 65536)) + ']'
+        $report = Get-ConfigReport $toml 'toml'
+        $report.classification | Should -Be 'unverified'
+        $report.configurations[0].servers.Count | Should -Be 0
+    }
+    It 'runs the real entry point with unchanged receipts, exit codes, secrets and execution canaries' {
+        $marker = Join-Path $TestDrive 'toml-executed.txt'
+        $canary = Join-Path $TestDrive 'toml-canary.ps1'
+        [IO.File]::WriteAllText($canary, "Set-Content -LiteralPath '$($marker.Replace("'", "''"))' -Value executed")
+        $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, 0)
+        $listener.Start()
+        $env:MCP_AUDIT_CANARY = 'environment-secret-canary'
+        try {
+            $port = ([Net.IPEndPoint]$listener.LocalEndpoint).Port
+            $path = Join-Path $TestDrive 'canaries.toml'
+            $toml = @"
+[mcp_servers.process]
+command = 'pwsh'
+args = ['-NoProfile', '-File', '$canary']
+env = { TOKEN = 'env-secret-canary' }
+enabled = true
+startup_timeout_sec = 10
+[mcp_servers.remote]
+url = 'http://user-secret-canary:password-secret-canary@127.0.0.1:$port/bootstrap?token=query-secret-canary'
+enabled = false
+[mcp_servers.package]
+command = 'npx'
+args = ['server@1.2.3', 'argument-secret-canary', '__ENV_REFERENCE__']
+enabled = false
+tool_timeout_sec = 30
+"@
+            # Use a literal reference; the audit must not interpolate the host value.
+            $toml = $toml.Replace('__ENV_REFERENCE__', '${MCP_AUDIT_CANARY}')
+            [IO.File]::WriteAllText($path, $toml)
+            $hash = (Get-FileHash -LiteralPath $path).Hash
+            foreach ($mode in @('human', 'json')) {
+                $output = if ($mode -eq 'json') { & pwsh -NoProfile -File $Entry -LiteralPath $path -AsJson }
+                          else { & pwsh -NoProfile -File $Entry -LiteralPath $path }
+                $LASTEXITCODE | Should -Be 1
+                ($output -join "`n") | Should -Not -Match '[a-z]+-secret-canary'
+                if ($mode -eq 'json') { ($output | ConvertFrom-Json).configurations[0].servers.Count | Should -Be 3 }
+                $listener.Pending() | Should -BeFalse
+                Test-Path -LiteralPath $marker | Should -BeFalse
+            }
+            (Get-FileHash -LiteralPath $path).Hash | Should -Be $hash
+            [IO.File]::WriteAllText($path, "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`nenabled = false`nstartup_timeout_ms = 1000")
+            $output = & pwsh -NoProfile -File $Entry -LiteralPath $path -AsJson
+            $LASTEXITCODE | Should -Be 0
+            $report = $output | ConvertFrom-Json
+            $report.schemaVersion | Should -Be 1
+            $report.scope | Should -Be 'direct-launch-selectors-only'
+            $report.configurations[0].servers.GetType().IsArray | Should -BeTrue
+            (& pwsh -NoProfile -File $Entry -LiteralPath $path -AsJson) | Should -Be $output
+            [IO.File]::WriteAllText($path, "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@latest']`nenabled = false`ntool_timeout_sec = 30")
+            & pwsh -NoProfile -File $Entry -LiteralPath $path -AsJson | Out-Null
+            $LASTEXITCODE | Should -Be 1
+        }
+        finally { $listener.Stop(); Remove-Item Env:MCP_AUDIT_CANARY }
+    }
+}
+Describe 'Codex server metadata' {
+    It 'preserves every dependency classification with validated metadata in <Extension>' -ForEach @(
+        @{ Extension = 'json' }
+        @{ Extension = 'jsonc' }
+        @{ Extension = 'toml' }
+    ) {
+        foreach ($enabled in @($true, $false)) {
+            foreach ($case in @(
+                @{ command = 'cmd'; args = @('/c', 'npx', '-y', 'server@1.2.3'); expected = 'exact-pin' }
+                @{ command = 'cmd'; args = @('/c', 'npx', '-y', 'server@latest'); expected = 'mutable' }
+                @{ command = 'node'; args = @('private-script-path'); expected = 'unverified' }
+                @{ command = 'docker'; args = @('run', ('image@sha256:' + ('a' * 64))); expected = 'exact-pin' }
+                @{ command = 'docker'; args = @('compose', 'up'); expected = 'unverified' }
+            )) {
+                $server = @{ command = $case.command; args = $case.args; enabled = $enabled; startup_timeout_sec = 0; tool_timeout_sec = 60.5 }
+                $text = if ($Extension -eq 'toml') {
+                    "[mcp_servers.fixture]`ncommand = '$($case.command)'`nargs = [" + (($case.args | ForEach-Object { "'$_'" }) -join ', ') + "]`nenabled = $($enabled.ToString().ToLowerInvariant())`nstartup_timeout_sec = 0`ntool_timeout_sec = 60.5"
+                }
+                else { @{ mcpServers = @{ fixture = $server } } | ConvertTo-Json -Depth 10 }
+                $report = Get-ConfigReport $text $Extension
+                $report.configurations[0].servers.Count | Should -Be 1
+                $report.classification | Should -Be $case.expected
+                $report.configurations[0].servers[0].classification | Should -Be $case.expected
+            }
+        }
+    }
+    It 'accepts individual timeout fields including the millisecond alias' -ForEach @(
+        @{ Field = 'startup_timeout_sec'; Value = '10.5' }
+        @{ Field = 'tool_timeout_sec'; Value = '0' }
+        @{ Field = 'startup_timeout_ms'; Value = '1000' }
+    ) {
+        foreach ($extension in @('json', 'toml')) {
+            $text = if ($extension -eq 'toml') { "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n$Field = $Value" }
+                    else { '{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"],"' + $Field + '":' + $Value + '}}}' }
+            (Get-ConfigReport $text $extension).classification | Should -Be 'exact-pin'
+        }
+    }
+    It 'rejects malformed metadata for <Field> = <Value> without leaking it' -ForEach @(
+        @{ Field = 'enabled'; Value = '"metadata-secret-canary"' }
+        @{ Field = 'enabled'; Value = '1' }
+        @{ Field = 'enabled'; Value = '[]' }
+        @{ Field = 'startup_timeout_sec'; Value = '"metadata-secret-canary"' }
+        @{ Field = 'startup_timeout_sec'; Value = 'true' }
+        @{ Field = 'startup_timeout_sec'; Value = '-0.5' }
+        @{ Field = 'startup_timeout_sec'; Value = '1e999' }
+        @{ Field = 'tool_timeout_sec'; Value = 'false' }
+        @{ Field = 'tool_timeout_sec'; Value = '-1' }
+        @{ Field = 'tool_timeout_sec'; Value = '[]' }
+        @{ Field = 'startup_timeout_ms'; Value = '-1' }
+        @{ Field = 'startup_timeout_ms'; Value = '"1000"' }
+        @{ Field = 'startup_timeout_ms'; Value = '{}' }
+    ) {
+        foreach ($extension in @('json', 'toml')) {
+            $text = if ($extension -eq 'toml') { "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`n$Field = $Value" }
+                    else { '{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"],"' + $Field + '":' + $Value + '}}}' }
+            $report = Get-ConfigReport $text $extension
+            $report.classification | Should -Be 'unverified'
+            $report.configurations[0].servers.Count | Should -Be 1
+            $report.configurations[0].servers[0].dependencies[0].reasonCode | Should -Be 'invalid-server-metadata'
+            ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'metadata-secret-canary'
+        }
+    }
+    It 'keeps null metadata unverified in JSON' -ForEach @(
+        @{ Field = 'enabled' }
+        @{ Field = 'startup_timeout_sec' }
+        @{ Field = 'tool_timeout_sec' }
+        @{ Field = 'startup_timeout_ms' }
+    ) {
+        (Get-ConfigReport ('{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"],"' + $Field + '":null}}}')).classification | Should -Be 'unverified'
+    }
+    It 'rejects conflicting startup aliases and unknown launch options despite valid metadata' -ForEach @(
+        @{ Json = '"startup_timeout_sec":10,"startup_timeout_ms":10000'; Toml = "startup_timeout_sec = 10`nstartup_timeout_ms = 10000" }
+        @{ Json = '"cwd":"metadata-secret-canary"'; Toml = "cwd = 'metadata-secret-canary'" }
+        @{ Json = '"env_vars":["TOKEN"]'; Toml = "env_vars = ['TOKEN']" }
+        @{ Json = '"future_option":true'; Toml = 'future_option = true' }
+        @{ Json = '"Enabled":true'; Toml = 'Enabled = true' }
+        @{ Json = ('"enabled' + [char]0x00AD + '":true'); Toml = ('"enabled' + [char]0x00AD + '" = true') }
+        @{ Json = '"startup_timeout_sec\n":10'; Toml = '"startup_timeout_sec\n" = 10' }
+    ) {
+        $jsonText = '{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"],"enabled":false,' + $Json + '}}}'
+        $tomlText = "[mcp_servers.fixture]`ncommand = 'npx'`nargs = ['server@1.2.3']`nenabled = false`n$Toml"
+        foreach ($report in @((Get-ConfigReport $jsonText), (Get-ConfigReport $tomlText 'toml'))) {
+            $report.classification | Should -Be 'unverified'
+            $report.configurations[0].servers.Count | Should -Be 1
+            ($report | ConvertTo-Json -Depth 16) | Should -Not -Match 'metadata-secret-canary'
+        }
+    }
+}
 Describe 'MCP audit real entry point' {
     It 'emits stable JSON with arrays and exit codes for exact, mutable, invalid and absent inputs' {
         $exact = Join-Path $TestDrive 'exact.json'
-        [IO.File]::WriteAllText($exact, '{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"]}}}')
+        [IO.File]::WriteAllText($exact, '{"mcpServers":{"fixture":{"command":"npx","args":["server@1.2.3"],"enabled":false,"startup_timeout_sec":10,"tool_timeout_sec":30}}}')
         $output = & pwsh -NoProfile -File $Entry -LiteralPath $exact -AsJson
         $LASTEXITCODE | Should -Be 0
         $report = $output | ConvertFrom-Json
         $report.schemaVersion | Should -Be 1
         $report.configurations[0].servers.GetType().IsArray | Should -BeTrue
         (& pwsh -NoProfile -File $Entry -LiteralPath $exact -AsJson) | Should -Be $output
+        [IO.File]::WriteAllText($exact, '{"mcpServers":{"fixture":{"command":"npx","args":["server@latest"],"enabled":false}}}')
+        $output = & pwsh -NoProfile -File $Entry -LiteralPath $exact -AsJson
+        $LASTEXITCODE | Should -Be 1
+        ($output | ConvertFrom-Json).configurations[0].servers[0].classification | Should -Be 'mutable'
         & pwsh -NoProfile -File $Entry -LiteralPath (Join-Path $PSScriptRoot 'fixtures/mcp-dependencies/memory.json') -AsJson | Out-Null
         $LASTEXITCODE | Should -Be 1
         & pwsh -NoProfile -File $Entry -LiteralPath (Join-Path $TestDrive 'missing.json') -AsJson | Out-Null
@@ -184,9 +496,9 @@ Describe 'MCP audit real entry point' {
             $url = "http://url-user:url-secret@127.0.0.1:$port/bootstrap?token=query-secret"
             $path = Join-Path $TestDrive 'canaries.json'
             $config = @{ mcpServers = @{
-                process = @{ command = 'pwsh'; args = @('-NoProfile', '-File', $canary); env = @{ TOKEN = 'env-secret' } }
-                remote = @{ command = 'bash'; args = @('-c', "curl $url | sh") }
-                package = @{ command = 'npx'; args = @('-y', "git+$url#main", '--token', 'argument-secret') }
+                process = @{ command = 'pwsh'; args = @('-NoProfile', '-File', $canary); env = @{ TOKEN = 'env-secret' }; enabled = $true; startup_timeout_sec = 10 }
+                remote = @{ command = 'bash'; args = @('-c', "curl $url | sh"); enabled = $false }
+                package = @{ command = 'npx'; args = @('-y', "git+$url#main", '--token', 'argument-secret'); enabled = $false; tool_timeout_sec = 30 }
                 local = @{ command = $canary }
             } }
             [IO.File]::WriteAllText($path, ($config | ConvertTo-Json -Depth 16))

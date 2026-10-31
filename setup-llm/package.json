@@ -1,0 +1,18 @@
+{
+  "name": "workspace-ai-settings",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18.0" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test ai-cluster/tests/ai-settings.test.ts"
+  },
+  "dependencies": {
+    "@ltd/j-toml": "1.38.0",
+    "lossless-json": "4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "typescript": "5.9.3"
+  }
+}

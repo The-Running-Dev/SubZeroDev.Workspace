@@ -1,5 +1,6 @@
 #Requires -Version 7.4
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'McpAuditToml.ps1')
 
 function New-AuditDependency {
     param([string]$Kind, [string]$Selector, [string]$Classification, [string]$Reason)
@@ -131,6 +132,23 @@ function Get-DockerAudit {
     New-AuditDependency 'docker' $image 'mutable' 'docker-tag-or-implicit-latest'
 }
 
+function Test-McpAuditServerMetadata {
+    param([System.Collections.IDictionary]$Server)
+    if ($Server.Contains('enabled') -and $Server.enabled -isnot [bool]) { return $false }
+    # Codex accepts the millisecond name as an alias. Do not infer precedence when
+    # both spellings occur, even when their values appear equivalent.
+    if ($Server.Contains('startup_timeout_sec') -and $Server.Contains('startup_timeout_ms')) { return $false }
+    foreach ($field in @('startup_timeout_sec', 'startup_timeout_ms', 'tool_timeout_sec')) {
+        if (!$Server.Contains($field)) { continue }
+        $value = $Server[$field]
+        # Only numeric types emitted by the JSON/TOML readers qualify. PowerShell
+        # coercion would otherwise accept strings, booleans and null as numbers.
+        if (($value -isnot [long] -and $value -isnot [int] -and $value -isnot [double]) -or
+            ![double]::IsFinite([double]$value) -or $value -lt 0) { return $false }
+    }
+    return $true
+}
+
 function Get-McpServerAudit {
     param([string]$Name, [object]$Server, [int]$Index)
     $label = if ($Name -cmatch '^[A-Za-z][A-Za-z0-9_.-]{0,63}$') { $Name } else { "server-$Index" }
@@ -142,8 +160,12 @@ function Get-McpServerAudit {
         $Server.Contains('command') -and $Server.command -is [string] -and $Server.command.Length -gt 0 -and
         (!$Server.Contains('type') -or $Server.type -ceq 'stdio') -and !$Server.Contains('url') -and
         (!$Server.Contains('env') -or ($Server.env -is [System.Collections.IDictionary] -and @($Server.env.Values | Where-Object { $_ -isnot [string] }).Count -eq 0)) -and
-        @($Server.Keys | Where-Object { $_ -cnotin @('command', 'args', 'type', 'env') }).Count -eq 0 -and
+        @($Server.Keys | Where-Object { $_ -cnotmatch '\A(command|args|type|env|enabled|startup_timeout_sec|startup_timeout_ms|tool_timeout_sec)\z' }).Count -eq 0 -and
         (!$Server.Contains('args') -or ($Server.args -is [array] -and $Server.args.Count -le 256 -and @($Server.args | Where-Object { $_ -isnot [string] }).Count -eq 0))
+    if ($valid -and !(Test-McpAuditServerMetadata $Server)) {
+        $valid = $false
+        $reason = 'invalid-server-metadata'
+    }
     if ($valid) {
         $command = $Server.command
         [string[]]$arguments = @()
@@ -225,26 +247,33 @@ function Invoke-McpDependencyAudit {
             # No provider evaluation, URL fetching, directory discovery or CLI exports.
             if ($path -match '^(?:[\\/]{2}|[A-Za-z][A-Za-z0-9+.-]*://)') { throw 'Local files only.' }
             $file = Get-Item -LiteralPath $path -ErrorAction Stop
-            if ($file -isnot [System.IO.FileInfo] -or $file.Extension -cnotin @('.json', '.jsonc')) { throw 'Unsupported file.' }
+            if ($file -isnot [System.IO.FileInfo] -or $file.Extension -cnotin @('.json', '.jsonc', '.toml')) { throw 'Unsupported file.' }
             $reason = 'unreadable-or-malformed-configuration'
             if ($file.Length -gt 2MB) { throw 'Input too large.' }
             $text = [System.Text.UTF8Encoding]::new($false, $true).GetString([System.IO.File]::ReadAllBytes($file.FullName)).TrimStart([char]0xFEFF)
-            $options = [System.Text.Json.JsonDocumentOptions]::new()
-            $options.MaxDepth = 64
-            if ($file.Extension -ceq '.jsonc') {
-                $options.CommentHandling = [System.Text.Json.JsonCommentHandling]::Skip
-                $options.AllowTrailingCommas = $true
+            if ($file.Extension -ceq '.toml') {
+                $config = ConvertFrom-McpAuditToml $text
+                $serverKey = 'mcp_servers'
             }
-            $document = [System.Text.Json.JsonDocument]::Parse($text, $options)
-            Assert-AuditJsonKeys $document.RootElement
-            $config = ConvertFrom-Json -InputObject $text -AsHashtable -Depth 64 -ErrorAction Stop
+            else {
+                $options = [System.Text.Json.JsonDocumentOptions]::new()
+                $options.MaxDepth = 64
+                if ($file.Extension -ceq '.jsonc') {
+                    $options.CommentHandling = [System.Text.Json.JsonCommentHandling]::Skip
+                    $options.AllowTrailingCommas = $true
+                }
+                $document = [System.Text.Json.JsonDocument]::Parse($text, $options)
+                Assert-AuditJsonKeys $document.RootElement
+                $config = ConvertFrom-Json -InputObject $text -AsHashtable -Depth 64 -ErrorAction Stop
+                $serverKey = 'mcpServers'
+            }
             $reason = 'unsupported-configuration-shape'
-            if ($config -isnot [System.Collections.IDictionary] -or !$config.Contains('mcpServers') -or
-                $config.mcpServers -isnot [System.Collections.IDictionary] -or !$config.mcpServers.Count -or $config.mcpServers.Count -gt 512) { throw 'Unsupported shape.' }
+            if ($config -isnot [System.Collections.IDictionary] -or !$config.Contains($serverKey) -or
+                $config[$serverKey] -isnot [System.Collections.IDictionary] -or !$config[$serverKey].Count -or $config[$serverKey].Count -gt 512) { throw 'Unsupported shape.' }
             $serverIndex = 0
-            $servers = @(foreach ($name in ($config.mcpServers.Keys | Sort-Object -CaseSensitive)) {
+            $servers = @(foreach ($name in ($config[$serverKey].Keys | Sort-Object -CaseSensitive)) {
                 $serverIndex++
-                Get-McpServerAudit -Name $name -Server $config.mcpServers[$name] -Index $serverIndex
+                Get-McpServerAudit -Name $name -Server $config[$serverKey][$name] -Index $serverIndex
             })
             $classification = Get-AuditClassification $servers
             $reason = 'parsed'

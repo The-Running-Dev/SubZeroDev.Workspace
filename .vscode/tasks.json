@@ -305,6 +305,144 @@
       "problemMatcher": []
     },
     {
+      "label": "Conversation: Fork",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "fork",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Attach",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "attach",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Return",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "return",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Review memory",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "review",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Store reviewed candidates",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "store",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Host adapter request",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/conversation-task.mjs",
+        "--operation",
+        "host",
+        "--archive-root",
+        "${input:conversationArchive}",
+        "--request-file",
+        "${input:conversationRequest}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": false
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Conversation: Fork (Opt-in)",
       "type": "process",
       "command": "node",
@@ -316,8 +454,8 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
         }
       },
       "presentation": {
@@ -344,8 +482,8 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
         }
       },
       "presentation": {
@@ -372,8 +510,8 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
         }
       },
       "presentation": {
@@ -400,9 +538,9 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}",
-          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationProject}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}",
+          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationTaskProject}"
         }
       },
       "presentation": {
@@ -429,9 +567,9 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}",
-          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationProject}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}",
+          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationTaskProject}"
         }
       },
       "presentation": {
@@ -458,8 +596,8 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationArchive}",
-          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationRequest}"
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
         }
       },
       "presentation": {
@@ -479,17 +617,27 @@
     {
       "id": "conversationArchive",
       "type": "promptString",
+      "description": "Absolute private archive path (existing AgentKit archive)"
+    },
+    {
+      "id": "conversationRequest",
+      "type": "promptString",
+      "description": "Absolute private AgentKit request JSON path (matching task action)"
+    },
+    {
+      "id": "conversationTaskArchive",
+      "type": "promptString",
       "description": "Existing PRIVATE archive checkout (absolute path; no default)",
       "password": true
     },
     {
-      "id": "conversationRequest",
+      "id": "conversationTaskRequest",
       "type": "promptString",
       "description": "Reviewed PRIVATE AgentKit request JSON (absolute path; selects source/action)",
       "password": true
     },
     {
-      "id": "conversationProject",
+      "id": "conversationTaskProject",
       "type": "promptString",
       "description": "Existing project checkout whose origin selects the memory namespace",
       "password": true

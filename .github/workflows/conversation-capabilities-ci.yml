@@ -10,6 +10,22 @@ on:
 permissions: {}
 
 jobs:
+  editor-tasks:
+    name: Editor task transport (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Literal arguments and private result transport
+        run: node --test setup-llm/scripts/conversation-task.test.mjs
+
   capabilities:
     name: Conversation capabilities
     uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1

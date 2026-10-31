@@ -7,6 +7,91 @@ Append-only. Newest at the top. The rejected alternatives are the point — with
 
 - Local inference phases 5 (a sample consumer of the gateway) and 6 (multi-GPU, dual RTX 3090) each need a brief before they can be sliced. Phase 5 touches a downstream repository, and phase 6 changes runtime topology. Phases 1–4 follow-ups are #48 and #49.
 
+### 2026-10-30 — Node/TypeScript AI settings engine
+
+Context: Ben explicitly requested removal of the AI settings Python dependency
+and implementation in Node/TypeScript, following the repository's Node tooling.
+This supersedes the runtime choice in the earlier S1 decision below.
+
+Chosen: Node 22.18 or later runs erasable TypeScript directly, with `node:test`
+acceptance tests and a separate TypeScript typecheck. Pin `@ltd/j-toml` for full
+TOML 1.0 validation and `lossless-json` for duplicate rejection and unowned number
+precision. Keep the PowerShell entry point, lexical TOML edits, before/after
+semantic verification, bounded retries, sandbox and rollback semantics. Use a
+small PowerShell/.NET Windows ACL adapter before writing staging contents.
+Install the lockfile with npm ci; no package lifecycle scripts are needed.
+
+Rejected: retaining the Python engine or tests; a PowerShell engine rewrite
+(superseded by Ben's Node/TypeScript instruction); a bounded TOML subset or whole
+file TOML serialization; ordinary JSON.parse for unowned numbers (can round them).
+
+Reversibility: cheap — the optional engine and its dependencies remain isolated
+under setup-llm; no app profile or machine installation is changed.
+
+### 2026-10-30 — Fixture-only AI preferences and full TOML validation
+
+Context: Ben accepted S1 after reviewing preference ownership, removal semantics,
+concurrent writes and recovery limitations, and restricted implementation to
+temporary profiles. The original design files contain no AI settings contract.
+
+Chosen: add the accepted S1 contract linked from 20-contract.md. Require an
+explicit sandbox for both the PowerShell wrapper and Python engine. Use Python
+3.11–3.14 standard-library json and tomllib, with a lexical span scanner for
+TOML edits and full before/after semantic verification. Python 3.15 expands
+tomllib to TOML 1.1 and is refused until that contract is reconsidered.
+Python JSON object parsing replaces the proposed ConvertFrom-Json implementation
+detail while retaining case-sensitive unowned values and rejecting duplicates.
+No third-party package installation. Existing Python sidecars provide a repo
+precedent. The small skill stays in this repository, uninstalled.
+
+Rejected: reusing the MCP auditor's bounded TOML subset for writes (not a full
+validator); first-bracket-line scanning (strings can contain fake headers);
+rewriting whole TOML files (destroys unrelated formatting); adding TOMLKit
+(unneeded third-party dependency); live root defaults or silently enabling a
+schedule (outside current authorization); claiming fingerprint checks are a
+transaction (rename has no compare-and-swap precondition).
+
+Reversibility: remove this optional command, fixtures, skill and workflow.
+No existing setup path, app profile or chezmoi configuration changes.
+
+### 2026-10-28 — Explicit, read-only hook registration audit
+
+Context: the ECC reassessment identified value in spotting repeated registrations
+without importing its hook runtime or duplicating AgentKit and SkyNetHR ownership.
+
+Chosen: an opt-in local data reader with an explicit host and a conservative command
+subset. Compare exact supported registrations, including optional-field presence;
+never infer shell equivalence or effective host loading. Unknown fields remain
+unverified. Redact commands, matchers, paths and descriptive strings without
+publishing reversible fingerprints. See the linked contract in `20-contract.md`.
+
+Rejected: installing ECC; executing candidate hooks; scanning user profiles;
+automatically rewriting registrations; claiming identical presence proves double
+execution; adding runtime monitoring or permission-policy enforcement here.
+
+Reversibility: cheap — remove the optional auditor and its CI; no host configuration
+or existing setup/doctor path is changed.
+
+### 2026-10-28 — Validate Codex metadata without filtering disabled dependencies
+
+Context: ordinary enablement and timeout metadata currently obscures otherwise recognizable direct dependency selectors in the optional MCP audit.
+
+Chosen: validate a bounded set of metadata in the shared classifier, independently of enablement. Reject malformed metadata and conflicting startup aliases without copying their values into reports. Keep unknown launch options unverified and preserve the report schema and read-only boundary.
+
+Rejected: skipping disabled entries, which hides mutable dependencies that can later be enabled; ignoring every extra field, which could promote an unsupported launch shape to exact; inferring precedence between startup aliases, which would bind the static auditor to a client-specific resolution rule.
+
+Reversibility: cheap — remove the metadata allowance; launch parsing and host configuration remain independent.
+
+### 2026-10-28 — Bounded native Codex TOML input for the read-only MCP auditor
+
+Context: the existing MCP dependency audit accepts JSON/JSONC, leaving native Codex configuration unverified even when it describes the same direct launch selectors.
+
+Chosen: parse an explicit, bounded TOML 1.0 subset locally in PowerShell and normalize `mcp_servers` into the existing classifier. Unsupported syntax anywhere rejects the whole input. Keep the existing report schema, exit codes, redaction and no-execution/no-network boundary; no parser or runtime dependency is installed.
+
+Rejected: regex extraction of MCP sections, which can overlook later conflicting definitions or malformed unrelated content; invoking Codex exports, which crosses the read-only data boundary; requiring Python or downloading a general TOML library, which adds a runtime or supply-chain dependency to the optional standalone audit. Full TOML coverage can be considered separately if real configurations require it.
+
+Reversibility: cheap — the adapter is isolated from the existing JSON parser and selector classification.
+
 ### 2026-10-27 — Thin opt-in VS Code conversation entry points (#58)
 
 Context: merged AgentKit branching, reviewed memory and native outbox helpers own

@@ -36,18 +36,22 @@ global indexing, or discovery against Notes. It does not rely on exclusions to s
 a broad private corpus. The installed package API is version sensitive: incompatible
 imports/builds report an optional adapter failure and leave no retrievable old graph.
 
-**Live context-graph owner/API/schema remains unverified.** Every result reports
-`contextGraph: unknown-owner`; no live context-graph adapter is claimed. The selected
-extraction provides an explicit mapping for an eventual verified owner. Historical
-AgentKit design files are not treated as the running context graph.
+**Graphify is the selected context-graph tool.** Successful builds and receipts report
+`contextGraph: graphify`; optional installation/build failure reports `unavailable`.
+Its build API, graph JSON and `path` retrieval are the current integration contract.
+No additional owner, API service or database is required. Historical AgentKit design
+files are not treated as a running context graph. Existing state selections and ledgers
+rebuild unchanged; rebuilding refreshes an older receipt's owner label and graph hash.
 
 **Memory remains AgentKit #496's reviewed MemoryKit workflow**, with its configured
 namespace and store as authority. Optional summary `memoryRef` values are opaque
 references to already reviewed records, not new memory writes or proof of existence.
 This adapter never opens a memory store, switches stores, registers MCP tools or
-enables infrastructure. This workstation has no verified configured MemoryKit/VS Code
-memory tool, as recorded by #56. Their absence does not block portable Notes capture
-or this local graph projection. There is no automatic graph-to-memory synchronization.
+enables infrastructure. The [subsequent verification](./conversation-tools-verification.md)
+records configured private storage, successful AgentKit recall and a tested MemoryKit
+MCP server. Codex host activation and VS Code memory commands remain unverified.
+Optional memory integration does not block portable Notes capture or this local graph
+projection. There is no automatic graph-to-memory synchronization.
 
 ## Run with existing tools
 
@@ -204,4 +208,6 @@ ancestors, adapter failure and retry, private/raw/secret sentinels, unrelated ar
 preservation, locks and symlink refusal (skipped if the host cannot create symlinks).
 CI runs this suite on Windows, Linux and macOS and executes the PowerShell entry point
 with an absent optional Graphify installation. The actual installed Graphify smoke above
-is separate evidence; a live context-graph smoke remains blocked on identifying its owner.
+is separate evidence for the selected Graphify context graph. See the
+[memory and graph verification](./conversation-tools-verification.md) for the existing
+MemoryKit CLI/MCP smoke and local configuration boundaries.

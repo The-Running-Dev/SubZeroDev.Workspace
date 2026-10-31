@@ -5,6 +5,7 @@ Run this optional check before trusting MCP launch configuration. It reads expli
 ```powershell
 pwsh -NoProfile -File ./setup-llm/scripts/Test-McpDependencies.ps1 -LiteralPath ./.mcp.json
 pwsh -NoProfile -File ./setup-llm/scripts/Test-McpDependencies.ps1 -LiteralPath ./.mcp.json -AsJson
+pwsh -NoProfile -File ./setup-llm/scripts/Test-McpDependencies.ps1 -LiteralPath ./.codex/config.toml -AsJson
 # Multiple inputs from PowerShell:
 & ./setup-llm/scripts/Test-McpDependencies.ps1 -LiteralPath @('./.mcp.json', './claude.json') -AsJson
 ```
@@ -13,9 +14,17 @@ Requires PowerShell 7.4 or newer. CI runs the same tests on native Windows, Ubun
 
 ## Inputs and limits
 
-Only UTF-8 local `.json` and `.jsonc` files with a nonempty top-level `mcpServers` object are supported. JSON is strict; JSONC additionally permits comments and trailing commas. Either may have a UTF-8 BOM. Duplicate keys, invalid encoding, files over 2 MiB, nesting over 64 levels and more than 512 servers fail closed. A server uses `command` (nonempty string), optional `args` (at most 256 strings), optional `type: "stdio"` and optional `env` object with string values. Additional server fields remain unverified; client-specific launch options require an explicit future grammar extension. Tokens longer than 8192 characters or containing NUL/newlines remain unverified.
+JSON inputs must be UTF-8 local `.json` and `.jsonc` files with a nonempty top-level `mcpServers` object. JSON is strict; JSONC additionally permits comments and trailing commas. Either may have a UTF-8 BOM. Duplicate keys, invalid encoding, files over 2 MiB, nesting over 64 levels and more than 512 servers fail closed. A server uses `command` (nonempty string), optional `args` (at most 256 strings), optional `type: "stdio"` and optional `env` object with string values. The bounded metadata fields described below are also accepted. Additional server fields remain unverified; client-specific launch options require an explicit future grammar extension. Tokens longer than 8192 characters or containing NUL/newlines remain unverified.
 
-Other shapes and transports, remote configuration URLs, directories, Codex TOML (`mcp_servers`), VS Code `servers`, local package selectors and unsupported launcher syntax remain **unverified**. Supply a separately prepared local JSON export if necessary; this tool does not invoke a client to export it. Input paths are literal, without wildcard expansion. The audit does not discover configuration files or inspect server implementations, environment files, lockfiles or transitive dependencies.
+Native [Codex TOML configuration](https://developers.openai.com/codex/mcp/) is also accepted from explicit `.toml` paths with a nonempty top-level `mcp_servers` table. Its servers use the same classifier, supported server fields and report schema as JSON. Every server is represented, including HTTP servers, disabled entries and entries with extra options. Fields such as `url`, `cwd` and `env_vars` make that server **unverified**; they are not silently discarded.
+
+The recognized [Codex metadata](https://learn.chatgpt.com/docs/config-file/config-reference) is optional `enabled` (a boolean), `startup_timeout_sec`, `tool_timeout_sec` and the `startup_timeout_ms` alias (finite nonnegative numbers). Strings, booleans used as numbers, null, negative or nonfinite values, and simultaneous startup aliases produce `invalid-server-metadata` with an **unverified** result. Field names are exact and case-sensitive. Valid metadata preserves the existing direct-selector classification in JSON, JSONC and TOML. Disabled entries are still audited: `enabled = false` neither hides a dependency nor makes it exact. This is bounded static metadata validation, not validation of the complete client configuration or proof that a server is active. Metadata values are not echoed in either output mode.
+
+The dependency-free parser accepts a bounded TOML 1.0 subset: bare/quoted/dotted keys, standard tables, single-line basic and literal strings, standard string escapes, arrays (including comments, newlines and trailing commas), and inline tables with simple keys. Booleans, signed 64-bit decimal integers and decimal floats are accepted as structural data. Keys are case-sensitive. Duplicate keys, repeated tables and conflicting definitions reject the entire input.
+
+Multiline strings, date/time values, nondecimal integers, `inf`/`nan`, arrays of tables and dotted keys inside inline tables are outside this grammar. Unsupported or malformed syntax **anywhere in the file** produces one unverified configuration with no partial server list, including when it occurs in unrelated Codex settings. Parsing is bounded to 64 nesting levels and 65,536 values, with the same 2 MiB and 512-server limits as JSON. Either format may have a UTF-8 BOM; encoding must be strict UTF-8. If necessary, supply a separately prepared supported JSON or TOML input; the tool does not invoke Codex to export configuration.
+
+Other shapes and transports, remote configuration URLs, directories, VS Code `servers`, local package selectors and unsupported launcher syntax remain **unverified**. Input paths are literal, without wildcard expansion. The audit does not discover configuration files or inspect server implementations, environment files, lockfiles or transitive dependencies.
 
 ## Classification
 

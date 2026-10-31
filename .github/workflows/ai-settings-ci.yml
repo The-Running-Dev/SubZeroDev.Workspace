@@ -1,0 +1,60 @@
+name: AI Settings S1 CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  entrypoint:
+    name: AI settings PowerShell contract
+    uses: The-Running-Dev/GitHub-ActionTemplates/.github/workflows/pwsh-ci.yml@v1
+    permissions:
+      contents: read
+    with:
+      os: '["windows-latest", "ubuntu-latest", "macos-latest"]'
+      paths: |
+        setup-llm/scripts/Manage-AISettings.ps1
+        setup-llm/scripts/Set-AISettingsPermissions.ps1
+        setup-llm/scripts/Install-AISettingsDependencies.ps1
+        setup-llm/ai-cluster/tests/ai-settings.Tests.ps1
+      tests: |
+        setup-llm/ai-cluster/tests/ai-settings.Tests.ps1
+      analyzer: true
+      pre-build: setup-llm/scripts/Install-AISettingsDependencies.ps1
+      artifact-name: ai-settings-entrypoint
+
+  engine:
+    name: AI settings (${{ matrix.os }}, Node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        node: ['22.18.0', '24']
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: setup-llm/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --prefix setup-llm --ignore-scripts --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck --prefix setup-llm
+      - name: Synthetic acceptance suite
+        run: npm test --prefix setup-llm
+      - name: PowerShell entry point with pinned Node
+        shell: pwsh
+        run: |
+          Install-Module Pester -RequiredVersion 5.5.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Import-Module Pester -RequiredVersion 5.5.0
+          $result = Invoke-Pester -Path setup-llm/ai-cluster/tests/ai-settings.Tests.ps1 -PassThru
+          if ($result.FailedCount -gt 0) { exit 1 }

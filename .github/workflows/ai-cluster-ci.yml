@@ -7,12 +7,16 @@ on:
     paths:
       - '.github/workflows/ai-cluster-ci.yml'
       - 'setup-llm/ai-cluster/**'
+      - 'setup-llm/scripts/**'
+      - 'setup-llm/package*.json'
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/ai-cluster-ci.yml'
       - 'setup-llm/ai-cluster/**'
+      - 'setup-llm/scripts/**'
+      - 'setup-llm/package*.json'
   workflow_dispatch:
 
 concurrency:
@@ -32,6 +36,7 @@ jobs:
       tests: setup-llm/ai-cluster/tests
       # Static and config checks.
       pre-build: |
+        setup-llm/scripts/Install-AISettingsDependencies.ps1
         setup-llm/ai-cluster/scripts/Test-AiCluster.ps1
         setup-llm/ai-cluster/scripts/Test-OperationalControls.ps1
       # Gateway contract checks against deterministic backends, then the hardware smoke suite,
