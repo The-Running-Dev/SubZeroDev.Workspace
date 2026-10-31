@@ -92,6 +92,25 @@ Rejected: regex extraction of MCP sections, which can overlook later conflicting
 
 Reversibility: cheap — the adapter is isolated from the existing JSON parser and selector classification.
 
+### 2026-10-27 — Thin opt-in VS Code conversation entry points (#58)
+
+Context: merged AgentKit branching, reviewed memory and native outbox helpers own
+conversation semantics; Workspace capability evidence does not establish an editor API.
+
+Chosen: manual process tasks with explicit private selections in the task environment,
+installed helper argv dispatch, and private result/packet files beside each request.
+Review, selected candidate storage and acceptance stay separate. Native selection uses
+AgentKit's existing capability contract and outbox; Workspace adds no host transport.
+Node is already required by the installed helpers; no package dependency is added.
+
+Rejected: shell interpolation or private paths in editor command lines/terminal output;
+copying source, revision or memory rules into Workspace; inferred extension commands;
+automatic configuration, graph ingestion or another memory store.
+
+Reversibility: remove the additive tasks/wrapper/tests; existing provisioning and the
+canonical private archive remain independent.
+
+---
 ### 2026-10-27 — Selected Graphify projection, with persistent exclusions (#57)
 
 Context: AgentKit #495–#497 own portable branch capture, reviewed memory extraction

@@ -1,0 +1,42 @@
+name: Conversation Tasks CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tasks:
+    name: Conversation tasks (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        node: ['22.18.0', '24']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      # Test against the merged upstream contract, without copying its implementation.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: The-Running-Dev/SubZeroDev.AgentKit
+          ref: 5c0dbca50da5d8fac05b1e9d8a957bd63717896a
+          path: .agentkit-test
+          persist-credentials: false
+      - name: Validate task entry points with synthetic private fixtures
+        env:
+          AGENTKIT_HOME: ${{ github.workspace }}/.agentkit-test
+        run: node --test setup-llm/tests/conversation-tasks.test.mjs

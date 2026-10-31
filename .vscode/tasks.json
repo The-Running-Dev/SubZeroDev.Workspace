@@ -441,6 +441,176 @@
         "echo": false
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Conversation: Fork (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "fork"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Conversation: Attach (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "attach"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Conversation: Return (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "return"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Conversation: Review memory (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "review"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}",
+          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationTaskProject}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Conversation: Store selected memory candidates (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "store"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}",
+          "WORKSPACE_CONVERSATION_PROJECT": "${input:conversationTaskProject}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Conversation: Native host outbox (Opt-in)",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/setup-llm/scripts/Invoke-ConversationTask.mjs",
+        "--operation",
+        "host"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE_CONVERSATION_ARCHIVE": "${input:conversationTaskArchive}",
+          "WORKSPACE_CONVERSATION_REQUEST": "${input:conversationTaskRequest}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "echo": false,
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      }
     }
   ],
   "inputs": [
@@ -453,6 +623,24 @@
       "id": "conversationRequest",
       "type": "promptString",
       "description": "Absolute private AgentKit request JSON path (matching task action)"
+    },
+    {
+      "id": "conversationTaskArchive",
+      "type": "promptString",
+      "description": "Existing PRIVATE archive checkout (absolute path; no default)",
+      "password": true
+    },
+    {
+      "id": "conversationTaskRequest",
+      "type": "promptString",
+      "description": "Reviewed PRIVATE AgentKit request JSON (absolute path; selects source/action)",
+      "password": true
+    },
+    {
+      "id": "conversationTaskProject",
+      "type": "promptString",
+      "description": "Existing project checkout whose origin selects the memory namespace",
+      "password": true
     }
   ]
 }
